@@ -1,0 +1,19 @@
+citHeader("To cite 'DTEval' package in publications use:")
+
+year <- sub("-.*", "", meta$Date)
+version <- meta$Version
+
+bibentry(bibtype="Manual",
+         title = "DTEval: Diffusion Tube Evaluation Code",
+         author = c(as.person("Karl Ropkins")),
+         year = year,
+         note = paste("R package version ",
+                    version, sep=""),
+         textVersion = paste("Karl Ropkins (", year, ") ",
+                    "DTEval: Diffusion Tube Evaluation Code, ",
+                    "R package version ",
+                    version,".", sep=""))
+
+citFooter("Please cite both 'DTEval' and R ",
+          "when using 'DTEval'.",
+          "For R citation, see ", sQuote("citation()"))
