@@ -7,7 +7,7 @@ Description: R code used for the pro-processing, analysis and evaluation of diff
 Authors@R: person(given = "Karl", family = "Ropkins", role = c("aut", "cre"), email =
          "k.ropkins@its.leeds.ac.uk", comment = c(ORCID = "0000-0002-0294-6997"))
 Maintainer: Karl Ropkins <k.ropkins@its.leeds.ac.uk>
-License: GPL (>= 3) [to be confirmed]
+License: GPL (>= 3) 
 Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.5.0)
