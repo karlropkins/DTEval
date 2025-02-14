@@ -36,7 +36,7 @@
 #' @param method The method to apply when aggregating \code{ref} (and
 #' \code{data.ref}) to compare with \code{tube} (and \code{data}). There is
 #' currently one method, set up to run with \code{openair}-format
-#' \code{data.ref} data sets. This aggregates and averages
+#' \code{data.ref} data sets. This method aggregates and averages
 #' \code{data.ref} at the sampling resolution of the tube data set, \code{data}, as
 #' identified from tags built using \code{\link{tagTube}} methods, before merging
 #' tube and reference data sets. See below or ?\code{\link{tagTube}}
@@ -70,7 +70,15 @@
 #' conditioning arguments like \code{group} and \code{facet} are also
 #' tracked by \code{testTubeAccuracy} itself and used to subset data
 #' when comparing \code{tube} and near-\code{ref} measurements.
+#'
+#' When merging \code{data} and \code{data.ref}, \code{testTubeAccuracy} adds
+#' a \code{'.ref'} suffix to data columns from \code{data.ref}, so it you want
+#' to facet or group data by a column in \code{data.ref}, you need to include
+#' the suffix when naming it.
 
+# see bodge 3/3...
+#    need this is data.ref names in output are sometimes name and sometimes
+#         name.ref depending on if name in both data and data.ref...
 
 ## notes
 
@@ -164,7 +172,7 @@ testTubeAccuracy <-
 
 ##############
 #start of new code to allow multiple CAs
-    #needs work...
+    #working but needs work...
 ##########
 
     #calc distance from tube to ref site
@@ -186,7 +194,7 @@ testTubeAccuracy <-
     out <- lapply(rf.test, function(i){
       .ref <- subset(data.ref, paste(latitude, longitude, sep="<>") == i)
       #########################
-      #bodge 1/2
+      #bodge 1/3
       #holding on to these to fix out after AQEval::calcDateRangeStat
       .rr <- .ref[1,]
       #########################
@@ -208,20 +216,32 @@ testTubeAccuracy <-
       # NOTED as issue, see AQEval notes...
       names(.ref)[1:2] <- c(".start_date", ".end_date")
       ####################################
-      #bodge 2/2
+      #bodge 2/3
       #  getting source, site and code from .rr
       #  might not have these if users has non-openair dataset....
       .ref[c("source", "site", "code")] <- .rr[c("source", "site", "code")]
       ####################################
-      # also like the args to be ref.[name] rather than [name].ref...
+      #bodge 3/3
+      # bit messy but leaving for now but...
+      #    I would column names from ref to be consistent in output
+      #    the left_join add suffix only when names are in both and not in by...
+      #    this just makes from ref all [name].ref
+      #          (would get messy if similar already in .ref)
+      #    personally, would have preferred ref.[name] rather than [name].ref...
+      #           but not worrying for now...
+      names(.ref) <- ifelse(names(.ref) %in% c(".start_date", ".end_date"),
+                            names(.ref), paste(names(.ref), ".ref", sep=""))
+      #  shouldn't need the suffixes but leaving just in case...
       out <- dplyr::left_join(.data, .ref, by=c(".start_date", ".end_date"),
                               suffix = c("", ".ref"))
       #merge data
       out$.tube <- out[,tube]
-      out$.ref <- out[,ref]
+      out$.ref <- out[,paste(ref, ".ref", sep="")]
       out
     })
     out <- do.call(rbind, out)
+    #bodge 3/3... last bit
+    ref <- paste(ref, ".ref", sep="")
 
 ##################
 # end of distance calc AND merge
@@ -231,6 +251,12 @@ testTubeAccuracy <-
     #   plus it generates a ggplot warning for missing cases
     #   BUT maybe think about this
     out <- out[!is.na(out$.tube) & !is.na(out$.ref),]
+
+    if(is.null(out) || nrow(out)<1){
+      stop("[testTubeAccuracy]> Halting test; no tube/data.ref pairs (check sources?)",
+           call.=FALSE)
+    }
+
 
 ###################
 # testing doing group and facet here...

@@ -32,7 +32,7 @@ DT NO2 concentrations (in ug/m3).}
 \item{method}{The method to apply when aggregating \code{ref} (and
 \code{data.ref}) to compare with \code{tube} (and \code{data}). There is
 currently one method, set up to run with \code{openair}-format
-\code{data.ref} data sets. This aggregates and averages
+\code{data.ref} data sets. This method aggregates and averages
 \code{data.ref} at the sampling resolution of the tube data set, \code{data}, as
 identified from tags built using \code{\link{tagTube}} methods, before merging
 tube and reference data sets. See below or ?\code{\link{tagTube}}
@@ -76,4 +76,9 @@ common plotting arguments, e.g. X and Y axes label handling. Plot
 conditioning arguments like \code{group} and \code{facet} are also
 tracked by \code{testTubeAccuracy} itself and used to subset data
 when comparing \code{tube} and near-\code{ref} measurements.
+
+When merging \code{data} and \code{data.ref}, \code{testTubeAccuracy} adds
+a \code{'.ref'} suffix to data columns from \code{data.ref}, so it you want
+to facet or group data by a column in \code{data.ref}, you need to include
+the suffix when naming it.
 }

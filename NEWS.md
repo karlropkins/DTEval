@@ -18,4 +18,6 @@
     * __v 0.0.5__ [2024-11-26] added ggplotTubeShell to handle common 
     plotting terms, added getTubeX. 
     * __v 0.0.6__ [2024-12-05] added checkTubeData  
+    * __v 0.0.7__ [2025-02-12] tidied data.ref name handling when merging 
+    in testTubeAccuracy 
     
