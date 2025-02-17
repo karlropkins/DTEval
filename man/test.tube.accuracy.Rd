@@ -12,6 +12,7 @@ testTubeAccuracy(
   ref = "no2",
   method = 1,
   max.distance = 10,
+  nearest.only = FALSE,
   show = c("plot", "report"),
   ...
 )
@@ -41,6 +42,9 @@ for further details.}
 \item{max.distance}{the maximum distance (m) between tube and reference
 method locations when pairing diffusion tube and reference measurements for
 comparison.}
+
+\item{nearest.only}{A logical (default \code{FALSE}); if \code{TRUE} only
+the nearest tube/ref pairings are retained.}
 
 \item{show}{The outputs to show when returning results, by default the
 plot and summary report.}

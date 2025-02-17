@@ -44,6 +44,8 @@
 #' @param max.distance the maximum distance (m) between tube and reference
 #' method locations when pairing diffusion tube and reference measurements for
 #' comparison.
+#' @param nearest.only A logical (default \code{FALSE}); if \code{TRUE} only
+#' the nearest tube/ref pairings are retained.
 #' @param show The outputs to show when returning results, by default the
 #' plot and summary report.
 #' @param ... Additional arguments, currently passed to
@@ -116,6 +118,7 @@ testTubeAccuracy <-
   function(data, data.ref = NULL,
            tube = "measurement", ref = "no2",
            method = 1, max.distance = 10,
+           nearest.only = FALSE,
            show = c("plot", "report"), ...){
 
     #thinking about
@@ -240,7 +243,7 @@ testTubeAccuracy <-
       out
     })
     out <- do.call(rbind, out)
-    #bodge 3/3... last bit
+    #bodge 3/3... last bit for now...
     ref <- paste(ref, ".ref", sep="")
 
 ##################
@@ -314,6 +317,9 @@ testTubeAccuracy <-
         local <- test[test$distance.m < max.distance,]
         if(nrow(local)>0){
           local <- local[!is.na(local$.tube) & !is.na(local$.ref),]
+          if(nearest.only & nrow(local)>0){
+            local <- local[local$distance.m == min(local$distance.m),]
+          }
         }
         if(nrow(local)>3){
             form <- as.formula(paste(tube, ref, sep="~"))
@@ -364,7 +370,10 @@ testTubeAccuracy <-
     })
     rep <- paste(unlist(rep), collapse="\n")
     rep <- paste("'", tube, "' vs. '", ref,
-                 "' (dist < ", max.distance, "):", "\n",
+                 "' (dist < ", max.distance,
+                 if(nearest.only){
+                   "; nearest.only"
+                 }, "):", "\n",
                  rep, sep="", collapse="")
 
     ## plot
