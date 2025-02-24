@@ -2,7 +2,7 @@
 #misc setup and code
 ###########################
 
-#' @importFrom stats as.formula end lm loess predict qt quantile sd start
+#' @importFrom stats as.formula end lm loess predict qt quantile sd start qnorm
 #' @importFrom utils data modifyList
 #' @importFrom methods is
 

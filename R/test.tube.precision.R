@@ -28,11 +28,14 @@
 #' one of the following methods to estimate the precision of cases
 #' with \code{n} replicates:
 #'
-#' * \code{method = 1} uses \code{quantile(x, 0.05, 0.95)}
+#' * \code{method = 1} uses \code{quantile(x, 0.025, 0.975)}
 #'
-#' * \code{method = 2} uses \code{mean(x) +/- qt(1-0.05/2, n(x)-1))} &ast;
+#' * \code{method = 2} uses \code{mean(x) +/- qt(0.975, n(x)-1))} &ast;
 #' \code{sd(x)/sqrt(n(x))}
 #'
+#' * \code{method = 3} used \code{mean(x) +/- 1.96} &ast; \code{sd(x)/sqrt(n(x)))}
+#'
+#' * \code{method = 4} used \code{mean(x) +/- qnorm(0.975)} &ast; \code{sd(x)}
 
 # document these properly when other methods go in...
 
@@ -136,10 +139,9 @@
 
 # better way of building the models?
 #     different ways of doing methods
-#     other methods UK and Europe ??
-#         maybe as methods 3 & 4 ???
-#     if so reference paper to reference ??
-#     also need to document this
+#     think about order of these ???
+#          if change these, also need to update the documents
+#     any other methods or alternative methods ???
 
 # better document
 #     methods need documenting and references included ???
@@ -223,7 +225,7 @@ testTubePrecision <-
 # maybe warn or stop if multiples...
 ##################
     method <- as.character(method)
-    .check <- 1:2 # available methods
+    .check <- 1:4 # available methods
     if(!method %in% .check){
       stop("[testTubePrecision]> '", method, "' unknown method",
            "\n\trecommend one of: ", paste (.check, collapse = ", "),
@@ -244,20 +246,43 @@ testTubePrecision <-
         test <- dplyr::summarise(test,
                           .n = length(.tube[is.finite(.tube)]),
                           .mean = mean(.tube, na.rm=TRUE),
-                          .low = quantile(.tube, 0.05, na.rm=TRUE),
-                          .high = quantile(.tube, 0.95, na.rm=TRUE)
+                          .low = quantile(.tube, 0.025, na.rm=TRUE),
+                          .high = quantile(.tube, 0.975, na.rm=TRUE)
         )
       }
       if(method=="2"){
         test <- dplyr::summarise(test,
-                          .n = length(.tube[is.finite(.tube)]),
-                          .mean = mean(.tube, na.rm=TRUE),
-                          .low = ifelse(.n>1, .mean - qt(1- 0.05/2, (dplyr::n() - 1)) *
-                                        sd(.tube, na.rm=TRUE)/sqrt(dplyr::n()), NA),
-                          .high =  ifelse(.n>1, .mean + qt(1- 0.05/2, (dplyr::n() - 1)) *
-                                          sd(.tube, na.rm=TRUE)/sqrt(dplyr::n()), NA)
+                                 .n = length(.tube[is.finite(.tube)]),
+                                 .mean = mean(.tube, na.rm=TRUE),
+                                 .low = ifelse(.n>2, .mean - (qt(0.975, df=.n-1) * sd(.tube, na.rm=TRUE)/
+                                                                     sqrt(.n)), NA),
+                                 .high = ifelse(.n>2, .mean + (qt(0.975, df=.n-1) * sd(.tube, na.rm=TRUE)/
+                                                                 sqrt(.n)), NA)
         )
       }
+      if(method=="3"){
+        test <- dplyr::summarise(test,
+                                 .n = length(.tube[is.finite(.tube)]),
+                                 .mean = mean(.tube, na.rm=TRUE),
+                                 .low = ifelse(.n>2, mean(.tube, na.rm=TRUE) - (1.96*sd(.tube, na.rm=TRUE)/
+                                                                     sqrt(.n)), NA),
+                                 .high = ifelse(.n>2, mean(.tube, na.rm=TRUE) + (1.96*sd(.tube, na.rm=TRUE)/
+                                                                      sqrt(.n)), NA)
+        )
+      }
+      if(method=="4"){
+        test <- dplyr::summarise(test,
+                                 .n = length(.tube[is.finite(.tube)]),
+                                 .mean = mean(.tube, na.rm=TRUE),
+                                 .low = ifelse(length(.tube[is.finite(.tube)])>2,
+                                               mean(.tube, na.rm=TRUE) - (qnorm(0.975)*sd(.tube, na.rm=TRUE)),
+                                               NA),
+                                 .high = ifelse(length(.tube[is.finite(.tube)])>2,
+                                                mean(.tube, na.rm=TRUE) + (qnorm(0.975)*sd(.tube, na.rm=TRUE)),
+                                                NA)
+        )
+      }
+
       test <- merge(dat.ans, test)    #a join might be faster ???
       test <- subset(test, .n==n)     #subset for data with replicates
       test <- test[!is.na(test$.tube),]

@@ -20,4 +20,6 @@
     * __v 0.0.6__ [2024-12-05] added checkTubeData  
     * __v 0.0.7__ [2025-02-17] testTubeAccuracy updates: tidied data.ref 
     name handling when merging; added nearest.only argument 
+    * __v 0.0.8__ [2025-02-24] testTubePrecision updates: added methods 
+    based on qt() and rnorm() 
     
