@@ -1,0 +1,76 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+R code for Diffusion Tube Data Evaluation.
+
+__DTEval__ is a package of R code used for the pro-processing, analysis and 
+evaluation of diffusion tube (DT) data typically collected in air quality 
+assessment exercises. 
+
+## Project Webpages
+
+__DTEval__ Projects pages: [to be build once package is PUBLIC]
+
+## Installation
+
+Get developer's version of __DTEval__ from [GitHub](https://github.com)  ([archive](https://github.com/karlropkins/AQEval)) [currently PRIVATE]:
+
+```{r, eval=FALSE}
+# (if you do not have remotes package, install it from CRAN) 
+# install.packages("remotes")
+remotes::install_github("karlropkins/DTEval") 
+```
+
+If you have the __DTEval__ .tar.gz file:
+
+```{r, eval=FALSE}
+# install.packages("remotes")
+remotes::install_local(file.choose()) # and select
+```
+
+## Background
+This package contains code developed as part 
+of an on-going project.
+
+## Contributing
+Contributions are very welcome.  
+
+## License
+GPL-3 
+
+## Example
+
+```{r}
+require(DTEval)
+```
+
+### Using DT data from York City Council: 
+
+City of York Council / York Open Data
+
+https://data.yorkopendata.org/dataset/diffusion-tubes-data
+
+(downloaded 2024-12-02)
+
+
+### DT Precision Test:
+
+(Using all triplicate data)
+
+```{r}
+testTubePrecision(dt.york, n=3, facet="SiteName")
+```
+
+
