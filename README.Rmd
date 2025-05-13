@@ -56,21 +56,33 @@ GPL-3
 require(DTEval)
 ```
 
-### Using DT data from York City Council: 
+### Get local reference data for York: 
 
-City of York Council / York Open Data
+```{r, warning=FALSE, message=FALSE}
+#AURN sites: YK10-11
+#AQE sites: YK7-9, YK13, YK15-16
+#(using openair and dplyr) 
 
-https://data.yorkopendata.org/dataset/diffusion-tubes-data
+ref.york <- dplyr::bind_rows(
+  openair::importAURN(c("YK10", "YK11"), year=2005:2023, meta=TRUE),
+  openair::importAQE(c("YK7", "YK8", "YK9", "YK13", "YK15", "YK16"), 
+                     year=2005:2023, meta=TRUE)
+)
+```
 
-(downloaded 2024-12-02)
-
-
-### DT Precision Test:
-
-(Using all triplicate data)
+### Compare DT and reference data
 
 ```{r}
-testTubePrecision(dt.york, n=3, facet="SiteName")
+#DT data packaged as dt.york 
+#source City of York Council / York Open Data
+#https://data.yorkopendata.org/dataset/diffusion-tubes-data 
+#(downloaded 2024-12-02)
+
+testTubeAccuracy(dt.york, ref.york, 
+                 tube="measurement", ref="no2", 
+                 facet="site.ref", 
+                 group="CalendarYear==2017")
 ```
 
 
+(Maybe wrong units in 2017?)
