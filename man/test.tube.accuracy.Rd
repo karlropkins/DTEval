@@ -13,7 +13,7 @@ testTubeAccuracy(
   method = 1,
   max.distance = 10,
   nearest.only = FALSE,
-  show = c("plot", "report"),
+  show = c("plot", "summary.report"),
   ...
 )
 }

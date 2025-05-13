@@ -159,7 +159,7 @@ testTubePrecision <-
            tube = "measurement",
            n = 3,
            method = 2,
-           show = c("plot", "report"),
+           show = c("plot", "summary.report"),
            ...){
 
     #setup
@@ -372,6 +372,15 @@ testTubePrecision <-
     if("plot" %in% tolower(show)){
       if(!is.null(plt)){
         plot(plt)
+      }
+    }
+    if("summary.report" %in% tolower(show)){
+      temp <-  strsplit(rep, "\n")[[1]]
+      temp <- temp[!grepl("Insufficient replicates", temp)]
+      if(length(temp)>1){
+        message(paste(temp, collapse="\n"))
+      } else {
+        message("not enough replicated data...")
       }
     }
     if("report" %in% tolower(show)){

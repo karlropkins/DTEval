@@ -94,7 +94,7 @@
 
 # looks like BHA4 (2019 onwards) and BATH (up until oct-2019) are my local AURN...
 # data.ref <- openair::importAURN("bha4", year=2019:2024, meta=TRUE)
-# testTubeAccuracy(dont.share::dt.banes, data.ref, tube="measurement", ref="no", facet="year_of_measurement")
+# testTubeAccuracy(dont.share::dt.banes, data.ref, tube="measurement", ref="no2", facet="year_of_measurement")
 
 
 ## notes
@@ -109,7 +109,7 @@
 ##   local_authority <chr>
 
 # data.ref <- openair::importAURN(c("LEED", "LED6"), year=2019:2024, meta=TRUE)
-# testTubeAccuracy(dont.share::dt.leeds, data.ref, tube="measurement", ref="no", facet="year_of_measurement")
+# testTubeAccuracy(dont.share::dt.leeds, data.ref, tube="measurement", ref="no2", facet="year_of_measurement")
 
 
 #' @rdname test.tube.accuracy
@@ -119,7 +119,7 @@ testTubeAccuracy <-
            tube = "measurement", ref = "no2",
            method = 1, max.distance = 10,
            nearest.only = FALSE,
-           show = c("plot", "report"), ...){
+           show = c("plot", "summary.report"), ...){
 
     #thinking about
     #######################
@@ -398,6 +398,15 @@ testTubeAccuracy <-
     if("plot" %in% tolower(show)){
       if(!is.null(plt)){
         plot(plt)
+      }
+    }
+    if("summary.report" %in% tolower(show)){
+      temp <-  strsplit(rep, "\n")[[1]]
+      temp <- temp[!grepl("Insufficient data", temp)]
+      if(length(temp)>1){
+        message(paste(temp, collapse="\n"))
+      } else {
+        message("nothing near enough...")
       }
     }
     if("report" %in% tolower(show)){

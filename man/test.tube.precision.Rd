@@ -10,7 +10,7 @@ testTubePrecision(
   tube = "measurement",
   n = 3,
   method = 2,
-  show = c("plot", "report"),
+  show = c("plot", "summary.report"),
   ...
 )
 }

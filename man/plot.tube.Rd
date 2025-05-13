@@ -19,8 +19,6 @@ X and Y axes, respectively.}
 \value{
 \code{ggplotTubeShell} returns a ggplot shell the user then
 needs to add \code{geom}s to, to build a standard plot.
-
-NOTES: Maybe I'm already missed \code{qplot}...
 }
 \description{
 \code{DTEval} uses ggplot2 to generate most plots.
@@ -39,4 +37,7 @@ supplied groups are factors.
 \item \code{facet} The name of the data-series to use to cut
 the data by when generating multiple plot panels.
 }
+}
+\note{
+Maybe I'm already missing \code{qplot}...
 }

@@ -30,7 +30,7 @@
 #' @return \code{ggplotTubeShell} returns a ggplot shell the user then
 #' needs to add \code{geom}s to, to build a standard plot.
 #'
-#' NOTES: Maybe I'm already missed \code{qplot}...
+#' @note Maybe I'm already missing \code{qplot}...
 
 
 #############################
