@@ -56,8 +56,8 @@
 
 #' @return \code{testTubePrecision} returns a list of test results,
 #' typically \code{data} all \code{n}-replicate measurement sets identified
-#' using \code{\link{tagTube}}, \code{plot}, and results \code{lookup} table
-#' and \code{report}.
+#' using \code{\link{tagTube}}, \code{plot}, results \code{lookup} table
+#' and; the (full) \code{report}.
 
 #splatted function
 
