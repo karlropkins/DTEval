@@ -22,4 +22,7 @@
     name handling when merging; added nearest.only argument 
     * __v 0.0.8__ [2025-02-24] testTubePrecision updates: added methods 
     based on qt() and rnorm() 
+    * __v 0.0.8__ [2025-05-14] testTubeAccuracy and ...Precision updates, 
+    summary report option; ggplotTubeShell update, group handled as 
+    factor 
     

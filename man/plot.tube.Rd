@@ -33,9 +33,14 @@ In addition to \code{data}, the main data source for plots,
 different from plot defaults.
 \item \code{group} The name of the data-series to use to group
 plotted data with. By default, \code{ggplotTubeShell} assumes
-supplied groups are factors.
+supplied groups are factors if less than 20 unique cases.
 \item \code{facet} The name of the data-series to use to cut
-the data by when generating multiple plot panels.
+the data by when generating multiple plot panels. Also provides
+an addition \code{facet.type} shortcut to different \code{ggplot2}
+facet options: \code{'wrap'} for \code{facet_wrap} (default),
+\code{'grid'} for \code{facet_grid} (or 'grid.row' or grid.col' to
+specific by row-then-column or column-then-row grid handling,
+respectively).
 }
 }
 \note{

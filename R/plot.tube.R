@@ -21,10 +21,16 @@
 #'
 #'  * \code{group} The name of the data-series to use to group
 #'  plotted data with. By default, \code{ggplotTubeShell} assumes
-#'  supplied groups are factors.
+#'  supplied groups are factors if less than 20 unique cases.
 #'
 #'  * \code{facet} The name of the data-series to use to cut
-#'  the data by when generating multiple plot panels.
+#'  the data by when generating multiple plot panels. Also provides
+#'  an addition \code{facet.type} shortcut to different \code{ggplot2}
+#'  facet options: \code{'wrap'} for \code{facet_wrap} (default),
+#'  \code{'grid'} for \code{facet_grid} (or 'grid.row' or grid.col' to
+#'  specific by row-then-column or column-then-row grid handling,
+#'  respectively).
+
 
 
 #' @return \code{ggplotTubeShell} returns a ggplot shell the user then
@@ -120,6 +126,10 @@ ggplotTubeShell <-
     if("group" %in% names(.xargs)){
       data <- checkTubeData(data, x=.xargs$group, n.x=1,
                             if.err = "stop<<ggplotTubeShell>>group")
+      #if unique(group) less than 20 treat as factor...
+      if(length(unique(data[[.xargs$group]]))<20){
+        data[[.xargs$group]] <- factor(data[[.xargs$group]])
+      }
     }
     if("facet" %in% names(.xargs)){
       data <- checkTubeData(data, x=.xargs$facet, n.x=2,
@@ -149,6 +159,7 @@ ggplotTubeShell <-
     if("col" %in% names(.xargs)){
       data <- checkTubeData(data, x=.xargs$col, n.x=1,
                       if.err = "stop<<ggplotTubeShell>>col")
+      #this overrides group option if both in call...
       plt$mapping$colour <- data[[.xargs$col]]
     }
 
