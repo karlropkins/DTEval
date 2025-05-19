@@ -78,21 +78,6 @@
 
 # runs without warning or error but generates nothing usable
 
-## testTubePrecision(basildon, type="year_of_measurement", method=2)
-
-## bias_adjusted_measurement' (rep = 3 subset):
-##  [2019] mean: 24.41 (17.65 to 34.93) precision: -8.055[%] to 8.055[%]
-##  [2020] Insufficient replicates...
-##  [2021] Insufficient replicates...
-##  [2022] Insufficient replicates...
-##  [2023] Insufficient replicates...
-##  [2024] Insufficient replicates...
-
-# generates a plot with the strip to right
-#   side is better when there are lots of plot panels
-#   e.g. with testTubePrecision(banes, type="year_of_measurement")
-#   BUT maybe better on top if only one...
-#   (or option to change facet options)
 
 
 #####################
@@ -354,15 +339,22 @@ testTubePrecision <-
 
     #plot
     if(nrow(test)> n){
+      ###############################
+      # note
+      ###############################
+      #  need more line control ??
+      if(!"line.col" %in% names(.xargs)){
+        .xargs$line.col <- "red"
+      }
       plt <- ggplotTubeShell(test, x=".mean", y=".tube",
                              xlab="replicate mean",
                              ylab=tube,
                              ...) +
         ggplot2::geom_point() +
-        ggplot2::geom_line(ggplot2::aes(y=.y), col="red") +
-        ggplot2::geom_line(ggplot2::aes(y=.ylow), col="red",
+        ggplot2::geom_line(ggplot2::aes(y=.y), col=.xargs$line.col) +
+        ggplot2::geom_line(ggplot2::aes(y=.ylow), col=.xargs$line.col,
                            linetype="dashed") +
-        ggplot2::geom_line(ggplot2::aes(y=.yhigh), col="red",
+        ggplot2::geom_line(ggplot2::aes(y=.yhigh), col=.xargs$line.col,
                            linetype="dashed")
     } else {
       plt <- NULL

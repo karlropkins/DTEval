@@ -158,11 +158,10 @@ ggplotTubeShell <-
 
     if("col" %in% names(.xargs)){
       data <- checkTubeData(data, x=.xargs$col, n.x=1,
-                      if.err = "stop<<ggplotTubeShell>>col")
-      #this overrides group option if both in call...
+                            if.err = "stop<<ggplotTubeShell>>col")
+      ##this overrides group option if both in call...
       plt$mapping$colour <- data[[.xargs$col]]
     }
-
 
     #facet
     if("facet" %in% names(.xargs)){
@@ -219,18 +218,50 @@ ggplotTubeShell <-
         }
       }
     }
+
+    #palette
+    ############################
+    # note
+    ############################
+    #   testing a colouring option
+    ############################
+    if("palette" %in% names(.xargs)){
+      if(is.null(plt$mapping$colour)){
+        plt$mapping$colour <- "default"
+        plt <- plt + ggplot2::scale_color_manual(values=.xargs$palette,
+                                                 guide="none")
+      } else {
+        if(is.numeric(plt$mapping$colour)){
+          plt <- plt + ggplot2::scale_color_gradientn(colours=.xargs$palette)
+        } else {
+          if(length(unique(plt$mapping$colour)) > length(.xargs$palette)){
+            .xargs$palette <- colorRampPalette(.xargs$palette)(length(unique(plt$mapping$colour)))
+          }
+          plt <- plt + ggplot2::scale_color_manual(values=.xargs$palette)
+        }
+      }
+    }
+
     plt <- plt +
       ggplot2::xlab(.xargs$xlab) +
       ggplot2::ylab(.xargs$ylab) +
       ggplot2::theme_bw() +
       ggplot2::theme(strip.background = ggplot2::element_rect(fill="transparent"))
     if("auto.text" %in% names(.xargs) && .xargs$auto.text){
+      ###########################
+      #note
+      ###########################
+      # following may need expanding to other plot labels
+      #     strip, scale, etc ???
       plt <- plt +  ggplot2::theme(axis.title.x = ggtext::element_markdown(),
                                    axis.title.y = ggtext::element_markdown())
     }
     return(plt)
 
   }
+
+
+
 
 
 
@@ -293,7 +324,7 @@ ggplotTubeShell_old <-
 #####################
 # this makes a factor
 # which would be bad if
-# user tried to group bu a big numeric...
+# user tried to group a big numeric...
 #####################
         #data[, .xargs$group] <- getTubeX(data, .xargs$group)
         #if(length(unique(data[, .xargs$group]))<25) {

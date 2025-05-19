@@ -383,6 +383,12 @@ testTubeAccuracy <-
       #not enough to plot...
       plt <- NULL
     } else {
+      ###########################
+      # note
+      ###########################
+      #    see testTubeAccuracy for line handling
+      #       BUT might not work the same...
+      ######################################
       plt <- ggplotTubeShell(local, x=".ref", y=".tube",
                              xlab=ref, ylab=tube, ...) +
                 ggplot2::geom_point() +
