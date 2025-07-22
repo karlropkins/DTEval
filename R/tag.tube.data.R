@@ -25,7 +25,8 @@
 
 # Well, might work ... ??
 
-#' @param data Data source, typically a data.frame or similar, containing
+#' @param data Data source, typically a
+#' data.frame or similar, containing
 #' data-series of diffusion tube records.
 #' @param method The method to apply when testing or modifying \code{data}.
 #' The default (\code{method=-1}) means try all methods in order until one

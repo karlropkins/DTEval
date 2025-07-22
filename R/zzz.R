@@ -6,6 +6,14 @@
 #' @importFrom utils data modifyList
 #' @importFrom methods is
 
+##########################
+#don't want to keep this
+##########################
+
+#' @import data.table
+
+
+
 #undefined globals
 utils::globalVariables(c(".data", ".mean",".n", ".tube",".y", ".yhigh",
                          ".ylow", "latitude", "longitude"))

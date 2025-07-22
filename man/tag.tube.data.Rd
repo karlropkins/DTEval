@@ -17,7 +17,8 @@ tagTubeLatLon(data, method = -1, force = FALSE, ...)
 tagTubeSiteID(data, method = -1, force = FALSE, ...)
 }
 \arguments{
-\item{data}{Data source, typically a data.frame or similar, containing
+\item{data}{Data source, typically a
+data.frame or similar, containing
 data-series of diffusion tube records.}
 
 \item{...}{Additional arguments can be used to assign data sources if

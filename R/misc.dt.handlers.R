@@ -1,9 +1,9 @@
 ##################################################
-#' @title Miscellaneous Diffusion Tube Data handling
+#' @title Miscellaneous Diffusion Tube Data Handling
 ##################################################
 
-#' @name misc.tube.data
-#' @aliases misc.tube.data getTubeX checkTubeData
+#' @name misc.dt.data.handlers
+#' @aliases misc.dt.data.handlers getTubeX checkTubeData
 #' @description Miscellaneous code for routine diffusion tube (DT) data
 #' handling with \code{DTEval}.
 
