@@ -25,4 +25,5 @@
     * __v 0.0.9__ [2025-05-19] testTubeAccuracy and ...Precision updates, 
     summary report option; ggplotTubeShell updates, group handled as 
     factor, added palette option  
-    
+    * __v 0.0.10__ [2025-07-23] added data.table; testTube... functions 
+    rewritten using data.table

@@ -28,9 +28,9 @@
 #' one of the following methods to estimate the precision of cases
 #' with \code{n} replicates:
 #'
-#' * \code{method = 1} uses \code{quantile(x, 0.025, 0.975)}
+#' * \code{method = 1} uses \code{quantile(x, 0.05, 0.95)}
 #'
-#' * \code{method = 2} uses \code{mean(x) +/- qt(0.975, n(x)-1))} &ast;
+#' * \code{method = 2} uses \code{mean(x) +/- qt(0.05/2, n(x)-1), lower.tail=FALSE)} &ast;
 #' \code{sd(x)/sqrt(n(x))}
 #'
 #' * \code{method = 3} used \code{mean(x) +/- 1.96} &ast; \code{sd(x)/sqrt(n(x)))}
@@ -99,7 +99,7 @@
 
 # think about facet/group/.cut handling
 #    added but not fully  tested
-#    currently .cut us just group and facet
+#    currently .cut uses just group and facet
 #        may want option for user to control these separately ??
 #        TESTING option to set colour, etc, in ggplotTubeShell
 #             as option to do this
@@ -139,6 +139,8 @@
 
 #' @rdname test.tube.precision
 #' @export
+
+
 testTubePrecision <-
   function(data,
            tube = "measurement",
@@ -200,15 +202,15 @@ testTubePrecision <-
       data$.cut <- paste(data$.cut, "|", sep="")
     }
 
-#################
-# could remove some of above with checkTubeData ??
-##################
+    #################
+    # could remove some of above with checkTubeData ??
+    ##################
 
 
-##################
-#only does method one at a time at moment...
-# maybe warn or stop if multiples...
-##################
+    ##################
+    #only does method one at a time at moment...
+    # maybe warn or stop if multiples...
+    ##################
     method <- as.character(method)
     .check <- 1:4 # available methods
     if(!method %in% .check){
@@ -224,51 +226,50 @@ testTubePrecision <-
     ls <- lapply(unique(data$.cut), function(z){
       dat.ans <- data[data$.cut==z,]
       test <- c(".start_date",
-               ".end_date", ".site_id", ".cut", group,
-               facet)
-      test <- dplyr::group_by(dat.ans, dplyr::pick(test))
+                ".end_date", ".site_id", ".cut", group,
+                facet)
+      #moving to data.table
+      #test <- dplyr::group_by(dat.ans, dplyr::pick(test))
+      dat.ans <- data.table::as.data.table(dat.ans)
       if(method=="1"){
-        test <- dplyr::summarise(test,
-                          .n = length(.tube[is.finite(.tube)]),
-                          .mean = mean(.tube, na.rm=TRUE),
-                          .low = quantile(.tube, 0.025, na.rm=TRUE),
-                          .high = quantile(.tube, 0.975, na.rm=TRUE)
-        )
+        test <- dat.ans[, .(.n = length(.tube[is.finite(.tube)]),
+                            .mean = mean(.tube, na.rm=TRUE),
+                            .low = quantile(.tube, 0.05, na.rm=TRUE),
+                            .high = quantile(.tube, 0.95, na.rm=TRUE)
+        ), by=test]
+        test <- as.data.frame(test)
       }
       if(method=="2"){
-        test <- dplyr::summarise(test,
-                                 .n = length(.tube[is.finite(.tube)]),
-                                 .mean = mean(.tube, na.rm=TRUE),
-                                 .low = ifelse(.n>2, .mean - (qt(0.975, df=.n-1) * sd(.tube, na.rm=TRUE)/
-                                                                     sqrt(.n)), NA),
-                                 .high = ifelse(.n>2, .mean + (qt(0.975, df=.n-1) * sd(.tube, na.rm=TRUE)/
-                                                                 sqrt(.n)), NA)
-        )
+        test <- dat.ans[, .(.n = length(.tube[is.finite(.tube)]),
+                            .mean = mean(.tube, na.rm=TRUE),
+                            .sd = sd(.tube, na.rm=TRUE)
+        ), by=test]
+        test <- as.data.frame(test)
+        .ts <- suppressWarnings(qt(0.05/2, df=test$.n-1, lower.tail = FALSE))
+        test$.low <- ifelse(test$.n>2, test$.mean - (.ts * (test$.sd/sqrt(test$.n))), NA)
+        test$.high <- ifelse(test$.n>2, test$.mean + (.ts * (test$.sd/sqrt(test$.n))), NA)
       }
       if(method=="3"){
-        test <- dplyr::summarise(test,
-                                 .n = length(.tube[is.finite(.tube)]),
-                                 .mean = mean(.tube, na.rm=TRUE),
-                                 .low = ifelse(.n>2, mean(.tube, na.rm=TRUE) - (1.96*sd(.tube, na.rm=TRUE)/
-                                                                     sqrt(.n)), NA),
-                                 .high = ifelse(.n>2, mean(.tube, na.rm=TRUE) + (1.96*sd(.tube, na.rm=TRUE)/
-                                                                      sqrt(.n)), NA)
-        )
+        test <- dat.ans[, .(.n = length(.tube[is.finite(.tube)]),
+                            .mean = mean(.tube, na.rm=TRUE),
+                            .sd = sd(.tube, na.rm=TRUE)
+        ), by=test]
+        test <- as.data.frame(test)
+        test$.low <- ifelse(test$.n>2, test$.mean - (1.96*test$.sd/sqrt(test$.n)), NA)
+        test$.high <- ifelse(test$.n>2, test$.mean + (1.96*test$.sd/sqrt(test$.n)), NA)
       }
       if(method=="4"){
-        test <- dplyr::summarise(test,
-                                 .n = length(.tube[is.finite(.tube)]),
-                                 .mean = mean(.tube, na.rm=TRUE),
-                                 .low = ifelse(length(.tube[is.finite(.tube)])>2,
-                                               mean(.tube, na.rm=TRUE) - (qnorm(0.975)*sd(.tube, na.rm=TRUE)),
-                                               NA),
-                                 .high = ifelse(length(.tube[is.finite(.tube)])>2,
-                                                mean(.tube, na.rm=TRUE) + (qnorm(0.975)*sd(.tube, na.rm=TRUE)),
-                                                NA)
-        )
+        test <- dat.ans[, .(.n = length(.tube[is.finite(.tube)]),
+                            .mean = mean(.tube, na.rm=TRUE),
+                            .sd = sd(.tube, na.rm=TRUE)
+        ), by=test]
+        test <- as.data.frame(test)
+        test$.low <- ifelse(test$.n>2, test$.mean - (qnorm(0.975)*test$.sd), NA)
+        test$.high <- ifelse(test$.n>2, test$.mean + (qnorm(0.975)*test$.sd), NA)
       }
-
-      test <- merge(dat.ans, test)    #a join might be faster ???
+      test <- as.data.frame(test)
+      dat.ans <- as.data.frame(dat.ans)
+      test <- merge(dat.ans, test)    #a join or data.table.merge might be faster ???
       test <- subset(test, .n==n)     #subset for data with replicates
       test <- test[!is.na(test$.tube),]
       if(nrow(test) >= n){
@@ -386,7 +387,6 @@ testTubePrecision <-
     return(invisible(out))
 
   }
-
 
 
 

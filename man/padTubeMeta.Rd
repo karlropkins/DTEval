@@ -14,35 +14,32 @@ data-series of diffusion tube records.}
 \item{x}{The name of a data-series in \code{data} or expression to
 be evaluated, supplied as a character string. See Details below.}
 
+\item{site.id}{The name of a data-series that can be used as a
+sampling site identifier. If \code{site.id} is not supplied, the
+function will check for known \code{DTEval} \code{tags}.
+See Details below.}
+
 \item{...}{additional arguments, currently ignored.}
 }
 \value{
-\code{getTubeX} returns \code{x} if it can
-be evaluated with the supplied \code{data}.
-
-\code{getTubeData} returns \code{data} plus any additions columns required to
-allow all valid \code{x} to be used directly as column names, e.g, in form:
-
-\code{data[, x]}
+\code{padTubeMeta} returns \code{data} with the requested fix,
+if it can be applied.
 }
 \description{
 Miscellaneous code for fixing commonly reported issues with
 diffusion tube (DT) data.
 }
 \details{
-\code{getTubeX} attempts to extract \code{x} from \code{data} (or
-build it from information in \code{data}. It uses \code{with(data, x)},
-so can evaluates terms like:
+\code{padTubeMeta} attempts to pad the \code{x} data-series by replacing
+any \code{NA}s with the non-\code{NA} entries from the same data-series.
+It is intended for use with meta-data data-series, e.g. a \code{latitude}
+(or \code{longitude column}) where value was only entered once. Meta-data
+is only be expected to unique at a specific level of aggregation, e.g.
+\code{latitude} will be unique for a sample site. So, an additional
+identifier is required to group the data, \code{site.id}.
 
-\code{getTubeX(data, 'factor(y)')}
+The function returns the supplied data with the attempted fix applied,
+and is generally used in the form:
 
-(assuming \code{y} is in \code{data} or visible from it, and \code{x}
-is a character string)
-
-It is intended for use with a single \code{x} term and returns it as a
-vector.
-
-\code{checkTubeData} is a general purpose wrapper for \code{getTubeX} that
-handles multiple \code{x} terms. It attempts to evaluate each in turn and
-returns the supplied \code{data} plus any additions required.
+\code{dt.data.new <- padTubeMeta(dt.data, "[meta.name]", "[id.name]")}
 }

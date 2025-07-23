@@ -234,15 +234,31 @@ testTubeAccuracy <-
       #           but not worrying for now...
       names(.ref) <- ifelse(names(.ref) %in% c(".start_date", ".end_date"),
                             names(.ref), paste(names(.ref), ".ref", sep=""))
-      #  shouldn't need the suffixes but leaving just in case...
-      out <- dplyr::left_join(.data, .ref, by=c(".start_date", ".end_date"),
-                              suffix = c("", ".ref"))
+      ################################
+      # replacing dplyr with data.table
+      ## out <- dplyr::left_join(.data, .ref, by=c(".start_date", ".end_date"),
+      ##                         suffix = c("", ".ref"))
+      # 1. time class now needs to match
+      .ref$.start_date <- as.Date(.ref$.start_date)
+      .ref$.end_date <- as.Date(.ref$.end_date)
+      out <- data.table::merge.data.table(data.table::as.data.table(.data),
+                                          data.table::as.data.table(.ref),
+                                          all.x=TRUE, all.y=FALSE,
+                                          sort=FALSE, suffix = c("", ".ref"),
+                                          by=c(".start_date", ".end_date"))
+      out <- as.data.frame(out)
+
       #merge data
       out$.tube <- out[,tube]
       out$.ref <- out[,paste(ref, ".ref", sep="")]
       out
     })
-    out <- do.call(rbind, out)
+    ########################
+    # replacing rbind with data.table version
+    #out <- do.call(rbind, out)
+    out <- data.table::rbindlist(out)
+    out <- as.data.frame(out)
+
     #bodge 3/3... last bit for now...
     ref <- paste(ref, ".ref", sep="")
 

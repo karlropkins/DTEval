@@ -2,21 +2,23 @@
 #misc setup and code
 ###########################
 
-#' @importFrom stats as.formula end lm loess predict qt quantile sd start qnorm
+#' @importFrom stats as.formula end lm loess predict qt quantile sd start qnorm na.omit
 #' @importFrom utils data modifyList
 #' @importFrom methods is
+#' @importFrom grDevices colorRampPalette
 
 ##########################
-#don't want to keep this
+# don't want full import
 ##########################
+## #' @import data.table
+#' @importFrom data.table as.data.table .SD :=
 
-#' @import data.table
 
 
 
 #undefined globals
 utils::globalVariables(c(".data", ".mean",".n", ".tube",".y", ".yhigh",
-                         ".ylow", "latitude", "longitude"))
+                         ".ylow", "latitude", "longitude", "."))
 
 
 ###########################

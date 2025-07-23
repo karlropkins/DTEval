@@ -52,8 +52,8 @@ to identify replicate samples, if not already tagged, then applies
 one of the following methods to estimate the precision of cases
 with \code{n} replicates:
 \itemize{
-\item \code{method = 1} uses \code{quantile(x, 0.025, 0.975)}
-\item \code{method = 2} uses \code{mean(x) +/- qt(0.975, n(x)-1))} *
+\item \code{method = 1} uses \code{quantile(x, 0.05, 0.95)}
+\item \code{method = 2} uses \code{mean(x) +/- qt(0.05/2, n(x)-1), lower.tail=FALSE)} *
 \code{sd(x)/sqrt(n(x))}
 \item \code{method = 3} used \code{mean(x) +/- 1.96} * \code{sd(x)/sqrt(n(x)))}
 \item \code{method = 4} used \code{mean(x) +/- qnorm(0.975)} * \code{sd(x)}
