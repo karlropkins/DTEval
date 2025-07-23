@@ -17,7 +17,7 @@ R code for Diffusion Tube Data Evaluation.
 
 __DTEval__ is a package of R code used for the pro-processing, analysis and 
 evaluation of diffusion tube (DT) data typically collected in air quality 
-assessment exercises. 
+assessment exercises.  
 
 ## Project Webpages
 
