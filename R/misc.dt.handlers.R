@@ -2,8 +2,8 @@
 #' @title Miscellaneous Diffusion Tube Data Handling
 ##################################################
 
-#' @name misc.dt.data.handlers
-#' @aliases misc.dt.data.handlers getTubeX checkTubeData
+#' @name misc.dt.handlers
+#' @aliases misc.dt.handlers getTubeX checkTubeData
 #' @description Miscellaneous code for routine diffusion tube (DT) data
 #' handling with \code{DTEval}.
 
@@ -62,7 +62,7 @@
 ## etc...
 ## with(iris, eval(parse(text=a)))
 
-#' @rdname misc.tube.data
+#' @rdname misc.dt.handlers
 #' @export
 
 getTubeX <- function(data, x=NULL, ..., test.class=NULL,
@@ -134,7 +134,7 @@ getTubeX <- function(data, x=NULL, ..., test.class=NULL,
 ## wrapper for getTubeX
 ## returning x's to data
 
-#' @rdname misc.tube.data
+#' @rdname misc.dt.handlers
 #' @export
 
 checkTubeData <- function(data, x=NULL, ..., n.x=-1, if.err="return.null"){

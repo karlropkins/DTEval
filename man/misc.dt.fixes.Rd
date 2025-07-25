@@ -2,24 +2,34 @@
 % Please edit documentation in R/misc.dt.fixes.R
 \name{misc.dt.fixes}
 \alias{misc.dt.fixes}
+\alias{addTubeMeta}
 \alias{padTubeMeta}
 \title{Miscellaneous Diffusion Tube Data Fixes}
 \usage{
-padTubeMeta(data, x = NULL, site.id = NULL, ...)
+addTubeMeta(data, ref = NULL, by = NULL, ...)
+
+padTubeMeta(data, x = NULL, by = NULL, ...)
 }
 \arguments{
 \item{data}{Data source, typically a data.frame or similar, containing
 data-series of diffusion tube records.}
 
-\item{x}{The name of a data-series in \code{data} or expression to
-be evaluated, supplied as a character string. See Details below.}
+\item{ref}{(For \code{addTubeMeta} only) The meta data source, typically
+a data.frame or similar, containing meta-information associated with the
+diffusion tube records in \code{data}. See Details below.}
 
-\item{site.id}{The name of a data-series that can be used as a
-sampling site identifier. If \code{site.id} is not supplied, the
-function will check for known \code{DTEval} \code{tags}.
-See Details below.}
+\item{by}{The name of a data-series that can be used as a
+case identifier for meta information. For most diffusion tube meta data,
+this is often a site identifier, e.g. a site code or name. If \code{by}
+is not supplied, the function will check for known \code{DTEval}
+\code{tags} and file details, but may still require user input. See
+Details below.}
 
 \item{...}{additional arguments, currently ignored.}
+
+\item{x}{(For \code{padTubeMeta} only) The name of a data-series in
+\code{data} or expression to be evaluated, supplied as a character string.
+See Details below.}
 }
 \value{
 \code{padTubeMeta} returns \code{data} with the requested fix,
@@ -30,16 +40,18 @@ Miscellaneous code for fixing commonly reported issues with
 diffusion tube (DT) data.
 }
 \details{
+#' \code{addTubeMeta} attempts to merge \code{data} and \code{ref} using
+\code{by} as the common term. It is intended for use then
 \code{padTubeMeta} attempts to pad the \code{x} data-series by replacing
 any \code{NA}s with the non-\code{NA} entries from the same data-series.
 It is intended for use with meta-data data-series, e.g. a \code{latitude}
 (or \code{longitude column}) where value was only entered once. Meta-data
 is only be expected to unique at a specific level of aggregation, e.g.
 \code{latitude} will be unique for a sample site. So, an additional
-identifier is required to group the data, \code{site.id}.
+identifier is required to group the data, \code{by}.
 
 The function returns the supplied data with the attempted fix applied,
 and is generally used in the form:
 
-\code{dt.data.new <- padTubeMeta(dt.data, "[meta.name]", "[id.name]")}
+\code{dt.data.new <- padTubeMeta(dt.data, "[meta.name]", "[by.name]")}
 }
