@@ -1,11 +1,11 @@
 Package: DTEval
 Title: Diffusion Tube Evaluation Code
-Version: 0.0.10
-Date: 2025-07-23
-Description: R code used for the pro-processing, analysis and evaluation of diffusion tube (DT) data typically
-            collected in air quality assessment exercises.
-Authors@R: person(given = "Karl", family = "Ropkins", role = c("aut", "cre"), email = "k.ropkins@its.leeds.ac.uk",
-            comment = c(ORCID = "0000-0002-0294-6997"))
+Version: 0.0.11
+Date: 2025-08-07
+Description: R code used for the pro-processing, analysis and evaluation of diffusion tube (DT) data
+           typically collected in air quality assessment exercises.
+Authors@R: person(given = "Karl", family = "Ropkins", role = c("aut", "cre"), email =
+           "k.ropkins@its.leeds.ac.uk", comment = c(ORCID = "0000-0002-0294-6997"))
 Maintainer: Karl Ropkins <k.ropkins@its.leeds.ac.uk>
 License: GPL (>= 3)
 Encoding: UTF-8
