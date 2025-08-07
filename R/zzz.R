@@ -133,7 +133,7 @@ dte_quickText <- function (text, auto.text = TRUE)
 ##########################
 
 # old function
-# above tagTubeSiteID gets all cases seen to-date
+# now using tagTubeSampleID which is a little different
 
 #findTubeReplicates <-
 #  function(data, method = 0){
@@ -143,7 +143,7 @@ dte_quickText <- function (text, auto.text = TRUE)
 #      ## switch might be neater...
 #
 #      ## each method should:
-#      ## make replicate and site_id identifiers
+#      ## make replicate and site id identifiers
 #      if(method==0){
 #        #match latitude+longitude
 #        test <- factor(paste(data$latitude, data$longitude,

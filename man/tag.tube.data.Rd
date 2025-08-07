@@ -5,7 +5,7 @@
 \alias{tagTube}
 \alias{tagTubeDates}
 \alias{tagTubeLatLon}
-\alias{tagTubeSiteID}
+\alias{tagTubeSampleID}
 \title{Diffusion Tube Pro-processing}
 \usage{
 tagTube(data, ...)
@@ -14,7 +14,7 @@ tagTubeDates(data, method = -1, force = FALSE, ...)
 
 tagTubeLatLon(data, method = -1, force = FALSE, ...)
 
-tagTubeSiteID(data, method = -1, force = FALSE, ...)
+tagTubeSampleID(data, method = -1, force = FALSE, ...)
 }
 \arguments{
 \item{data}{Data source, typically a
@@ -99,9 +99,9 @@ one method: \code{method=1} assigning all locations based on identified
 latitude and longitude. These are then tagged as \code{.latitude} and
 \code{.longitude}, respectively.
 
-\code{tagTubeSiteID} identifies replicate samples. It currently uses
+\code{tagTubeSampleID} identifies samples. It currently uses
 one method: \code{method=1} assigning all same-location-and-time DTs as
-replicates, and is added to \code{data} as \code{.site_id}.
+replicates, and is added to \code{data} as \code{.sample_id}.
 
 \code{tagTube} is a wrapper that runs \code{tagTubeDates},
 \code{tagTubeLatLon} and \code{tagTubeiteID}. Other \code{DTEval}

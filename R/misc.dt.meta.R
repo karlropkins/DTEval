@@ -1,13 +1,14 @@
 ##################################################
-#' @title Miscellaneous Diffusion Tube Data Fixes
+#' @title Miscellaneous Diffusion Tube Meta Data
 ##################################################
 
-#' @name misc.dt.fixes
-#' @aliases misc.dt.fixes padTubeMeta
-#' @description Miscellaneous code for fixing commonly reported issues with
-#' diffusion tube (DT) data.
+#' @name misc.dt.meta
+#' @aliases misc.dt.meta padTubeMeta
+#' @description Miscellaneous code used to work with
+#' diffusion tube (DT) meta data.
 
-# general data fix code
+# general meta data code
+# mainly fixes at the moment...
 
 #' @param data Data source, typically a data.frame or similar, containing
 #' data-series of diffusion tube records.
@@ -46,6 +47,12 @@
 #' if it can be applied.
 
 
+######################################
+# to think about
+######################################
+
+# would like a getTubeMeta if possible
+#     but maybe need a testAsTubeMeta as part of the setup
 
 #############################
 # addTubeMeta
@@ -62,7 +69,7 @@
 #    but be a big job... because I'll need to go through the package and do the lot...
 
 
-#' @rdname misc.dt.fixes
+#' @rdname misc.dt.meta
 #' @export
 
 addTubeMeta <- function(data, ref=NULL, by=NULL,...){
@@ -71,8 +78,8 @@ addTubeMeta <- function(data, ref=NULL, by=NULL,...){
   }
   if(is.null(by)){
     # use tag if there
-    if(".site_id" %in% names(data)){
-      by <- ".site_id"
+    if(".sample_id" %in% names(data)){
+      by <- ".sample_id"
     } else {
       stop("[addTubeMeta] Sorry, need a valid 'by'",
            call.=FALSE)
@@ -133,7 +140,7 @@ addTubeMeta <- function(data, ref=NULL, by=NULL,...){
 #    see in-code notes
 #
 
-#' @rdname misc.dt.fixes
+#' @rdname misc.dt.meta
 #' @export
 
 padTubeMeta <- function(data, x=NULL, by=NULL,...){
@@ -142,8 +149,8 @@ padTubeMeta <- function(data, x=NULL, by=NULL,...){
   }
   if(is.null(by)){
     # use tag if there
-    if(".site_id" %in% names(data)){
-      by <- ".site_id"
+    if(".sample_id" %in% names(data)){
+      by <- ".sample_id"
     } else {
       stop("[padTubeMeta] Sorry, need a valid 'by'",
            call.=FALSE)

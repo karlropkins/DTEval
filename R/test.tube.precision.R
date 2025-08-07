@@ -226,7 +226,7 @@ testTubePrecision <-
     ls <- lapply(unique(data$.cut), function(z){
       dat.ans <- data[data$.cut==z,]
       test <- c(".start_date",
-                ".end_date", ".site_id", ".cut", group,
+                ".end_date", ".sample_id", ".cut", group,
                 facet)
       #moving to data.table
       #test <- dplyr::group_by(dat.ans, dplyr::pick(test))

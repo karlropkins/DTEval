@@ -3,7 +3,7 @@
 ############################################
 
 #' @name tag.tube.data
-#' @aliases tag.tube.data tagTube tagTubeDates tagTubeLatLon tagTubeSiteID
+#' @aliases tag.tube.data tagTube tagTubeDates tagTubeLatLon tagTubeSampleID
 
 #' @description Pre-processing diffusion tube (DT) data for use with
 #' \code{DTEval}. Coded methods to standardise DT data collected using
@@ -94,9 +94,9 @@
 # ALSO time allowing what to include so transform options here ...
 
 #'
-#' \code{tagTubeSiteID} identifies replicate samples. It currently uses
+#' \code{tagTubeSampleID} identifies samples. It currently uses
 #' one method: \code{method=1} assigning all same-location-and-time DTs as
-#' replicates, and is added to \code{data} as \code{.site_id}.
+#' replicates, and is added to \code{data} as \code{.sample_id}.
 #'
 #' \code{tagTube} is a wrapper that runs \code{tagTubeDates},
 #' \code{tagTubeLatLon} and \code{tagTubeiteID}. Other \code{DTEval}
@@ -122,7 +122,7 @@
 # some code wants tidying
 #      if tags there and not forcing, return should be first
 #          no point wasting time doing anything
-#          currently first in latlon and siteid but NOT dates
+#          currently first in latlon and sampleid but NOT dates
 #
 
 ################################
@@ -130,7 +130,7 @@
 ################################
 
 # in development wrapper for main diffusion tube info tagging
-# applies in order tagTubeDates, tagTubeLatLon, tagTubeSiteId
+# applies in order tagTubeDates, tagTubeLatLon, tagTubeSampleId
 
 # used by testTubePrecision
 
@@ -145,12 +145,12 @@ tagTube <-
     ############################
     # to override for individual functions (force or method only)
     #    e.g. dates.force overrides force for just tagTubeDates, etc...
-    #    logic: then always there, e.g. in tagTubeSiteID when it run
+    #    logic: then always there, e.g. in tagTubeSampleID when it run
     #           other two...
 
     data <- tagTubeDates(data, ...)
     data <- tagTubeLatLon(data, ...)
-    data <- tagTubeSiteID(data, ...)
+    data <- tagTubeSampleID(data, ...)
     return(data)
   }
 
@@ -193,7 +193,7 @@ tagTubeDates <-
         stop("[tagTubeDate]> unknown method(s) '",
              paste(method[!method %in% check], collapse = "',"), "'",
              "\n\trecommend one of: ", paste (check, collapse = ", "),
-             "\n\t(and maybe check ?tagTubeSiteID) \n",
+             "\n\t(and maybe check ?tagTubeSampleID) \n",
              call.=FALSE)
       }
     }
@@ -326,7 +326,7 @@ tagTubeDates_method03 <- function(data, ...){
 # tagTubeLatLon
 ################################
 
-# used by tagTubeSiteID
+# used by tagTubeSampleID
 
 # sim here is handle lat lon transforms here if we have time to include it
 
@@ -390,14 +390,10 @@ tagTubeLatLon <-
 
 
 
-
-
-
 ################################
-# tagTubeSiteID
+# tagTubeSampleID
 ################################
 
-# used by tubeReplicatePrecision
 
 # this step is currently on month, year_of_measurement and latitude and
 # longitude ....
@@ -405,11 +401,11 @@ tagTubeLatLon <-
 
 #' @rdname tag.tube.data
 #' @export
-tagTubeSiteID <-
+tagTubeSampleID <-
   function(data, method = -1, force=FALSE, ...){
 
-    #fast return if siteid there and not forcing...
-    if(".site_id" %in% names(data) & !force){
+    #fast return if .sample_id there and not forcing...
+    if(".sample_id" %in% names(data) & !force){
       return(data)
     }
     #setup
@@ -417,11 +413,11 @@ tagTubeSiteID <-
     data <- tagTubeLatLon(data, ...)
     # higher level force and method overwrites
     .xargs <- list(...)
-    if("siteid.force" %in% names(.xargs)){
-      force <- .xargs$siteid.force
+    if("sampleid.force" %in% names(.xargs)){
+      force <- .xargs$sampleid.force
     }
-    if("siteid.method" %in% names(.xargs)){
-      method <- .xargs$siteid.method
+    if("sampleid.method" %in% names(.xargs)){
+      method <- .xargs$sampleid.method
     }
     #check method
     check <- 1
@@ -429,31 +425,31 @@ tagTubeSiteID <-
       method <- check
     }
     if(!method %in% check){
-      stop("[tagTubeSiteID]> '", method, "' unknown method",
+      stop("[tagTubeSampleID]> '", method, "' unknown method",
            "\n\trecommend one of: ", paste (check, collapse = ", "),
-           "\n\t(and maybe check ?tagTubeSiteID) \n",
+           "\n\t(and maybe check ?tagTubeSampleID) \n",
            call.=FALSE)
     }
-#########################
-# old method
-# DEFRA DTs ONLY
-#########################
-#    if(method=="1"){
-#      #match latitude+longitude
-#      test <- factor(paste(data$latitude, data$longitude,
-#                           data$year_of_measurement, data$month))
-#      data$.site_id <- as.numeric(test)
-#    }
+    #########################
+    # old method
+    # DEFRA DTs ONLY
+    ###########################
+    # ALSO changed name to sample_id because
+    #         it is sample not site....
+    #########################
+    #    if(method=="1"){
+    #      #match latitude+longitude
+    #      test <- factor(paste(data$latitude, data$longitude,
+    #                           data$year_of_measurement, data$month))
+    #      data$.site_id <- as.numeric(test)
+    #    }
     if(method=="1"){
       #match latitude+longitude
       test <- data[c(".latitude", ".longitude", ".start_date", ".end_date")]
       test <- as.factor(apply(test , 1 , paste , collapse = "-" ))
-      data$.site_id <- as.numeric(test)
+      data$.sample_id <- as.numeric(test)
     }
     data
   }
-
-
-
 
 
