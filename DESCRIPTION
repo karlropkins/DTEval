@@ -13,4 +13,12 @@ LazyData: true
 Depends: R (>= 3.5.0)
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
-Imports: methods, AQEval (>= 0.6.0), dplyr, data.table (>= 1.9.8), ggplot2, ggtext
+Imports: 
+    methods,
+    AQEval (>= 0.6.0),
+    dplyr,
+    data.table (>= 1.9.8),
+    ggplot2,
+    ggtext,
+    leaflet,
+    OpenStreetMap

@@ -2,8 +2,8 @@
 #' @title Diffusion Tube ggplot
 ############################################
 
-#' @name plot.tube
-#' @aliases plot.tube ggplotTubeShell
+#' @name tube.plots
+#' @aliases tube.plots ggplotTubeShell
 #' @description \code{DTEval} uses ggplot2 to generate most plots.
 #' \code{ggplotTubeShell} builds common plot shells for many of these, and
 #' handles some of of the generic plot control.
@@ -54,6 +54,19 @@
 
 
 
+
+
+
+####################################
+# ggplotTubeShell
+####################################
+
+# workhorse for default plots in testTube... functions
+
+# used by
+#   testTubeAccuracy
+#   testTubePrecision
+
 #####################
 # doing/text
 #####################
@@ -74,7 +87,7 @@
 #                           BUT currently not documented...
 
 
-#' @rdname plot.tube
+#' @rdname tube.plots
 #' @export
 
 ggplotTubeShell <-

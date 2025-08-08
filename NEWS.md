@@ -8,8 +8,8 @@
 
 * Package pre-release 
 
-    * __v 0.0.11__ [2025-09-07] (requested change) site_id to sample_id; 
-    added tubeSummary and tubeSampleSummary
+    * __v 0.0.11__ [2025-08-08] (requested change) site_id to sample_id; 
+    added tubeSummary, tubeSampleSummary and tubeMap 
     * __v 0.0.10__ [2025-07-23] added data.table; testTube... functions 
     rewritten using data.table
     * __v 0.0.9__ [2025-05-19] testTubeAccuracy and ...Precision updates, 
