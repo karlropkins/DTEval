@@ -2,9 +2,12 @@
 % Please edit documentation in R/tube.plots.R
 \name{tube.plots}
 \alias{tube.plots}
+\alias{tubePlot}
 \alias{ggplotTubeShell}
 \title{Diffusion Tube ggplot}
 \usage{
+tubePlot(data, x = NULL, y = NULL, ...)
+
 ggplotTubeShell(data, x = NULL, y = NULL, ...)
 }
 \arguments{
@@ -23,7 +26,10 @@ needs to add \code{geom}s to, to build a standard plot.
 \description{
 \code{DTEval} uses ggplot2 to generate most plots.
 \code{ggplotTubeShell} builds common plot shells for many of these, and
-handles some of of the generic plot control.
+handles some of of the generic plot control. \code{tubePlot} is a
+wrapper for several commonly used plots. Functions
+like \code{\link{testTubePrecision}} and \code{\link{testTubePrecision}}
+also use it to generate  associated plot outputs.
 }
 \details{
 In addition to \code{data}, the main data source for plots,

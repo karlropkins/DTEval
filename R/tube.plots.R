@@ -3,10 +3,13 @@
 ############################################
 
 #' @name tube.plots
-#' @aliases tube.plots ggplotTubeShell
+#' @aliases tube.plots tubePlot ggplotTubeShell
 #' @description \code{DTEval} uses ggplot2 to generate most plots.
 #' \code{ggplotTubeShell} builds common plot shells for many of these, and
-#' handles some of of the generic plot control.
+#' handles some of of the generic plot control. \code{tubePlot} is a
+#' wrapper for several commonly used plots. Functions
+#' like \code{\link{testTubePrecision}} and \code{\link{testTubePrecision}}
+#' also use it to generate  associated plot outputs.
 #' @param data Data source, typically a data.frame or similar, to be used to
 #' build a plot using ggplot2.
 #' @param x,y The names of the data-series to plot on the
@@ -54,7 +57,37 @@
 
 
 
+####################################
+# plotTube
+####################################
 
+# common plots warpper
+
+
+#####################
+# first draft
+#####################
+
+# maybe use ggplotTubeShell for this???
+
+# options for boxplot, point, smooth ect geom type
+# x,y defaults, e.g. x = .date for a time plot
+# time averaging, etc...
+# commonly used plots
+
+
+
+#' @rdname tube.plots
+#' @export
+
+tubePlot <-
+  function(data, x=NULL, y=NULL, ...){
+
+    out <- ggplotTubeShell(data, x, y, ...) +
+      ggplot2::geom_smooth()
+    out
+
+}
 
 
 ####################################
@@ -68,7 +101,7 @@
 #   testTubePrecision
 
 #####################
-# doing/text
+# doing/testing
 #####################
 
 # working up new version of ggplotTubeShell
