@@ -1,10 +1,11 @@
 #########################################################
-#' @title Miscellaneous Latitude and Longitude Handlers##
-#######################################################
+#' @title Miscellaneous Latitude and Longitude Handlers
+#########################################################
 
-# this needs sorting...
+# this may need rethinking when other start using it...
 
-# also bufferPolygon needs writing...
+# also bufferXYPolygon needs writing...
+#      probably using sf::st_buffer(polygon, distance)
 
 #' @name misc.dt.lat.lon
 #' @aliases misc.dt.lat.lon tubeInXYPolygon
@@ -30,12 +31,14 @@
 #' for the \code{data}-point locations and \code{x} and \code{y} for
 #' \code{polygon}.
 #'
-#' All functions assumed \code{data} and \code{polygon} contain point and
-#' polygon source information, that \code{data} is data \code{DTEval} will
-#' recognise as diffusion tube data, so either previously tagged tube data
-#' or data that is tag-able using a default call of \code{\link{tagTube}},
-#' and that these and the x/y data in \code{polygon} are WGS84 format
-#' map coordinates.
+#' All functions assume \code{data} and \code{polygon} contain point and
+#' polygon source information, respectively, that \code{data} is data
+#' \code{DTEval} will recognise as diffusion tube data, i.e.,  previously
+#' tagged (see \code{\link{tagTube}}), and that these and the x/y values in
+#' \code{polygon} are WGS84 format map coordinates.
+
+# not sure above is currently right?? not tag-able
+#     by default it assumed
 
 #' @return By default \code{tubeInXYPolygon} returns \code{data} with an
 #' additional column, \code{.in_polygon} that tube inclusion as \code{TRUE}
@@ -48,17 +51,20 @@
 #############################
 
 # inout wrapper to handle
-#   differently labelled x/y sources in data types
-#   NAs
-#   different output options
+#   differently name x/y sources in data and polygon
+#   data lat/lon NAs
 
 # currently doing
 ###############################
-#
+#  handling for different outputs??
+#       vector name
+#       vector elements/type
+
 
 #  thinking about
 ##############################
-#
+#  handling grouping/subsets within polygon
+#      for multiple polygon files and for buffering
 
 #' @rdname misc.dt.lat.lon
 #' @export
@@ -91,6 +97,7 @@ tubeInXYPolygon <- function(data, polygon, ...){
   df1 <- df1[!is.na(df1$x),]
   df1 <- df1[!is.na(df1$y),]
   # only need to do unique lat/lon combinations...
+  #     merging them back onto dataset
   df1 <- df1[!duplicated(paste(df1$x, df1$y)),]
 
   # set up df2 - x/y poly source
@@ -118,6 +125,7 @@ tubeInXYPolygon <- function(data, polygon, ...){
   names(df1) <- c(lon, lat, ".in_polygon")
 
   #currently output is hard coded as data + .in_polygon (the T/F/NA column)
+  # if we start using merge.data.table for this we need to check dim in versus dim out
   out <- merge(data, df1)
 
   return(out)

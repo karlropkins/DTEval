@@ -3,7 +3,7 @@
 \name{misc.dt.lat.lon}
 \alias{misc.dt.lat.lon}
 \alias{tubeInXYPolygon}
-\title{Miscellaneous Latitude and Longitude Handlers##}
+\title{Miscellaneous Latitude and Longitude Handlers}
 \usage{
 tubeInXYPolygon(data, polygon, ...)
 }
@@ -36,10 +36,9 @@ for inclusion. However, if you want to use different \code{data} or
 for the \code{data}-point locations and \code{x} and \code{y} for
 \code{polygon}.
 
-All functions assumed \code{data} and \code{polygon} contain point and
-polygon source information, that \code{data} is data \code{DTEval} will
-recognise as diffusion tube data, so either previously tagged tube data
-or data that is tag-able using a default call of \code{\link{tagTube}},
-and that these and the x/y data in \code{polygon} are WGS84 format
-map coordinates.
+All functions assume \code{data} and \code{polygon} contain point and
+polygon source information, respectively, that \code{data} is data
+\code{DTEval} will recognise as diffusion tube data, i.e.,  previously
+tagged (see \code{\link{tagTube}}), and that these and the x/y values in
+\code{polygon} are WGS84 format map coordinates.
 }
