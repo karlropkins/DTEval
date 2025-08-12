@@ -12,9 +12,9 @@
 #' Diffusion tubes are typically deployed for
 #' several weeks, so each sample record has an associated sampling start and
 #' end date (\code{.start_date} and \code{.end_date} once tagged, see
-#' \code{link{tagTube}}) and an associated sampling interval. These functions
-#' are intended as shortcuts for unfamiliar with the \code{R} \code{Date}
-#' object class.
+#' \code{\link{tagTube}}) and an associated sampling interval. These functions
+#' are intended as shortcuts for those unfamiliar with the \code{R} \code{Date}
+#' object class used by \code{DTEval}.
 
 # common date handlers
 
@@ -38,6 +38,7 @@
 #' @return By default \code{setTubeDate} returns \code{data} with an
 #' additional column, \code{.date} of sampling dates determined using
 #' requested method.
+
 
 
 

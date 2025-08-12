@@ -18,7 +18,9 @@
 
 #undefined globals
 utils::globalVariables(c(".data", ".mean",".n", ".tube",".y", ".yhigh",
-                         ".ylow", "latitude", "longitude", "."))
+                         ".ylow", "latitude", "longitude", ".",
+                         ".latitude", ".longitude", ".start_date",
+                         ".end_date", "X", "Y", "checksum"))
 
 
 ###########################

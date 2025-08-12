@@ -153,7 +153,7 @@ tubeMap_leaflet <-
 # draw maps of tubes using ggplot2...
 
 tubeMap_ggplot2 <-
-  function(data, x=NULL, y=NULL, polygon=NULL...){
+  function(data, x=NULL, y=NULL, polygon=NULL, ...){
 
     #caz.brd <- as.data.frame(sf::st_coordinates(caz.brd))
     dt <- tagTube(data)

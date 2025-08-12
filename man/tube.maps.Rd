@@ -11,7 +11,7 @@ tubeMap(data, x = NULL, y = NULL, polygon = NULL, plot.type = "", ...)
 
 tubeMap_leaflet(data, x = NULL, y = NULL, polygon = NULL, ...)
 
-tubeMap_ggplot2(data, x = NULL, y = NULL, polygon = NULL...)
+tubeMap_ggplot2(data, x = NULL, y = NULL, polygon = NULL, ...)
 }
 \arguments{
 \item{data}{Data source, typically a data.frame or similar, to be used to
