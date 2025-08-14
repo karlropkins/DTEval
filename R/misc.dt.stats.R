@@ -166,20 +166,26 @@ tubeSampleSummary <- function(data, ...){
 
 # currently does
 ###############################
-#    orders unique lat/lons by distance from appr. center of data
+#    orders unique non-NA lat/lon combinations by distance from appr. center of data
 #        very rough center... (should be better)
-#        then uses AQEval findNearLatLon
+#        then uses AQEval findNearLatLon to calculate distance to center
+#        then reorder furthermost (first) to nearest (last)
 
 #  thinking about
 ##############################
-#  (from misc.dt.lat.lon notes)
-#      these about 15 miles and 5 miles as metres
-#           tubeMap(dt, polygon= sf::st_buffer(caz.brd, 24500), plot.type="leaflet")
-#           tubeMap(dt, polygon= sf::st_buffer(caz.brd, 8200), plot.type="leaflet")
-#   also
+
+#   also other methods
+#        1. calculate center better or differently
+#              found a couple of methods but not sure they'll make much of a difference at these scales???
+#        2. calculate in/out area based on a reference, bbox or circle etc
+#              (from misc.dt.lat.lon notes)
+#              these about 15 miles and 5 miles as metres
+#                   tubeMap(dt, polygon= sf::st_buffer(caz.brd, 24500), plot.type="leaflet")
+#                   tubeMap(dt, polygon= sf::st_buffer(caz.brd, 8200), plot.type="leaflet")
+#              but what could be used ?? above is 15 and 5 buffers about the caz...
+#   playing with as a plot summary
 #       ggplot2::ggplot(tubeLatLonSummary(dt)) + ggplot2::geom_histogram(ggplot2::aes(x=distance.m), bins=220)
 #       (bins is nrow for output)
-#   and
 
 # not sure this is staying
 
@@ -191,13 +197,19 @@ tubeLatLonSummary <- function(data, ...){
 
   #d2 should have all tags if data is recognisable dt data
   d2 <- tagTube(data)
+
+  # get unique+non-na lat/lon combinations
   d2 <- d2[!duplicated(paste(d2$.latitude, d2$.longitude)), ]
   d2 <- d2[!is.na(d2$.latitude),]
   d2 <- d2[!is.na(d2$.longitude),]
 
+  #estimate lat/lon 'center'
   lat <- median(d2$.latitude, na.rm=TRUE)
   lon <- median(d2$.longitude, na.rm=TRUE)
-  out <- AQEval::findNearLatLon(lat, lon, ref=d2, nmax=nrow(d2))
+  # assuming we have valid lat/lon tags...
+  out <- AQEval::findNearLatLon(lat, lon, ref = d2, nmax = nrow(d2),
+                                rename.ref.lon = ".longitude",
+                                rename.ref.lat = ".latitude")
   out <- out[order(out$distance.m, decreasing=TRUE),
              c(".sample_id", ".latitude", ".longitude", "distance.m")]
 

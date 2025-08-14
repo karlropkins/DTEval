@@ -4,11 +4,14 @@
 \alias{misc.dt.stats}
 \alias{tubeSummary}
 \alias{tubeSampleSummary}
+\alias{tubeLatLonSummary}
 \title{Miscellaneous Diffusion Tube Data Statistics}
 \usage{
 tubeSummary(data, ...)
 
 tubeSampleSummary(data, ...)
+
+tubeLatLonSummary(data, ...)
 }
 \arguments{
 \item{data}{Data source, typically a data.frame or similar, containing
@@ -30,6 +33,10 @@ supplied \code{DTEval} diffusion tube data set \code{data}.
 
 \code{tubeSampleSummary} attempts to generate a summary of
 sample-related counts and check sums for \code{data}.
+
+\code{tubeLatlonSummary} attempts to calculate the distance between
+sample locations (unique lat/lon combinations) and the estimated center
+of sampling, and ranks by distance starting with the most-distance.
 
 They are also intended to be used in the form:
 

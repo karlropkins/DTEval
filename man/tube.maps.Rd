@@ -7,7 +7,7 @@
 \alias{tubeMap_ggplot2}
 \title{Diffusion Tube maps}
 \usage{
-tubeMap(data, x = NULL, y = NULL, polygon = NULL, plot.type = "", ...)
+tubeMap(data, x = NULL, y = NULL, polygon = NULL, plot.type = "leaflet", ...)
 
 tubeMap_leaflet(data, x = NULL, y = NULL, polygon = NULL, ...)
 
@@ -24,7 +24,7 @@ X and Y axes, respectively.}
 CAZ boundaries.}
 
 \item{plot.type}{Type of plot generated, current options are 'leaflet'
-and 'ggplot2'.}
+(default) and 'ggplot2'.}
 
 \item{...}{Additional arguments. See Notes}
 }

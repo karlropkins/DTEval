@@ -6,7 +6,7 @@
 
 # also bufferXYPolygon needs writing...
 #      probably using sf::st_buffer(polygon, distance)
-# see also about spotting suspect lat/lons 
+# see also about spotting suspect lat/lons
 #      these about 15 miles and 5 miles as metres
 #           tubeMap(dt, polygon= sf::st_buffer(caz.brd, 24500), plot.type="leaflet")
 #           tubeMap(dt, polygon= sf::st_buffer(caz.brd, 8200), plot.type="leaflet")
@@ -14,6 +14,12 @@
 # getting ranges data
 #       following takes a while and does not quite work....
 #            tubeMap_leaflet(dt, polygon= sf::st_buffer(sf::st_as_sf(dt, coords=c(".longitude", ".latitude")), 1))
+
+# note sure we need bufferXYPolygon ???
+#      something to make standard data.frames into sp objects might be better, e.g.
+#            sf::st_as_sf(dt, coords=c(".longitude", ".latitude"))
+#                may then hull or whatever to make into a polygon...
+
 
 #' @name misc.dt.lat.lon
 #' @aliases misc.dt.lat.lon tubeInXYPolygon
@@ -64,13 +70,13 @@
 
 # currently doing
 ###############################
-#  handling for different outputs??
-#       vector name
-#       vector elements/type
 
 
 #  thinking about
 ##############################
+#  handling for different outputs??
+#       vector name
+#       vector elements/type
 #  handling grouping/subsets within polygon
 #      for multiple polygon files and for buffering
 
