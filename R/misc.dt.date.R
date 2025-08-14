@@ -18,6 +18,13 @@
 
 # common date handlers
 
+#######################################################
+#######################################################
+# think there should be a tubeSummaryDates on this page???
+#######################################################
+#######################################################
+
+
 #' @param data Data source, typically a data.frame or similar, containing
 #' data-series of diffusion tube records.
 #' @param method The method to use (see details).

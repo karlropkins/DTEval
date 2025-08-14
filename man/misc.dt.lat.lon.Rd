@@ -2,32 +2,43 @@
 % Please edit documentation in R/misc.dt.lat.lon.R
 \name{misc.dt.lat.lon}
 \alias{misc.dt.lat.lon}
+\alias{tubeSummaryLatLon}
 \alias{tubeInXYPolygon}
 \title{Miscellaneous Latitude and Longitude Handlers}
 \usage{
+tubeSummaryLatLon(data, ...)
+
 tubeInXYPolygon(data, polygon, ...)
 }
 \arguments{
 \item{data}{Data source, typically a data.frame or similar, containing
 data-series of diffusion tube records.}
 
-\item{polygon}{Data source or polygon shape file.}
-
 \item{...}{additional arguments, currently ignored.}
+
+\item{polygon}{Data source or polygon shape file.}
 }
 \value{
+\code{tubeSummaryLatLon} return a \code{data.frame} of requested
+\code{data} statistics.
+
 By default \code{tubeInXYPolygon} returns \code{data} with an
-additional column, \code{.in_polygon} that tube inclusion as \code{TRUE}
-or \code{FALSE}.
+additional column, \code{.in_polygon} that identifies tubes as
+\code{TRUE} (inside \code{polygon} bounderies) or \code{FALSE}
+(outside \code{polygon} bounderies).
 }
 \description{
 Miscellaneous functions for use with Latitude and Longtitude
 data. By default, these are setup for use with \code{DTEval}, so
-expect tagged data (see \code{\link{tagTube}}).
+expects tagged data (see \code{\link{tagTube}}).
 }
 \details{
-\code{TubeinXYPolygon} attempts to identify all records in \code{data},
-that are within the boundaries of the supplied \code{polygon}. It is a
+\code{tubeSummaryLatLon} attempts to calculate the distance between
+sample locations (unique lat/lon combinations) and the estimated center
+of sampling, and ranks by distance starting with the most-distance.
+
+\code{tubeinXYPolygon} attempts to identify all records in \code{data}
+that are inside the supplied \code{polygon}. It is a
 wrapper for \code{splancs} function \code{inout} that uses the latitude
 and longitude tags of the supplied \code{data}, and the \code{x} and
 \code{y} columns of the supplied \code{polygon} to test \code{data} rows

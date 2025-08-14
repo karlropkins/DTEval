@@ -8,9 +8,9 @@
 
 * Package pre-release 
 
-    * __v 0.0.11__ [2025-08-12] (requested change) site_id to sample_id; 
-    added tubeSummary, tubeSampleSummary, tubeMap, tubeInXYPolygon and 
-    setTubeDate
+    * __v 0.0.11__ [2025-08-14] (requested change) site_id to sample_id; 
+    added tubeSummary, tubeSummarySample, tubeSummaryLatLong, tubeMap, 
+    tubeInXYPolygon and setTubeDate
     * __v 0.0.10__ [2025-07-23] added data.table; testTube... functions 
     rewritten using data.table
     * __v 0.0.9__ [2025-05-19] testTubeAccuracy and ...Precision updates, 
