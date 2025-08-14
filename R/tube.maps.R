@@ -13,7 +13,7 @@
 #' @param polygon (Optional) Polygon of boundary records, e.g.
 #' CAZ boundaries.
 #' @param plot.type Type of plot generated, current options are 'leaflet'
-#' and 'ggplot2'.
+#' (default) and 'ggplot2'.
 #' @param ... Additional arguments. See Notes
 
 #' @details In addition to \code{data}, the main data source for plots,
@@ -95,7 +95,7 @@
 
 
 tubeMap <-
-  function(data, x=NULL, y=NULL, polygon=NULL, plot.type = "", ...){
+  function(data, x=NULL, y=NULL, polygon=NULL, plot.type = "leaflet", ...){
 
     d2 <- tagTube(data)
     .check  <- c("leaflet", "ggplot2")

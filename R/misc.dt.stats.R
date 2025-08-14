@@ -3,7 +3,7 @@
 #######################################################
 
 #' @name misc.dt.stats
-#' @aliases misc.dt.stats tubeSummary tubeSampleSummary
+#' @aliases misc.dt.stats tubeSummary tubeSampleSummary tubeLatLonSummary
 #' @description Miscellaneous code to calculate some common diffusion tube
 #' (DT) outputs used by \code{DTEval}.
 
@@ -19,6 +19,10 @@
 #'
 #' \code{tubeSampleSummary} attempts to generate a summary of
 #' sample-related counts and check sums for \code{data}.
+#'
+#' \code{tubeLatlonSummary} attempts to calculate the distance between
+#' sample locations (unique lat/lon combinations) and the estimated center
+#' of sampling, and ranks by distance starting with the most-distance.
 #'
 #' They are also intended to be used in the form:
 #'
@@ -120,7 +124,7 @@ tubeSummary <- function(data, ...){
 #1 4107 410 3111
 
 # bad data
-# (this was not lat and lon entries...)
+# (this had incomplete lat and lon entries...)
 #> data.frame(t(summary(factor(tubeSampleSummary(tagTube(dont.share::dt.bradford))$n))))
 #X1 X2 X3 X8 X275 X284 X286 X290 X296 X297 X300 X301 X302 X305 X310 X311 X312 X314 X318 X319 X321 X329 X330
 #1 2349 33 33  1    1    1    1    1    2    1    1    1    1    1    1    1    1    1    2    2    1    1    1
@@ -147,6 +151,56 @@ tubeSampleSummary <- function(data, ...){
   out <- as.data.frame(test)
   out$checksum <- out$missing.latitudes + out$missing.longitudes +
                   out$missing.start.dates + out$missing.end.dates
+  return(out)
+
+}
+
+
+
+
+#############################
+# tubeLatLonSummary
+#############################
+
+# standard DT by lat/lon check
+
+# currently does
+###############################
+#    orders unique lat/lons by distance from appr. center of data
+#        very rough center... (should be better)
+#        then uses AQEval findNearLatLon
+
+#  thinking about
+##############################
+#  (from misc.dt.lat.lon notes)
+#      these about 15 miles and 5 miles as metres
+#           tubeMap(dt, polygon= sf::st_buffer(caz.brd, 24500), plot.type="leaflet")
+#           tubeMap(dt, polygon= sf::st_buffer(caz.brd, 8200), plot.type="leaflet")
+#   also
+#       ggplot2::ggplot(tubeLatLonSummary(dt)) + ggplot2::geom_histogram(ggplot2::aes(x=distance.m), bins=220)
+#       (bins is nrow for output)
+#   and
+
+# not sure this is staying
+
+
+#' @rdname misc.dt.stats
+#' @export
+
+tubeLatLonSummary <- function(data, ...){
+
+  #d2 should have all tags if data is recognisable dt data
+  d2 <- tagTube(data)
+  d2 <- d2[!duplicated(paste(d2$.latitude, d2$.longitude)), ]
+  d2 <- d2[!is.na(d2$.latitude),]
+  d2 <- d2[!is.na(d2$.longitude),]
+
+  lat <- median(d2$.latitude, na.rm=TRUE)
+  lon <- median(d2$.longitude, na.rm=TRUE)
+  out <- AQEval::findNearLatLon(lat, lon, ref=d2, nmax=nrow(d2))
+  out <- out[order(out$distance.m, decreasing=TRUE),
+             c(".sample_id", ".latitude", ".longitude", "distance.m")]
+
   return(out)
 
 }
