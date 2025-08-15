@@ -52,7 +52,12 @@
 ######################################
 
 # would like a getTubeMeta if possible
+#     maybe call it extractTubeMeta
 #     but maybe need a testAsTubeMeta as part of the setup
+
+
+
+
 
 #############################
 # addTubeMeta

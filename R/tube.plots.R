@@ -61,7 +61,7 @@
 # plotTube
 ####################################
 
-# common plots warpper
+# common plots wrapper
 
 
 #####################
@@ -83,11 +83,75 @@
 tubePlot <-
   function(data, x=NULL, y=NULL, ...){
 
+
     out <- ggplotTubeShell(data, x, y, ...) +
       ggplot2::geom_smooth()
     out
 
 }
+
+
+# playing with
+
+# tubePlot2(dont.share::dt.bradford.2, plot.type="time", group="site")
+# tubePlot2(dont.share::dt.bradford.2, plot.type="time", group="site") + ggplot2::theme(legend.position="none")
+# tubePlot2(dont.share::dt.bradford.2, plot.type="time", group="site") + ggplot2::aes(col=NULL)
+
+# gave warning for NAs..
+# Warning message:
+#   Removed 3 rows containing missing values or values outside the scale range (`geom_point()`).
+
+# nice visualizations....
+#    https://www.nature.com/articles/s41467-018-03297-7
+
+# also
+#    tubePlot2(dont.share::dt.bradford.2, plot.type="site", palette=c("white", "green")) + ggplot2::geom_density_2d_filled(breaks=10^(0:10)) +ggplot2::xlim(-2.5,-1) + ggplot2::ylim(53.7, 54)
+
+
+#' @rdname tube.plots
+#' @export
+
+
+tubePlot2 <-
+  function(data, x=NULL, y=NULL, plot.type="time",
+           ...){
+
+    .xargs <- list(...)
+
+    if(length(plot.type)==1){
+      plot.type <- unlist(strsplit(plot.type, ","))
+    }
+    plot.type <- tolower(gsub(" ", "", plot.type))
+
+    # time plots
+    if("time" %in% plot.type){
+      if(is.null(x)){
+        data = setTubeDate(data)
+        x = ".date"
+      }
+      if(is.null(y)){
+        y = "measurement"
+      }
+    }
+
+    # site plots
+    if("site" %in% plot.type){
+      if(is.null(x)){
+        data = setTubeDate(data)
+        x = ".longitude"
+      }
+      if(is.null(y)){
+        y = ".latitude"
+      }
+      data <- calcTubeStat(data, by =c(".latitude", ".longitude",
+                                       .xargs$facet, .xargs$group))
+    }
+
+    out <- ggplotTubeShell(data, x, y, ...) +
+      ggplot2::geom_point()
+    out
+
+  }
 
 
 ####################################
@@ -118,6 +182,20 @@ tubePlot <-
 # currently only on xlab and ylab
 # needs fixing/tidying... - probably staying...
 #                           BUT currently not documented...
+
+
+
+#############################
+# think about
+##############################
+
+# think about an option to kill the legend...
+#    maybe do by default if group or col are factors or characters and too large
+#       but they add a kill option
+
+# think about extending palette to fill?
+#    playing with this...
+#    tubePlot2(dont.share::dt.bradford.2, plot.type="site", palette=c("white", "green")) + ggplot2::geom_density_2d_filled(breaks=10^(0:10)
 
 
 #' @rdname tube.plots

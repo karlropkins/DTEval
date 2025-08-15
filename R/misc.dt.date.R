@@ -28,6 +28,9 @@
 #' @param data Data source, typically a data.frame or similar, containing
 #' data-series of diffusion tube records.
 #' @param method The method to use (see details).
+#' @param force (logical) By default, these functions do not overwrite
+#' existing \code{.date} tags if they are already present. The option \code{force=TRUE}
+#' forces them to rebuild the tag using current settings.
 #' @param ... additional arguments, currently ignored.
 
 #' @details
@@ -65,14 +68,18 @@
 #  handling for different outputs??
 #       vector name
 #       vector elements/type
-#  overwrite/force handling???
+#  for overwrite/force handling???
+#       does this need a hidden date.force ???
 
 
 #' @rdname misc.dt.date
 #' @export
 
-setTubeDate <- function(data, method=2, ...){
+setTubeDate <- function(data, method=2, force=FALSE, ...){
 
+  if(".date" %in% names(data) && !force){
+    return(data)
+  }
   data <- tagTube(data)
   check <- 1:3
   if(!method %in% check){

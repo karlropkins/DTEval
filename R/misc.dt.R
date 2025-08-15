@@ -1,13 +1,13 @@
 #######################################################
-#' @title Miscellaneous Diffusion Tube Data Statistics
+#' @title Miscellaneous Diffusion Tube Code
 #######################################################
 
 #' @name misc.dt.stats
-#' @aliases misc.dt.stats tubeSummary tubeSummarySample
-#' @description Miscellaneous code to calculate some common diffusion tube
-#' (DT) outputs used by \code{DTEval}.
+#' @aliases misc.dt tubeSummary tubeSummarySample
+#' @description Miscellaneous functions for use with diffusion tube
+#' (DT) data in \code{DTEval}.
 
-# common summaries, stats, reports etc...
+# common functions that don't fit into a subset...
 
 ############################################################
 ############################################################
