@@ -1,10 +1,10 @@
 ############################################
-#' @title Diffusion Tube ggplot
+#' @title Diffusion Tube Data Plots
 ############################################
 
 #' @name tube.plots
 #' @aliases tube.plots tubePlot ggplotTubeShell
-#' @description \code{DTEval} uses ggplot2 to generate most plots.
+#' @description \code{DTEval} uses \code{ggplot2} to generate most plots.
 #' \code{ggplotTubeShell} builds common plot shells for many of these, and
 #' handles some of of the generic plot control. \code{tubePlot} is a
 #' wrapper for several commonly used plots. Functions
@@ -42,6 +42,13 @@
 #' @note Maybe I'm already missing \code{qplot}...
 
 
+
+# need to
+#########################
+
+# reference and link to ggplot2...
+
+
 #############################
 # notes
 #############################
@@ -50,12 +57,6 @@
 ## #' @import dplyr, etc
 ## now specifying directly in code, ggplot2::ggplot, etc
 
-# don't use is.null(.xargs$facet) to test for facet in ...
-# because it partial matches to longer facet... names if facet not there!!!
-
-# same for groups, etc...
-
-
 
 ####################################
 # plotTube
@@ -63,6 +64,12 @@
 
 # common plots wrapper
 
+########################
+# second draft ???
+########################
+
+# could make tubePlot the standard
+# then tubeTimePlot a variation that by default sets x  to data
 
 #####################
 # first draft
@@ -104,6 +111,9 @@ tubePlot <-
 # nice visualizations....
 #    https://www.nature.com/articles/s41467-018-03297-7
 
+# see this about irregular data
+#    https://stackoverflow.com/questions/37529116/how-to-plot-a-heat-map-with-irregular-data-in-ordinates-in-ggplot
+
 # also
 #    tubePlot2(dont.share::dt.bradford.2, plot.type="site", palette=c("white", "green")) + ggplot2::geom_density_2d_filled(breaks=10^(0:10)) +ggplot2::xlim(-2.5,-1) + ggplot2::ylim(53.7, 54)
 
@@ -132,6 +142,8 @@ tubePlot2 <-
       if(is.null(y)){
         y = "measurement"
       }
+      data.2 <- data
+      data.2$measurement.mean <- data.2$measurement
     }
 
     # site plots
@@ -143,15 +155,38 @@ tubePlot2 <-
       if(is.null(y)){
         y = ".latitude"
       }
-      data <- calcTubeStat(data, by =c(".latitude", ".longitude",
+      data.2 <- calcTubeStat(data, by =c(".latitude", ".longitude",
                                        .xargs$facet, .xargs$group))
     }
 
-    out <- ggplotTubeShell(data, x, y, ...) +
-      ggplot2::geom_point()
-    out
+    #clear time/site
+    plot.type <- plot.type[!plot.type %in% c("time", "site")]
+    if(length(plot.type)==0){
+      plot.type <- "point"
+    }
+
+    #loop through rest
+    out <- ggplotTubeShell(data, x, y, ...)
+    for(i in plot.type){
+      if(tolower(i)=="point") {
+        out <- out + ggplot2::geom_point(data=data.2, na.rm=TRUE)
+      }
+      if(tolower(i)=="density") {
+        out <- out + ggplot2::geom_density_2d_filled(data=data, na.rm=TRUE, ...)
+      }
+      if(tolower(i)=="heat") {
+        #out <- out + ggplot2::geom_tile(data=data.2, ggplot2::aes(fill=measurement.mean), na.rm=TRUE, ...)
+        out <- out + ggplot2::stat_summary_2d(data=data.2, ggplot2::aes(z=measurement.mean))
+      }
+
+    }
+
+
+    return(out)
 
   }
+
+
 
 
 ####################################
@@ -183,6 +218,15 @@ tubePlot2 <-
 # needs fixing/tidying... - probably staying...
 #                           BUT currently not documented...
 
+
+###########################
+# notes
+###########################
+
+# don't use is.null(.xargs$facet) to test for facet in ...
+# because it partial matches to longer facet... names if facet not there!!!
+
+# same for groups, etc...
 
 
 #############################
@@ -242,7 +286,6 @@ ggplotTubeShell <-
       .xargs$xlab <- dte_quickText(.xargs$xlab, TRUE)
       .xargs$ylab <- dte_quickText(.xargs$ylab, TRUE)
     }
-
 
     ##########################################
     #these currently ignore anything not expected...

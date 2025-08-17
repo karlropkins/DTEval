@@ -35,8 +35,8 @@ All functions return a \code{data.frame} of requested
 \code{data} statistics.
 }
 \description{
-Functions for common calculations using
-diffusion tube (DT) data handled using \code{DTEval}.
+Functions for common diffusion tube (DT)
+data calculations using \code{DTEval}.
 }
 \details{
 \code{calcTubeStat} attempts to calculate summary statistics.

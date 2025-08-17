@@ -2,10 +2,9 @@
 #' @title Miscellaneous Diffusion Tube Code
 #######################################################
 
-#' @name misc.dt.stats
-#' @aliases misc.dt tubeSummary tubeSummarySample
-#' @description Miscellaneous functions for use with diffusion tube
-#' (DT) data in \code{DTEval}.
+#' @name tube.summaries
+#' @aliases tube.summaries tubeSummary tubeSummaryLatLon tubeSummarySample
+#' @description Diffusion Tube (DT) data Summaries.
 
 # common functions that don't fit into a subset...
 
@@ -27,6 +26,10 @@
 #' \code{tubeSummarySample} attempts to generate a summary of
 #' sample-related counts and check sums for \code{data}.
 #'
+#' \code{tubeSummaryLatLon} attempts to calculate the distance between
+#' sample locations (unique lat/lon combinations) and the estimated center
+#' of sampling, and ranks these by distance starting with the most-distance.
+#'
 #' They are also intended to be used in the form:
 #'
 #' \code{tubeSummary(data)}
@@ -36,8 +39,8 @@
 #' tube data or data that is tag-able using a default call of
 #' \code{\link{tagTube}}
 
-#' @return All functions return a \code{data.frame} of requested
-#' \code{data} statistics.
+#' @return All functions return a \code{data.frame} of the requested
+#' \code{data} summary statistics.
 #'
 
 
@@ -65,7 +68,7 @@
 #      use as summary if we go to a DTEval object class
 #             maybe check AQEval to see if we did there ???
 
-#' @rdname misc.dt.stats
+#' @rdname tube.summaries
 #' @export
 
 tubeSummary <- function(data, ...){
@@ -135,7 +138,7 @@ tubeSummary <- function(data, ...){
 #1    1    1
 
 
-#' @rdname misc.dt.stats
+#' @rdname tube.summaries
 #' @export
 
 tubeSummarySample <- function(data, ...){
@@ -158,6 +161,68 @@ tubeSummarySample <- function(data, ...){
 
 }
 
+
+
+
+
+#############################
+# tubeSummaryLatLon
+#############################
+
+# standard DT by lat/lon check
+
+# currently does
+###############################
+#    orders unique non-NA lat/lon combinations by distance from appr. center of data
+#        very rough center... (should be better)
+#        then uses AQEval findNearLatLon to calculate distance to center
+#        then reorder furthermost (first) to nearest (last)
+
+#  thinking about
+##############################
+
+#   also other methods
+#        1. calculate center better or differently
+#              found a couple of methods but not sure they'll make much of a difference at these scales???
+#        2. calculate in/out area based on a reference, bbox or circle etc
+#              (from misc.dt.lat.lon notes)
+#              these about 15 miles and 5 miles as metres
+#                   tubeMap(dt, polygon= sf::st_buffer(caz.brd, 24500), plot.type="leaflet")
+#                   tubeMap(dt, polygon= sf::st_buffer(caz.brd, 8200), plot.type="leaflet")
+#              but what could be used ?? above is 15 and 5 buffers about the caz...
+#   playing with as a plot summary
+#       ggplot2::ggplot(tubeSummaryLatLon(dt)) + ggplot2::geom_histogram(ggplot2::aes(x=distance.m), bins=220)
+#       (bins is nrow for output)
+
+# not sure this is staying
+
+
+#' @rdname tube.summaries
+#' @export
+
+tubeSummaryLatLon <- function(data, ...){
+
+  #d2 should have all tags if data is recognisable dt data
+  d2 <- tagTube(data)
+
+  # get unique+non-na lat/lon combinations
+  d2 <- d2[!duplicated(paste(d2$.latitude, d2$.longitude)), ]
+  d2 <- d2[!is.na(d2$.latitude),]
+  d2 <- d2[!is.na(d2$.longitude),]
+
+  #estimate lat/lon 'center'
+  lat <- median(d2$.latitude, na.rm=TRUE)
+  lon <- median(d2$.longitude, na.rm=TRUE)
+  # assuming we have valid lat/lon tags...
+  out <- AQEval::findNearLatLon(lat, lon, ref = d2, nmax = nrow(d2),
+                                rename.ref.lon = ".longitude",
+                                rename.ref.lat = ".latitude")
+  out <- out[order(out$distance.m, decreasing=TRUE),
+             c(".sample_id", ".latitude", ".longitude", "distance.m")]
+
+  return(out)
+
+}
 
 
 

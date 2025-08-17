@@ -52,7 +52,7 @@
 #'
 #' * \code{start} and \code{end} to assign the individual DT
 #'  sampling period directly (\code{start} deployment and \code{end}
-#'  collection, respectively). \code{start} and \code{stop} are assumed
+#'  collection, respectively). \code{start} and \code{end} are assumed
 #'  to be provided in conventional 'YYYY-MM-DD' format, but this can also
 #'  be modified using \code{data.format} and \code{\link{strptime}}
 #'  formatting instructions.
@@ -70,8 +70,8 @@
 #'
 #' By default, these methods try all available methods in order, until they
 #' find a method that works and they run out methods. If you want to use a
-#' specific method, or method order, just specific them, e.g. to tag tube
-#' dates using first \code{method} 3 then 2:
+#' specific method, or method order, just specify them, e.g. to tag tube
+#' dates first trying \code{method} 3 then 2:
 #'
 #' \code{tagTubeDates(data, method=3:2)}
 #'

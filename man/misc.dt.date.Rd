@@ -5,13 +5,17 @@
 \alias{setTubeDate}
 \title{Miscellaneous Date Handlers}
 \usage{
-setTubeDate(data, method = 2, ...)
+setTubeDate(data, method = 2, force = FALSE, ...)
 }
 \arguments{
 \item{data}{Data source, typically a data.frame or similar, containing
 data-series of diffusion tube records.}
 
 \item{method}{The method to use (see details).}
+
+\item{force}{(logical) By default, these functions do not overwrite
+existing \code{.date} tags if they are already present. The option \code{force=TRUE}
+forces them to rebuild the tag using current settings.}
 
 \item{...}{additional arguments, currently ignored.}
 }

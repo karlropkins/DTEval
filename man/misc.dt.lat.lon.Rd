@@ -2,26 +2,20 @@
 % Please edit documentation in R/misc.dt.lat.lon.R
 \name{misc.dt.lat.lon}
 \alias{misc.dt.lat.lon}
-\alias{tubeSummaryLatLon}
 \alias{tubeInXYPolygon}
 \title{Miscellaneous Latitude and Longitude Handlers}
 \usage{
-tubeSummaryLatLon(data, ...)
-
 tubeInXYPolygon(data, polygon, ...)
 }
 \arguments{
 \item{data}{Data source, typically a data.frame or similar, containing
 data-series of diffusion tube records.}
 
-\item{...}{additional arguments, currently ignored.}
-
 \item{polygon}{Data source or polygon shape file.}
+
+\item{...}{additional arguments, currently ignored.}
 }
 \value{
-\code{tubeSummaryLatLon} return a \code{data.frame} of requested
-\code{data} statistics.
-
 By default \code{tubeInXYPolygon} returns \code{data} with an
 additional column, \code{.in_polygon} that identifies tubes as
 \code{TRUE} (inside \code{polygon} bounderies) or \code{FALSE}
@@ -33,10 +27,6 @@ data. By default, these are setup for use with \code{DTEval}, so
 expects tagged data (see \code{\link{tagTube}}).
 }
 \details{
-\code{tubeSummaryLatLon} attempts to calculate the distance between
-sample locations (unique lat/lon combinations) and the estimated center
-of sampling, and ranks by distance starting with the most-distance.
-
 \code{tubeinXYPolygon} attempts to identify all records in \code{data}
 that are inside the supplied \code{polygon}. It is a
 wrapper for \code{splancs} function \code{inout} that uses the latitude

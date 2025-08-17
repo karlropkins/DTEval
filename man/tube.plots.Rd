@@ -4,9 +4,12 @@
 \alias{tube.plots}
 \alias{tubePlot}
 \alias{ggplotTubeShell}
-\title{Diffusion Tube ggplot}
+\alias{tubePlot2}
+\title{Diffusion Tube Data Plots}
 \usage{
 tubePlot(data, x = NULL, y = NULL, ...)
+
+tubePlot2(data, x = NULL, y = NULL, plot.type = "time", ...)
 
 ggplotTubeShell(data, x = NULL, y = NULL, ...)
 }
@@ -24,7 +27,7 @@ X and Y axes, respectively.}
 needs to add \code{geom}s to, to build a standard plot.
 }
 \description{
-\code{DTEval} uses ggplot2 to generate most plots.
+\code{DTEval} uses \code{ggplot2} to generate most plots.
 \code{ggplotTubeShell} builds common plot shells for many of these, and
 handles some of of the generic plot control. \code{tubePlot} is a
 wrapper for several commonly used plots. Functions

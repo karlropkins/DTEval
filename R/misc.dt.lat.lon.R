@@ -22,7 +22,7 @@
 
 
 #' @name misc.dt.lat.lon
-#' @aliases misc.dt.lat.lon tubeSummaryLatLon tubeInXYPolygon
+#' @aliases misc.dt.lat.lon tubeInXYPolygon
 #' @description Miscellaneous functions for use with Latitude and Longtitude
 #' data. By default, these are setup for use with \code{DTEval}, so
 #' expects tagged data (see \code{\link{tagTube}}).
@@ -35,10 +35,6 @@
 #' @param ... additional arguments, currently ignored.
 
 #' @details
-#' \code{tubeSummaryLatLon} attempts to calculate the distance between
-#' sample locations (unique lat/lon combinations) and the estimated center
-#' of sampling, and ranks by distance starting with the most-distance.
-#'
 #' \code{tubeinXYPolygon} attempts to identify all records in \code{data}
 #' that are inside the supplied \code{polygon}. It is a
 #' wrapper for \code{splancs} function \code{inout} that uses the latitude
@@ -57,9 +53,7 @@
 
 # not sure above is currently right??
 
-#' @return \code{tubeSummaryLatLon} return a \code{data.frame} of requested
-#' \code{data} statistics.
-#'
+#' @return
 #' By default \code{tubeInXYPolygon} returns \code{data} with an
 #' additional column, \code{.in_polygon} that identifies tubes as
 #' \code{TRUE} (inside \code{polygon} bounderies) or \code{FALSE}
@@ -67,66 +61,6 @@
 
 
 
-
-
-#############################
-# tubeSummaryLatLon
-#############################
-
-# standard DT by lat/lon check
-
-# currently does
-###############################
-#    orders unique non-NA lat/lon combinations by distance from appr. center of data
-#        very rough center... (should be better)
-#        then uses AQEval findNearLatLon to calculate distance to center
-#        then reorder furthermost (first) to nearest (last)
-
-#  thinking about
-##############################
-
-#   also other methods
-#        1. calculate center better or differently
-#              found a couple of methods but not sure they'll make much of a difference at these scales???
-#        2. calculate in/out area based on a reference, bbox or circle etc
-#              (from misc.dt.lat.lon notes)
-#              these about 15 miles and 5 miles as metres
-#                   tubeMap(dt, polygon= sf::st_buffer(caz.brd, 24500), plot.type="leaflet")
-#                   tubeMap(dt, polygon= sf::st_buffer(caz.brd, 8200), plot.type="leaflet")
-#              but what could be used ?? above is 15 and 5 buffers about the caz...
-#   playing with as a plot summary
-#       ggplot2::ggplot(tubeSummaryLatLon(dt)) + ggplot2::geom_histogram(ggplot2::aes(x=distance.m), bins=220)
-#       (bins is nrow for output)
-
-# not sure this is staying
-
-
-#' @rdname misc.dt.lat.lon
-#' @export
-
-tubeSummaryLatLon <- function(data, ...){
-
-  #d2 should have all tags if data is recognisable dt data
-  d2 <- tagTube(data)
-
-  # get unique+non-na lat/lon combinations
-  d2 <- d2[!duplicated(paste(d2$.latitude, d2$.longitude)), ]
-  d2 <- d2[!is.na(d2$.latitude),]
-  d2 <- d2[!is.na(d2$.longitude),]
-
-  #estimate lat/lon 'center'
-  lat <- median(d2$.latitude, na.rm=TRUE)
-  lon <- median(d2$.longitude, na.rm=TRUE)
-  # assuming we have valid lat/lon tags...
-  out <- AQEval::findNearLatLon(lat, lon, ref = d2, nmax = nrow(d2),
-                                rename.ref.lon = ".longitude",
-                                rename.ref.lat = ".latitude")
-  out <- out[order(out$distance.m, decreasing=TRUE),
-             c(".sample_id", ".latitude", ".longitude", "distance.m")]
-
-  return(out)
-
-}
 
 
 
