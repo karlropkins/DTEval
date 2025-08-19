@@ -3,13 +3,13 @@
 \name{tube.plots}
 \alias{tube.plots}
 \alias{tubePlot}
+\alias{tubeTimePlot}
 \alias{ggplotTubeShell}
-\alias{tubePlot2}
 \title{Diffusion Tube Data Plots}
 \usage{
-tubePlot(data, x = NULL, y = NULL, ...)
+tubePlot(data, x = NULL, y = NULL, plot.type = "point", avg = NULL, ...)
 
-tubePlot2(data, x = NULL, y = NULL, plot.type = "time", ...)
+tubeTimePlot(data, x = NULL, y = NULL, plot.type = "point", avg = NULL, ...)
 
 ggplotTubeShell(data, x = NULL, y = NULL, ...)
 }
@@ -19,6 +19,10 @@ build a plot using ggplot2.}
 
 \item{x, y}{The names of the data-series to plot on the
 X and Y axes, respectively.}
+
+\item{plot.type}{The type of plot required.}
+
+\item{avg}{Optional data averaging.}
 
 \item{...}{Additional arguments. See details below}
 }

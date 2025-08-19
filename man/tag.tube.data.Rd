@@ -3,18 +3,21 @@
 \name{tag.tube.data}
 \alias{tag.tube.data}
 \alias{tagTube}
-\alias{tagTubeDates}
+\alias{tagTubeStartEnd}
 \alias{tagTubeLatLon}
 \alias{tagTubeSampleID}
+\alias{tagTubeDate}
 \title{Diffusion Tube Pro-processing}
 \usage{
 tagTube(data, ...)
 
-tagTubeDates(data, method = -1, force = FALSE, ...)
+tagTubeStartEnd(data, method = -1, force = FALSE, ...)
 
 tagTubeLatLon(data, method = -1, force = FALSE, ...)
 
 tagTubeSampleID(data, method = -1, force = FALSE, ...)
+
+tagTubeDate(data, method = 2, force = FALSE, ...)
 }
 \arguments{
 \item{data}{Data source, typically a
@@ -77,14 +80,15 @@ tells \code{tagTubeLatLon} to use the \code{data} columns named 'lat' and
 
 Function Methods:
 
-By default, these methods try all available methods in order, until they
-find a method that works and they run out methods. If you want to use a
-specific method, or method order, just specify them, e.g. to tag tube
-dates first trying \code{method} 3 then 2:
+Methods with -1 defaults try all available methods in order, until they
+find a method that works or they run out methods. If you want to use a
+specific method, or method order, just specify them, e.g. to try to tag
+tube start and end dates first with \code{method} 3 then (if that fails)
+methods 2:
 
-\code{tagTubeDates(data, method=3:2)}
+\code{tagTubeStartEnd(data, method=3:2)}
 
-\code{tagTubeDates} attempts to build \code{Date} class time-stamps for
+\code{tagTubeStartEnd} attempts to build \code{Date} class time-stamps for
 sampling dates. It currently has three methods: \code{method=1} use month
 and year records to build a nominal calendar monthly sampling record,
 i.e., first to last day of each month; \code{method=2} use month and year
@@ -97,20 +101,31 @@ to build directly using user-assigned sampling \code{start} and
 \code{tagTubeLatLon} identifies sample location. It currently uses
 one method: \code{method=1} assigning all locations based on identified
 latitude and longitude. These are then tagged as \code{.latitude} and
-\code{.longitude}, respectively.
+\code{.longitude}, respectively, and assumed to be WGS84 (EPSG4326)
+format coordinates.
 
 \code{tagTubeSampleID} identifies samples. It currently uses
 one method: \code{method=1} assigning all same-location-and-time DTs as
 replicates, and is added to \code{data} as \code{.sample_id}.
 
-\code{tagTube} is a wrapper that runs \code{tagTubeDates},
+\code{tagTube} is a wrapper that runs \code{tagTubeStartEnd},
 \code{tagTubeLatLon} and \code{tagTubeiteID}. Other \code{DTEval}
 functions typically pass your \code{data} to \code{tagTube} to check for
 tags and add them if missing. If you are using \code{tagTube} or one of
 these on untagged data and need to specific individual methods for each
 \code{tagTube...} function, prefix the method request, e.g. to use method
-2 for \code{tabTubeDates} but leave the other functions using default
+2 for \code{tagTubeStartEnd} but leave the other functions using default
 setting when applying \code{tagTube}, use:
 
-\code{tagTube(data, dates.method=2)}
+\code{tagTube(data, startend.method=2)}
+
+Other \code{tagTube} functions are less commonly used:
+
+\code{tagTubeDate} attempts to assign a representative date to each
+sampling record (\code{data} row). By default, it set the date to the
+mid-point between sample start and end dates, and is, for example,
+intended for use when plotting time-series: options: 1 (start date),
+2 (default; mid-point date); 3 (end date). Because it uses start and
+end dates, it runs \code{tagTubeStartEnd} if these are not already
+tagged.
 }

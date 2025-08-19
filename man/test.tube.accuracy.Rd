@@ -67,7 +67,7 @@ reference method (continuous analyser, CA) measurements.
 }
 \details{
 Both sampling dates and locations are identified/tagged using
-\code{\link{tagTube}} methods. \code{\link{tagTubeDates}} tags sampling
+\code{\link{tagTube}} methods. \code{\link{tagTubeStartEnd}} tags sampling
 dates and \code{\link{tagTubeLatLon}} tags locations.
 
 NOTE: \code{testTubeAccuracy} attempts to tag \code{data} using default

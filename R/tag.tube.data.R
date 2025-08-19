@@ -3,7 +3,8 @@
 ############################################
 
 #' @name tag.tube.data
-#' @aliases tag.tube.data tagTube tagTubeDates tagTubeLatLon tagTubeSampleID
+#' @aliases tag.tube.data tagTube tagTubeStartEnd tagTubeLatLon tagTubeSampleID
+#' tagTubeDate
 
 #' @description Pre-processing diffusion tube (DT) data for use with
 #' \code{DTEval}. Coded methods to standardise DT data collected using
@@ -68,14 +69,15 @@
 #'
 #' Function Methods:
 #'
-#' By default, these methods try all available methods in order, until they
-#' find a method that works and they run out methods. If you want to use a
-#' specific method, or method order, just specify them, e.g. to tag tube
-#' dates first trying \code{method} 3 then 2:
+#' Methods with -1 defaults try all available methods in order, until they
+#' find a method that works or they run out methods. If you want to use a
+#' specific method, or method order, just specify them, e.g. to try to tag
+#' tube start and end dates first with \code{method} 3 then (if that fails)
+#' methods 2:
 #'
-#' \code{tagTubeDates(data, method=3:2)}
+#' \code{tagTubeStartEnd(data, method=3:2)}
 #'
-#' \code{tagTubeDates} attempts to build \code{Date} class time-stamps for
+#' \code{tagTubeStartEnd} attempts to build \code{Date} class time-stamps for
 #' sampling dates. It currently has three methods: \code{method=1} use month
 #' and year records to build a nominal calendar monthly sampling record,
 #' i.e., first to last day of each month; \code{method=2} use month and year
@@ -88,27 +90,39 @@
 #' \code{tagTubeLatLon} identifies sample location. It currently uses
 #' one method: \code{method=1} assigning all locations based on identified
 #' latitude and longitude. These are then tagged as \code{.latitude} and
-#' \code{.longitude}, respectively.
+#' \code{.longitude}, respectively, and assumed to be WGS84 (EPSG4326)
+#' format coordinates.
 
-# NEED TO document required LAT/LON conventions...
-# ALSO time allowing what to include so transform options here ...
+# time allowing re could add transform options here ...
 
 #'
 #' \code{tagTubeSampleID} identifies samples. It currently uses
 #' one method: \code{method=1} assigning all same-location-and-time DTs as
 #' replicates, and is added to \code{data} as \code{.sample_id}.
 #'
-#' \code{tagTube} is a wrapper that runs \code{tagTubeDates},
+#' \code{tagTube} is a wrapper that runs \code{tagTubeStartEnd},
 #' \code{tagTubeLatLon} and \code{tagTubeiteID}. Other \code{DTEval}
 #' functions typically pass your \code{data} to \code{tagTube} to check for
 #' tags and add them if missing. If you are using \code{tagTube} or one of
 #' these on untagged data and need to specific individual methods for each
 #' \code{tagTube...} function, prefix the method request, e.g. to use method
-#' 2 for \code{tabTubeDates} but leave the other functions using default
+#' 2 for \code{tagTubeStartEnd} but leave the other functions using default
 #' setting when applying \code{tagTube}, use:
 #'
-#' \code{tagTube(data, dates.method=2)}
+#' \code{tagTube(data, startend.method=2)}
 #'
+#' Other \code{tagTube} functions are less commonly used:
+#'
+#' \code{tagTubeDate} attempts to assign a representative date to each
+#' sampling record (\code{data} row). By default, it set the date to the
+#' mid-point between sample start and end dates, and is, for example,
+#' intended for use when plotting time-series: options: 1 (start date),
+#' 2 (default; mid-point date); 3 (end date). Because it uses start and
+#' end dates, it runs \code{tagTubeStartEnd} if these are not already
+#' tagged.
+#'
+
+
 
 #################################
 # general
@@ -116,23 +130,34 @@
 
 # JOBS:
 
+# do we want/need a tagTube[function] for the tube measurement ??
+#     if so might need to check/sort testTube... functions
+#          e.g. I think they make a .tube
+#               if we want to use that as the name could use .value in these ???
+#
+
+
 # stops/warns/messages need rationalising
-#      start with this functions and then apply more widely
+#      start with these functions and then apply more widely
 
 # some code wants tidying
 #      if tags there and not forcing, return should be first
 #          no point wasting time doing anything
-#          currently first in latlon and sampleid but NOT dates
-#
+#          currently first in latlon and sampleid but NOT startend
+
+
+
 
 ################################
 # tagTube
 ################################
 
 # in development wrapper for main diffusion tube info tagging
-# applies in order tagTubeDates, tagTubeLatLon, tagTubeSampleId
+# applies in order tagTubeStartEnd, tagTubeLatLon, tagTubeSampleId
 
-# used by testTubePrecision
+# used by testTubePrecision,
+#      ANY OTHERS...
+
 
 
 
@@ -144,11 +169,11 @@ tagTube <-
     #note
     ############################
     # to override for individual functions (force or method only)
-    #    e.g. dates.force overrides force for just tagTubeDates, etc...
+    #    e.g. startend.force overrides force for just tagTubeStartEnd, etc...
     #    logic: then always there, e.g. in tagTubeSampleID when it run
     #           other two...
 
-    data <- tagTubeDates(data, ...)
+    data <- tagTubeStartEnd(data, ...)
     data <- tagTubeLatLon(data, ...)
     data <- tagTubeSampleID(data, ...)
     return(data)
@@ -156,44 +181,52 @@ tagTube <-
 
 
 ################################
-# tagTubeDates
+# tagTubeStartEnd
 ################################
 
 # in development at moment
-# diffusion tube date tagging
+# diffusion tube start and end date tagging
+
+# changed this from tagTubeDates to tagTubeStartEnd
 
 # has thee methods (as unexported functions, after main function)
 # 1. default monthly
 # 2. Defra/laqm scheme only works for monthly sampling
 # 3. specific start and end dates
 
+# to think about
+####################################
+
+
+# could be confusion with tagTubeDate
+
 #' @rdname tag.tube.data
 #' @export
-tagTubeDates <-
+tagTubeStartEnd <-
   function(data, method = -1, force=FALSE, ...){
 
     # setup/checks
     .xargs <- list(...)
-    if("dates.force" %in% names(.xargs)){
-      force <- .xargs$dates.force
+    if("startend.force" %in% names(.xargs)){
+      force <- .xargs$startend.force
     }
-    if("dates.method" %in% names(.xargs)){
-      method <- .xargs$dates.method
+    if("startend.method" %in% names(.xargs)){
+      method <- .xargs$startend.method
     }
 
     #methods
-    fun.ls <- list(tagTubeDates_method01,
-                   tagTubeDates_method02,
-                   tagTubeDates_method03)
+    fun.ls <- list(tagTubeStartEnd_method01,
+                   tagTubeStartEnd_method02,
+                   tagTubeStartEnd_method03)
     check <- 1:length(fun.ls)
     if(all(method == -1)) {
       method <- check
     } else {
       if(!all(method %in% check)){
-        stop("[tagTubeDate]> unknown method(s) '",
+        stop("[tagTubeStartEnd]> unknown method(s) '",
              paste(method[!method %in% check], collapse = "',"), "'",
              "\n\trecommend one of: ", paste (check, collapse = ", "),
-             "\n\t(and maybe check ?tagTubeSampleID) \n",
+             "\n\t(and maybe check ?tagTubeStartEnd) \n",
              call.=FALSE)
       }
     }
@@ -206,12 +239,13 @@ tagTubeDates <-
         }
       }
       if(class(ans)[1]=="try-error"){
-        stop("[tagTubeDates]> failed to match/build dates",
-             "\n\t(maybe check ?tagTubeDates) \n",
+        stop("[tagTubeStartEnd]> failed to match/build start and/or end dates",
+             "\n\t(maybe check ?tagTubeStartEnd) \n",
              call.=FALSE)
       }
       data <- ans
     }
+    #could add date here BUT method might be an issue
     #out
     return(data)
   }
@@ -219,7 +253,7 @@ tagTubeDates <-
 
 # unexported tube date build models
 
-tagTubeDates_method01 <- function(data, ...){
+tagTubeStartEnd_method01 <- function(data, ...){
   #dates build method 1
   ########################
   #nominal calendar month from month and year
@@ -261,7 +295,7 @@ tagTubeDates_method01 <- function(data, ...){
   data
 }
 
-tagTubeDates_method02 <- function(data, ...){
+tagTubeStartEnd_method02 <- function(data, ...){
   #dates build method 2
   ##################################
   # using month, year and
@@ -296,7 +330,7 @@ tagTubeDates_method02 <- function(data, ...){
   data
 }
 
-tagTubeDates_method03 <- function(data, ...){
+tagTubeStartEnd_method03 <- function(data, ...){
   #dates build method 3
   ##################################
   # using set start and end
@@ -409,7 +443,7 @@ tagTubeSampleID <-
       return(data)
     }
     #setup
-    data <- tagTubeDates(data, ...)
+    data <- tagTubeStartEnd(data, ...)
     data <- tagTubeLatLon(data, ...)
     # higher level force and method overwrites
     .xargs <- list(...)
@@ -452,4 +486,58 @@ tagTubeSampleID <-
     data
   }
 
+
+
+
+#############################
+# tagTubeDate
+#############################
+
+# minor tag; only used when needed
+
+# date for plot of measurement versus date
+#   default: use mid-range rather than start or end date
+#   needs tagTubeStartEnd run...
+
+# currently doing
+###############################
+#
+
+# think about
+##############################
+#  handling for different outputs??
+#       vector name
+#       vector elements/type
+#  for overwrite/force handling???
+#       does this need a hidden date.force ???
+
+
+#' @rdname tag.tube.data
+#' @export
+
+tagTubeDate <- function(data, method=2, force=FALSE, ...){
+
+  if(".date" %in% names(data) && !force){
+    return(data)
+  }
+  data <- tagTubeStartEnd(data, ...)
+  check <- 1:3
+  if(!method %in% check){
+    stop("[setTubeDate] Unknown method, maybe try one of: ", paste(check, collapse=","),
+         call.=FALSE)
+  }
+  if(method==1){
+    temp <- data$.start_date
+  }
+  if(method==2){
+    temp <- data$.start_date + ((data$.end_date - data$.start_date)/2)
+  }
+  if(method==3){
+    temp <- data$.end_date
+  }
+  data$.date <- temp
+
+  return(data)
+
+}
 

@@ -39,7 +39,7 @@
 #' These functions are in development, so may change.
 
 
-#' @return \code{tubeMap_leaflet} and \code{tubeMap_leaflet} return
+#' @return \code{tubeMap_leaflet} and \code{tubeMap_ggplot2} return
 #' \code{leaftlet} and \code{ggplot2} maps, respectively. \code{tubeMap}
 #' is wrapper for both.
 
@@ -98,16 +98,27 @@ tubeMap <-
   function(data, x=NULL, y=NULL, polygon=NULL, plot.type = "leaflet", ...){
 
     d2 <- tagTube(data)
+    if(length(plot.type)==1){
+      plot.type <- unlist(strsplit(plot.type, ","))
+    }
+    plot.type <- tolower(gsub(" ", "", plot.type))
+    temp <- plot.type[1]
+    plot.type <- if(length(plot.type)<2){
+      "point"
+    } else {
+      plot.type[2:length(plot.type)]
+    }
+
     .check  <- c("leaflet", "ggplot2")
-    if(!plot.type[1] %in% .check){
-      stop("[tubeMap] plot.type needs to be one of:",
+    if(!temp %in% .check){
+      stop("[tubeMap] plot.type needs to start with one of: ",
            paste(.check, sep=",", collapse = ","), call. = FALSE)
     }
-    if(plot.type=="leaflet"){
-      return(tubeMap_leaflet(d2, x , y, polygon,...))
+    if(temp=="leaflet"){
+      return(tubeMap_leaflet(d2, x , y, polygon, plot.type, ...))
     }
-    if(plot.type=="ggplot2"){
-      return(tubeMap_ggplot2(d2, x , y, polygon, ...))
+    if(temp=="ggplot2"){
+      return(tubeMap_ggplot2(d2, x , y, polygon, plot.type, ...))
     }
     #should never get here
     stop("[tubeMap] not clever...", call. = FALSE)
@@ -126,7 +137,7 @@ tubeMap <-
 # draw maps of tubes using leaflet...
 
 tubeMap_leaflet <-
-  function(data, x=NULL, y=NULL, polygon=NULL, ...){
+  function(data, x=NULL, y=NULL, polygon=NULL, plot.type="point", ...){
 
     #plot only intended for tagged or tag-able data...
     d2 <- tagTube(data)
@@ -153,7 +164,7 @@ tubeMap_leaflet <-
 # draw maps of tubes using ggplot2...
 
 tubeMap_ggplot2 <-
-  function(data, x=NULL, y=NULL, polygon=NULL, ...){
+  function(data, x=NULL, y=NULL, polygon=NULL, plot.type="point", ...){
 
     #caz.brd <- as.data.frame(sf::st_coordinates(caz.brd))
     dt <- tagTube(data)
