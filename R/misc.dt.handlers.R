@@ -22,6 +22,8 @@
 #' and \code{'stop<<FUN>>ARG'} to stop with function 'FUN' reporting a
 #' problem with argument ARG.
 #' @param n.x The maximum number of \code{x} that to be checked.
+#' @param output Where different outputs are an option, the requested
+#' output, e.g. data or report.
 
 #' @details
 #' \code{getTubeX} attempts to extract \code{x} from \code{data} (or
@@ -100,6 +102,10 @@ getTubeX <- function(data, x=NULL, ..., test.class=NULL,
   # evaluate
   out <- try(with(data, eval(parse(text=x))),
              silent=TRUE)
+  if(class(out)[1]=="try-error"){
+    out <- try(data[, x],
+               silent = TRUE)
+  }
   if(class(out)[1]=="try-error") {
     if(if.err=="return.null"){
       return(NULL)
@@ -137,7 +143,8 @@ getTubeX <- function(data, x=NULL, ..., test.class=NULL,
 #' @rdname misc.dt.handlers
 #' @export
 
-checkTubeData <- function(data, x=NULL, ..., n.x=-1, if.err="return.null"){
+checkTubeData <- function(data, x=NULL, ..., n.x=-1, if.err="return.null",
+                          output = "data"){
 
   if(is.null(x)){
     return(data)
@@ -170,7 +177,16 @@ checkTubeData <- function(data, x=NULL, ..., n.x=-1, if.err="return.null"){
     stop(fun.nm, " Sorry, only ", n.x, " ", x.nms, " term(s) allowed",
          call.=FALSE)
   }
-  return(data)
+
+  if(output=="data"){
+    return(data)
+  }
+  if(output=="report"){
+    return(x[x %in% names(data)])
+  }
+  warning(fun.nm, " unknown output; check ?CheckTubeData",
+          call. = FALSE)
+  return(NULL)
 }
 
 

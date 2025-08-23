@@ -130,6 +130,75 @@ dte_quickText <- function (text, auto.text = TRUE)
 }
 
 
+
+
+###########################
+# ggplotShellTest
+###########################
+
+# might export this later???
+
+# test data and .xargs for use with ggplot2...
+
+dte_ggplotShellTest <- function(.xargs, data){
+  .xargs.tmp <- lapply(.xargs, function(x) !is.null(getTubeX(data, x)))
+  .xargs.source <- ifelse(.xargs.tmp, "data", "unknown")
+  .xargs.tmp <- lapply(.xargs, function(x) !is.null(getTubeX(NULL, x)))
+  .xargs.source <- ifelse(.xargs.tmp, "fact", .xargs.source)
+  .xargs.source <- as.list(.xargs.source)
+  names(.xargs.source) <- names(.xargs)
+  .xargs.source
+}
+
+
+
+################################
+# dte_ggplotAddGeom
+################################
+
+# tubePlot handler
+
+dte_ggplotAddGeom <- function(.xargs, data, ggplot,
+                              geom, defaults=NULL, holds=NULL, drops=NULL){
+  # .xargs - list; what we are passing to the geom
+  # data - data source
+  # ggplot is the shell output
+  # geom is the geom we are adding
+  # defaults - list;any defaults you want geom to apply
+  # holds - list of values we want to keep
+  # drops - vector; names of anything we don't want given to the geom
+  if(is.null(defaults)){
+    defaults=list()
+  }
+  if(is.null(holds)){
+    holds=list()
+  }
+  if(is.null(drops)){
+    drops=c()
+  }
+  .xargs <- modifyList(defaults, .xargs)
+  .xargs <- modifyList(.xargs, holds)
+  .test <- dte_ggplotShellTest(.xargs, data)
+  .test <- .test[!names(.test) %in% drops]
+  xx <- ggplot$mapping
+  rest <- list()
+  if(length(.test)>0){
+    for(i in 1:length(.test)){
+      if(.test[[i]] == "data"){
+        xxx <- ggplot2::aes(temp = .data[[{{.xargs[[names(.test)[i]]]}}]])
+        names(xxx) <- names(.test)[i]
+        xx <- modifyList(xx, xxx)
+      } else {
+        rest <- c(rest, .xargs[names(.test)[i]])
+      }
+    }
+  }
+  ggplot + do.call(geom, modifyList(list(mapping=xx, data=data), rest))
+}
+
+
+
+
 ##########################
 # testing removing...
 ##########################
