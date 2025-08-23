@@ -72,6 +72,10 @@
 
 # reference and link to ggplot2... and/or plotting more generally in R
 
+# decide and document col/colour handling
+
+#
+
 
 #############################
 # notes
