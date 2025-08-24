@@ -6,7 +6,9 @@
 \alias{tagTubeStartEnd}
 \alias{tagTubeLatLon}
 \alias{tagTubeSampleID}
+\alias{TagTubeValue}
 \alias{tagTubeDate}
+\alias{tagTubeValue}
 \title{Diffusion Tube Pro-processing}
 \usage{
 tagTube(data, ...)
@@ -16,6 +18,8 @@ tagTubeStartEnd(data, method = -1, force = FALSE, ...)
 tagTubeLatLon(data, method = -1, force = FALSE, ...)
 
 tagTubeSampleID(data, method = -1, force = FALSE, ...)
+
+tagTubeValue(data, method = -1, force = FALSE, ...)
 
 tagTubeDate(data, method = 2, force = FALSE, ...)
 }
@@ -68,7 +72,8 @@ collection, respectively). \code{start} and \code{end} are assumed
 to be provided in conventional 'YYYY-MM-DD' format, but this can also
 be modified using \code{data.format} and \code{\link{strptime}}
 formatting instructions.
-\item \code{lat} and \code{lon}  to assign latitude and longitude, respectively.
+\item \code{lat} and \code{lon}  to assign as latitude and longitude, respectively.
+\item \code{value} to assign as the tube measurement
 }
 
 So, for example:
@@ -108,18 +113,22 @@ format coordinates.
 one method: \code{method=1} assigning all same-location-and-time DTs as
 replicates, and is added to \code{data} as \code{.sample_id}.
 
+\code{tagTubeValue} identifies the diffusion tube measurements. it currently
+uses one method: \code{method=1} to
+
 \code{tagTube} is a wrapper that runs \code{tagTubeStartEnd},
-\code{tagTubeLatLon} and \code{tagTubeiteID}. Other \code{DTEval}
-functions typically pass your \code{data} to \code{tagTube} to check for
-tags and add them if missing. If you are using \code{tagTube} or one of
-these on untagged data and need to specific individual methods for each
-\code{tagTube...} function, prefix the method request, e.g. to use method
+\code{tagTubeLatLon}, \code{tagTubeSampleID} and \code{tagTubeValue}.
+Other \code{DTEval} functions typically pass your \code{data} to
+\code{tagTube} to check for tags and add them if missing.
+If you are using \code{tagTube} or one of these on untagged data and
+need to specific individual methods for each \code{tagTube...} function,
+prefix the method request, e.g. to use method
 2 for \code{tagTubeStartEnd} but leave the other functions using default
 setting when applying \code{tagTube}, use:
 
 \code{tagTube(data, startend.method=2)}
 
-Other \code{tagTube} functions are less commonly used:
+Other \code{tagTube...} functions are less commonly used:
 
 \code{tagTubeDate} attempts to assign a representative date to each
 sampling record (\code{data} row). By default, it set the date to the

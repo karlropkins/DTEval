@@ -8,7 +8,14 @@
 \usage{
 getTubeX(data, x = NULL, ..., test.class = NULL, if.err = "return.null")
 
-checkTubeData(data, x = NULL, ..., n.x = -1, if.err = "return.null")
+checkTubeData(
+  data,
+  x = NULL,
+  ...,
+  n.x = -1,
+  if.err = "return.null",
+  output = "data"
+)
 }
 \arguments{
 \item{data}{Data source, typically a data.frame or similar, containing
@@ -29,6 +36,9 @@ and \code{'stop<<FUN>>ARG'} to stop with function 'FUN' reporting a
 problem with argument ARG.}
 
 \item{n.x}{The maximum number of \code{x} that to be checked.}
+
+\item{output}{Where different outputs are an option, the requested
+output, e.g. data or report.}
 }
 \value{
 \code{getTubeX} returns \code{x} if it can

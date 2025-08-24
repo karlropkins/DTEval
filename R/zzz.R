@@ -18,7 +18,7 @@
 
 #undefined globals
 utils::globalVariables(c(".data", ".mean",".n", ".tube",".y", ".yhigh",
-                         ".ylow", "latitude", "longitude", ".",
+                         ".ylow", "latitude", "longitude", ".", ".value",
                          ".latitude", ".longitude", ".start_date",
                          ".end_date", "X", "Y", "checksum"))
 
@@ -133,14 +133,16 @@ dte_quickText <- function (text, auto.text = TRUE)
 
 
 ###########################
-# ggplotShellTest
+# dte_ggshellTestArgs
 ###########################
 
 # might export this later???
 
 # test data and .xargs for use with ggplot2...
 
-dte_ggplotShellTest <- function(.xargs, data){
+# was dte_testShellAndArgs
+
+dte_ggshellTestArgs <- function(.xargs, data){
   .xargs.tmp <- lapply(.xargs, function(x) !is.null(getTubeX(data, x)))
   .xargs.source <- ifelse(.xargs.tmp, "data", "unknown")
   .xargs.tmp <- lapply(.xargs, function(x) !is.null(getTubeX(NULL, x)))
@@ -153,12 +155,14 @@ dte_ggplotShellTest <- function(.xargs, data){
 
 
 ################################
-# dte_ggplotAddGeom
+# dte_addGeomToShell
 ################################
 
 # tubePlot handler
 
-dte_ggplotAddGeom <- function(.xargs, data, ggplot,
+# was dte_ggplotAddGeom
+
+dte_ggshellAddGeom <- function(.xargs, data, ggplot,
                               geom, defaults=NULL, holds=NULL, drops=NULL){
   # .xargs - list; what we are passing to the geom
   # data - data source
@@ -178,7 +182,7 @@ dte_ggplotAddGeom <- function(.xargs, data, ggplot,
   }
   .xargs <- modifyList(defaults, .xargs)
   .xargs <- modifyList(.xargs, holds)
-  .test <- dte_ggplotShellTest(.xargs, data)
+  .test <- dte_ggshellTestArgs(.xargs, data)
   .test <- .test[!names(.test) %in% drops]
   xx <- ggplot$mapping
   rest <- list()

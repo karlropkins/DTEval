@@ -111,8 +111,8 @@
 #####################
 
 # using ggplotTubeShell
-#     dte_ggplotShellTest
-#     dte_ggplotAddGeom
+#     dte_ggshellTestArgs
+#     dte_ggshellAddGeom
 #     getTubeX and checkTubeData
 
 # once we have range of required plots agreed
@@ -165,10 +165,10 @@ tubePlot <-
       stop("[tubePlot]> need at least one of 'x' and 'y'...",
            call.=FALSE)
     }
-    .xargs.test <- dte_ggplotShellTest(.xargs, data)
+    .xargs.test <- dte_ggshellTestArgs(.xargs, data)
     .dd <- .xargs[names(.xargs) %in% names(.xargs.test[.xargs.test=="data"])]
     data <- checkTubeData(data, unlist(.dd))
-    .xargs.test <- dte_ggplotShellTest(.xargs, data)
+    .xargs.test <- dte_ggshellTestArgs(.xargs, data)
     # main args (x,y,group, facet) are checked
     #     BUT ALSO might want to run all .xargs
     #         identified as data through checkTubeData ???
@@ -234,7 +234,7 @@ tubePlot <-
       if(i=="point"){
         #standard point
         temp <- TRUE
-        out <- dte_ggplotAddGeom(.xargs, data, out,
+        out <- dte_ggshellAddGeom(.xargs, data, out,
                                  ggplot2::geom_point,
                                  defaults = list(na.rm=TRUE),
                                  drops = c())
@@ -243,7 +243,7 @@ tubePlot <-
         #standard point
         temp <- TRUE
         d2 <- data[names(data) != "..facet"]
-        out <- dte_ggplotAddGeom(.xargs, d2, out,
+        out <- dte_ggshellAddGeom(.xargs, d2, out,
                                  ggplot2::geom_point,
                                  defaults = list(na.rm=TRUE),
                                  holds = list(colour = "grey"))
@@ -252,7 +252,7 @@ tubePlot <-
       if(i=="count"){
         #standard count - might not stay
         temp <- TRUE
-        out <- dte_ggplotAddGeom(.xargs, data, out,
+        out <- dte_ggshellAddGeom(.xargs, data, out,
                                  ggplot2::geom_count, list(na.rm=TRUE),
                                  c())
       }
@@ -303,7 +303,7 @@ ggplotTubeShell <-
     #trusting last rather than first version of any argument
     #   that is duplicated...
     .xargs <- .xargs[!duplicated(names(.xargs), fromLast=TRUE)]
-    .xargs.test <- dte_ggplotShellTest(.xargs, data)
+    .xargs.test <- dte_ggshellTestArgs(.xargs, data)
 
     ##    print(.xargs.test)
 
@@ -548,7 +548,7 @@ tubePlot_old  <-
       stop("[tubePlot]> need at least one of 'x' and 'y'...",
            call.=FALSE)
     }
-    .xargs.test <- dte_ggplotShellTest(.xargs, data)
+    .xargs.test <- dte_ggshellTestArgs(.xargs, data)
     # main args (x,y,group, facet) are checked
     #     BUT ALSO might want to run all .xargs
     #         identified as data through checkTubeData ???

@@ -7,36 +7,55 @@
 \alias{ggplotTubeShell}
 \title{Diffusion Tube Data Plots}
 \usage{
-tubePlot(data, x = NULL, y = NULL, plot.type = "point", avg = NULL, ...)
-
-tubeTimePlot(data, x = NULL, y = NULL, plot.type = "point", avg = NULL, ...)
+tubePlot(
+  data,
+  x = NULL,
+  y = NULL,
+  plot.type = "point",
+  overplot.action = NULL,
+  ...
+)
 
 ggplotTubeShell(data, x = NULL, y = NULL, ...)
+
+tubeTimePlot(data, x = NULL, y = NULL, plot.type = "point", avg = NULL, ...)
 }
 \arguments{
 \item{data}{Data source, typically a data.frame or similar, to be used to
 build a plot using ggplot2.}
 
 \item{x, y}{The names of the data-series to plot on the
-X and Y axes, respectively.}
+X and Y axes, respectively, and assumed to be elements of \code{data}.}
 
 \item{plot.type}{The type of plot required.}
 
-\item{avg}{Optional data averaging.}
+\item{overplot.action}{Optional data handling for over-plotting. The default,
+\code{NULL}, allows over-plotting of co-located points. The current
+alternative, enabled by all \code{overplot.action} settings, is to (mean)
+average co-located point records.}
 
-\item{...}{Additional arguments. See details below}
+\item{...}{Additional arguments. See details below.}
 }
 \value{
-\code{ggplotTubeShell} returns a ggplot shell the user then
+\code{tubePlot} is a general purpose plot for diffusion tube
+data.
+
+\code{ggplotTubeShell} returns a ggplot object the user then
 needs to add \code{geom}s to, to build a standard plot.
 }
 \description{
 \code{DTEval} uses \code{ggplot2} to generate most plots.
-\code{ggplotTubeShell} builds common plot shells for many of these, and
-handles some of of the generic plot control. \code{tubePlot} is a
-wrapper for several commonly used plots. Functions
-like \code{\link{testTubePrecision}} and \code{\link{testTubePrecision}}
-also use it to generate  associated plot outputs.
+
+Obviously, you are welcome to use graphics package you know to generate
+you own plot. In fact, if you want really fine control of plot outputs, we
+recommend taking the time to learn a graphics package like
+\code{ggplot}, \code{lattice}, etc. But \code{DTEval} also includes
+several quick-use wrappers for some commonly used plot types and useful
+options like grouping and faceting, which can really help with data
+visualisation. It also includes \code{ggplotTubeShell}, which builds
+common plot shells for many of these, and handles some of of
+the generic plot control for functions like \code{\link{testTubePrecision}}
+and \code{\link{testTubePrecision}}.
 }
 \details{
 In addition to \code{data}, the main data source for plots,
@@ -55,6 +74,9 @@ facet options: \code{'wrap'} for \code{facet_wrap} (default),
 specific by row-then-column or column-then-row grid handling,
 respectively).
 }
+
+Functions like \code{tubePlot} add layers to this framework to
+generate common plots.
 }
 \note{
 Maybe I'm already missing \code{qplot}...

@@ -4,7 +4,7 @@
 
 #' @name tag.tube.data
 #' @aliases tag.tube.data tagTube tagTubeStartEnd tagTubeLatLon tagTubeSampleID
-#' tagTubeDate
+#' TagTubeValue tagTubeDate
 
 #' @description Pre-processing diffusion tube (DT) data for use with
 #' \code{DTEval}. Coded methods to standardise DT data collected using
@@ -58,7 +58,9 @@
 #'  be modified using \code{data.format} and \code{\link{strptime}}
 #'  formatting instructions.
 #'
-#'  * \code{lat} and \code{lon}  to assign latitude and longitude, respectively.
+#'  * \code{lat} and \code{lon}  to assign as latitude and longitude, respectively.
+#'
+#'  * \code{value} to assign as the tube measurement
 #'
 #' So, for example:
 #'
@@ -100,18 +102,22 @@
 #' one method: \code{method=1} assigning all same-location-and-time DTs as
 #' replicates, and is added to \code{data} as \code{.sample_id}.
 #'
+#' \code{tagTubeValue} identifies the diffusion tube measurements. it currently
+#' uses one method: \code{method=1} to
+#'
 #' \code{tagTube} is a wrapper that runs \code{tagTubeStartEnd},
-#' \code{tagTubeLatLon} and \code{tagTubeiteID}. Other \code{DTEval}
-#' functions typically pass your \code{data} to \code{tagTube} to check for
-#' tags and add them if missing. If you are using \code{tagTube} or one of
-#' these on untagged data and need to specific individual methods for each
-#' \code{tagTube...} function, prefix the method request, e.g. to use method
+#' \code{tagTubeLatLon}, \code{tagTubeSampleID} and \code{tagTubeValue}.
+#' Other \code{DTEval} functions typically pass your \code{data} to
+#' \code{tagTube} to check for tags and add them if missing.
+#' If you are using \code{tagTube} or one of these on untagged data and
+#' need to specific individual methods for each \code{tagTube...} function,
+#' prefix the method request, e.g. to use method
 #' 2 for \code{tagTubeStartEnd} but leave the other functions using default
 #' setting when applying \code{tagTube}, use:
 #'
 #' \code{tagTube(data, startend.method=2)}
 #'
-#' Other \code{tagTube} functions are less commonly used:
+#' Other \code{tagTube...} functions are less commonly used:
 #'
 #' \code{tagTubeDate} attempts to assign a representative date to each
 #' sampling record (\code{data} row). By default, it set the date to the
@@ -176,6 +182,7 @@ tagTube <-
     data <- tagTubeStartEnd(data, ...)
     data <- tagTubeLatLon(data, ...)
     data <- tagTubeSampleID(data, ...)
+    data <- tagTubeValue(data, ...)
     return(data)
   }
 
@@ -198,12 +205,15 @@ tagTube <-
 ####################################
 
 
-# could be confusion with tagTubeDate
-
 #' @rdname tag.tube.data
 #' @export
 tagTubeStartEnd <-
   function(data, method = -1, force=FALSE, ...){
+
+    #####################################
+    # needs reordering like tagTubeValue
+    #    currently ignores local .force settings
+    #####################################
 
     # setup/checks
     .xargs <- list(...)
@@ -369,15 +379,24 @@ tagTubeStartEnd_method03 <- function(data, ...){
 tagTubeLatLon <-
   function(data, method = -1, force=FALSE, ...){
 
+    #setup
+    .xargs <- modifyList(list(lat="latitude",
+                              lon="longitude"),
+                         list(...))
+    # higher level force and method override
+    if("latlon.force" %in% names(.xargs)){
+      force <- .xargs$latlon.force
+    }
+    if("latlon.method" %in% names(.xargs)){
+      method <- .xargs$latlon.method
+    }
+
     #return if lat and lon already tagged and not forcing ...
     if(".latitude" %in% names(data) & ".longitude" %in% names(data) &
        !force){
       return(data)
     }
-    #setup
-    .xargs <- modifyList(list(lat="latitude",
-                              lon="longitude"),
-                         list(...))
+
     #check lat and lon are in data
     test <- c()
     for(i in c("lat", "lon")){
@@ -391,13 +410,7 @@ tagTubeLatLon <-
            "\n\t(maybe check data or ?tagTubeLatLon) \n",
            call.=FALSE)
     }
-    # higher level force and method override
-    if("latlon.force" %in% names(.xargs)){
-      force <- .xargs$latlon.force
-    }
-    if("latlon.method" %in% names(.xargs)){
-      method <- .xargs$latlon.method
-    }
+
     #check method
     check <- 1
     if(all(method == -1)){
@@ -438,13 +451,6 @@ tagTubeLatLon <-
 tagTubeSampleID <-
   function(data, method = -1, force=FALSE, ...){
 
-    #fast return if .sample_id there and not forcing...
-    if(".sample_id" %in% names(data) & !force){
-      return(data)
-    }
-    #setup
-    data <- tagTubeStartEnd(data, ...)
-    data <- tagTubeLatLon(data, ...)
     # higher level force and method overwrites
     .xargs <- list(...)
     if("sampleid.force" %in% names(.xargs)){
@@ -453,6 +459,14 @@ tagTubeSampleID <-
     if("sampleid.method" %in% names(.xargs)){
       method <- .xargs$sampleid.method
     }
+
+    #fast return if .sample_id there and not forcing...
+    if(".sample_id" %in% names(data) & !force){
+      return(data)
+    }
+    #setup
+    data <- tagTubeStartEnd(data, ...)
+    data <- tagTubeLatLon(data, ...)
     #check method
     check <- 1
     if(all(method == -1)){
@@ -479,12 +493,83 @@ tagTubeSampleID <-
     #    }
     if(method=="1"){
       #match latitude+longitude
+      ##################################################
+      # if not all there ???
+      #    shouldn't this error out...
+      ##################################################
       test <- data[c(".latitude", ".longitude", ".start_date", ".end_date")]
       test <- as.factor(apply(test , 1 , paste , collapse = "-" ))
       data$.sample_id <- as.numeric(test)
     }
     data
   }
+
+
+################################
+# tagTubeValue
+################################
+
+# in development at moment
+# diffusion tube measurement tag
+
+
+# has 1 method (in code)
+# 1. default monthly
+# 2. Defra/laqm scheme only works for monthly sampling
+# 3. specific start and end dates
+
+# to think about
+####################################
+
+
+#' @rdname tag.tube.data
+#' @export
+tagTubeValue <-
+  function(data, method = -1, force=FALSE, ...){
+
+    # higher level force and method overwrites
+    .xargs <- modifyList(list(value="measurement"),
+                         list(...))
+    if("value.force" %in% names(.xargs)){
+      force <- .xargs$value.force
+    }
+    if("value.method" %in% names(.xargs)){
+      method <- .xargs$value.method
+    }
+    #fast return if .value there and not forcing...
+    if(".value" %in% names(data) & !force){
+      return(data)
+    }
+
+    #check method
+    check <- 1
+    if(all(method == -1)){
+      method <- check
+    }
+    if(!method %in% check){
+      stop("[tagTubeValue]> '", method, "' unknown method",
+           "\n\trecommend one of: ", paste (check, collapse = ", "),
+           "\n\t(and maybe check ?tagTubeValue) \n",
+           call.=FALSE)
+    }
+    if(method==1){
+      test <- NULL
+      for(i in .xargs$value){
+        if(is.null(test)){
+          test <- getTubeX(data, i)
+        }
+      }
+      if(is.null(test)){
+        stop("[tagTubeValue]> expected to find one of following: ",
+             "\n\t", paste (.xargs$value, collapse = ", "),
+             "\n\t(maybe see ?tagTubeValue or rerun with value set?) \n",
+             call.=FALSE)
+      }
+      data$.value <- test
+    }
+    data
+  }
+
 
 
 
@@ -517,6 +602,13 @@ tagTubeSampleID <-
 
 tagTubeDate <- function(data, method=2, force=FALSE, ...){
 
+  .xargs <- list(...)
+  if("date.force" %in% names(.xargs)){
+    force <- .xargs$date.force
+  }
+  if("date.method" %in% names(.xargs)){
+    method <- .xargs$date.method
+  }
   if(".date" %in% names(data) && !force){
     return(data)
   }

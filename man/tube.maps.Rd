@@ -9,9 +9,23 @@
 \usage{
 tubeMap(data, x = NULL, y = NULL, polygon = NULL, plot.type = "leaflet", ...)
 
-tubeMap_leaflet(data, x = NULL, y = NULL, polygon = NULL, ...)
+tubeMap_leaflet(
+  data,
+  x = NULL,
+  y = NULL,
+  polygon = NULL,
+  plot.type = "point",
+  ...
+)
 
-tubeMap_ggplot2(data, x = NULL, y = NULL, polygon = NULL, ...)
+tubeMap_ggplot2(
+  data,
+  x = NULL,
+  y = NULL,
+  polygon = NULL,
+  plot.type = "point",
+  ...
+)
 }
 \arguments{
 \item{data}{Data source, typically a data.frame or similar, to be used to
@@ -29,7 +43,7 @@ CAZ boundaries.}
 \item{...}{Additional arguments. See Notes}
 }
 \value{
-\code{tubeMap_leaflet} and \code{tubeMap_leaflet} return
+\code{tubeMap_leaflet} and \code{tubeMap_ggplot2} return
 \code{leaftlet} and \code{ggplot2} maps, respectively. \code{tubeMap}
 is wrapper for both.
 }
