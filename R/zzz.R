@@ -202,6 +202,15 @@ dte_ggshellAddGeom <- function(.xargs, data, ggplot,
 
 
 
+dte_GeomArgs <- function(GP){
+  #for GeomPoint, etc
+  #not sure if this needs
+  #GP$optional_aes, GP$non_missing_aes as weel
+  unique(c(GP$required_aes, names(GP$default_aes), GP$extra_params,
+           "group"))
+}
+
+
 
 ##########################
 # testing removing...

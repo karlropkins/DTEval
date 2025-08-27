@@ -7,18 +7,11 @@
 \alias{ggplotTubeShell}
 \title{Diffusion Tube Data Plots}
 \usage{
-tubePlot(
-  data,
-  x = NULL,
-  y = NULL,
-  plot.type = "point",
-  overplot.action = NULL,
-  ...
-)
+tubePlot(data, x = NULL, y = NULL, plot.type = "point", ...)
+
+tubeTimePlot(data, x = NULL, y = NULL, plot.type = "point", ...)
 
 ggplotTubeShell(data, x = NULL, y = NULL, ...)
-
-tubeTimePlot(data, x = NULL, y = NULL, plot.type = "point", avg = NULL, ...)
 }
 \arguments{
 \item{data}{Data source, typically a data.frame or similar, to be used to
@@ -29,16 +22,15 @@ X and Y axes, respectively, and assumed to be elements of \code{data}.}
 
 \item{plot.type}{The type of plot required.}
 
-\item{overplot.action}{Optional data handling for over-plotting. The default,
-\code{NULL}, allows over-plotting of co-located points. The current
-alternative, enabled by all \code{overplot.action} settings, is to (mean)
-average co-located point records.}
-
 \item{...}{Additional arguments. See details below.}
 }
 \value{
-\code{tubePlot} is a general purpose plot for diffusion tube
-data.
+\code{tubePlot} is a general purpose plotting functions for
+diffusion tube data.
+
+\code{tubeTimePlot} is a \code{tubePlot} wrapper that adds the tagged
+sampling date as a second axes if one of \code{x} or \code{y} is
+supplied.
 
 \code{ggplotTubeShell} returns a ggplot object the user then
 needs to add \code{geom}s to, to build a standard plot.
@@ -46,8 +38,8 @@ needs to add \code{geom}s to, to build a standard plot.
 \description{
 \code{DTEval} uses \code{ggplot2} to generate most plots.
 
-Obviously, you are welcome to use graphics package you know to generate
-you own plot. In fact, if you want really fine control of plot outputs, we
+Obviously, you are welcome to use any graphics package you know to generate
+your own plot. In fact, if you want really fine control of plot outputs, we
 recommend taking the time to learn a graphics package like
 \code{ggplot}, \code{lattice}, etc. But \code{DTEval} also includes
 several quick-use wrappers for some commonly used plot types and useful
