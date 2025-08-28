@@ -207,7 +207,7 @@ tubePlot <-
     #what to do about col/colour...?
     #   currently using this cludge in both tubePlot and ggplotTubeShell
     #      and assuming color hereafter...
-    names(.xargs)[names(.xargs)=="col"] <- "colour"
+    names(.xargs)[names(.xargs) %in% c("col", "color")] <- "colour"
     .xargs <- .xargs[!duplicated(names(.xargs), fromLast=TRUE)]
 
     #need this if facet source is also used for other args, e.g. col...
@@ -261,10 +261,11 @@ tubePlot <-
     ################################
     # moving calculation into layers where it is used
     # BUT calculating parameters early because they could be used multiple times...
-    #    so calculating .by and .x for using in calcTubeStat
+    #    so calculating .by and .x for use in calcTubeStat
     #       data <- suppressWarnings(calcTubeStat(data, .x, by =.by))
     #    AND
     #       stat <- function(x) { list(mean=mean(x, na.rm=TRUE))
+    #    BUT only running this when using it...
     # SEE point.mean as example...
 
     #if(!is.null(overplot.action)){
@@ -328,24 +329,39 @@ tubePlot <-
       #       or you'll get both all other any follow-on layers...
       # }
 
+      # box and whisker plot
       if(i=="box"){
-        # box and whisker plot
-        #   largely untested
-        # does this need a group term
-        #    if neither x or y are factors ???
-        #       see tubeTimePlot(tagTube(dont.share::dt.bradford.2), y="measurement", plot.type = "box", group=".date")
+        # largely untested
+        # local rules
+        #   if x and y and no group make one group as well
+        #     check with both tubePlot and tubeTimePlot if changing this...
+        #       example tubeTimePlot(tagTube(dont.share::dt.bradford.2), y="measurement", plot.type = "box")
+        #     this dies if both x and y are numeric...
+        #       possible next steps/options
+        #          use whichever has least unique elements as group ???
+        #          allow option like orientation or force ???
         # could be boxplot args I don't know about
-        #     or allow via dte_ggshellAddGeom
+        #     or allow via dte_ggshellAddGeom ???
         temp <- TRUE
-        drops <-  names(.xargs)[!names(.xargs) %in% dte_GeomArgs(ggplot2::GeomBoxplot)]
-        out <- dte_ggshellAddGeom(.xargs, data, out,
+        .xargs2 <- .xargs # might want the group going to all
+        if(!".default" %in% c(x,y)){
+          if(!"group" %in% names(.xargs2)){
+            .xargs2$group <- if(is.numeric(getTubeX(data, x))){
+              y
+            } else {
+              x
+            }
+          }
+        }
+        drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomBoxplot)]
+        out <- dte_ggshellAddGeom(.xargs2, data, out,
                                   ggplot2::geom_boxplot,
                                   defaults = list(na.rm=TRUE),
                                   drops = drops)
       }
 
+      #histogram
       if(i=="hist"){
-        # histogram
         # have to kill one of x or y for this
         #    so it does not play nicely with plots that do at the moment...
         # need to allow statistical args
@@ -355,8 +371,8 @@ tubePlot <-
         #        tubePlot(dt.york, x="measurement", plot.type = "hist",
         #                 facet="month", fill="factor(CalendarYear)",
         #                 group="CalendarYear")
-        # y axes name should be count...
-        #     but might have to cheat to fix that...
+        # other axes currently labelled count by default...
+        #     need to tisy this if we ...
 
         temp <- TRUE
         if(!".default" %in% c(x, y)){
@@ -367,10 +383,16 @@ tubePlot <-
         if(x==".default"){
           out$mapping$x <- NULL
           .xargs2$x <- NULL
+          if(out$labels$x == ""){
+            out$labels$x <- "count"
+          }
         }
         if(y==".default"){
           out$mapping$y <- NULL
           .xargs2$y <- NULL
+          if(out$labels$y==""){
+            out$labels$y <- "count"
+          }
         }
         drops <- names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomBar)]
         drops <- drops[!drops %in% c("bins", "binwidth")]
@@ -380,8 +402,20 @@ tubePlot <-
                                   drops = drops)
       }
 
-
+      #scatter plot 'point'
       if(i %in% c("point", "point.mean", "point.count")){
+        #  has overplotting options point.mean and point.count
+        #  possible issue
+        #     tubeTimePlot(tagTube(dont.share::dt.bradford.2),
+        #                   y="measurement", group="year_of_measurement",
+        #                   size="measurement",
+        #                   plot.type = "point.count")
+        #     is not what you would expect
+        #         because size="measurement" is the average of overplot points
+        #         when measurement is also one of the axes...
+        #     can pass ..dummy.count unless as other plot arg...I try to recolour...
+        #     might have to make a dummy of the duplicated axes to use in
+        #         point.mean/count
         temp <- TRUE
         if(i == "point.mean"){
           .stat <- function(x) { list(mean=mean(x, na.rm=TRUE)) }
@@ -389,6 +423,10 @@ tubePlot <-
           #names(d2) <- gsub("[.]mean", "", names(d2))
           .xargs2 <- .xargs
           .xargs2[.xargs2 %in% .x] <- paste(.xargs2[.xargs2 %in% .x], ".mean", sep="")
+          ##ignoring if nothing is averaged
+          ##if("..dummy.mean" %in% names(d2) & !"size" %in% names(.xargs2)){
+          ##  .xargs2$size = "..dummy.mean"
+          ##}
           drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPoint)]
           out <- dte_ggshellAddGeom(.xargs2, d2, out,
                                     ggplot2::geom_point,
@@ -401,6 +439,9 @@ tubePlot <-
           d2 <- suppressWarnings(calcTubeStat(data, .x, stat=.stat, by =.by))
           .xargs2 <- .xargs
           .xargs2[.xargs2 %in% .x] <- paste(.xargs2[.xargs2 %in% .x], ".count", sep="")
+          if("..dummy.count" %in% names(d2) & !"size" %in% names(.xargs2)){
+            .xargs2$size = "..dummy.count"
+          }
           drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPoint)]
           out <- dte_ggshellAddGeom(.xargs2, d2, out,
                                     ggplot2::geom_point,
@@ -415,6 +456,99 @@ tubePlot <-
                                  drops = drops)
         }
       }
+
+      #ribbons
+      if(grepl("stat.ribbon", i)){
+        #various stat.ribbons
+        # in-development
+        #    dte_GeomArgs(ggplot2::GeomRibbon)
+        #       returns "x|y"         "ymin|xmin"   "ymax|xmax"   "colour"      "fill"        "linewidth"   "linetype"
+        #               "alpha"       "na.rm"       "orientation" "group"
+        #       so y and y hidden ...
+        #           currently using unlist(strsplit(t1, "[|]")) to unhide these
+        #                (in xxx.r dte_GeomArgs)
+        # NEED TO
+        #    sort group behaviour....
+        #    decide ribbon.ref handling
+        #    look at following
+        #         tubeTimePlot(dd,x="measurement", plot.type = "stat.ribbon",
+        #                      ribbon.refs=c(0.4,0.5,0.6), palette=c("yellow", "purple"))
+        #         seeing with fill... which should not be there...
+        #            also adding yell to ribbon edges...
+        #
+        temp <- TRUE
+        # note: I need to mess with stat.ribbon...
+        local <- i
+        #set to "x.stat.ribbon" or "y.stat.ribbon" if not set
+        if(grepl("^stat[.]ribbon", local)){
+          local <- if(is.numeric(getTubeX(data, x))){
+               paste("y.", local, sep="")
+          } else {
+               paste("x.", local, sep="")
+          }
+        }
+        ##########################
+        # ribbon.ref will not be the final way this is handled
+        ##########################
+        .q <- if(is.null(.xargs$ribbon.refs)){
+          c(0, 0.5, 1)
+        } else {
+          .xargs$ribbon.refs
+        }
+        if(grepl("^x[.]", local)){
+          .stat <- function(x) { list(y.mid=stats::quantile(x, probs=.q[2], na.rm=TRUE, names=FALSE),
+                                      y.low=stats::quantile(x, probs=.q[1], na.rm=TRUE, names=FALSE),
+                                      y.hi=stats::quantile(x, probs=.q[3], na.rm=TRUE, names=FALSE)) }
+          d2 <- suppressWarnings(calcTubeStat(data, y, stat=.stat, by=
+                                                unique(c(.x,.by)[!c(.x,.by) %in% y])))
+          d2 <- d2[order(getTubeX(d2, x)),]
+          .xargs2 <- .xargs
+          .xargs2$y <- paste(y, ".y.mid", sep="")
+          .xargs2$ymin <- paste(y, ".y.low", sep="")
+          .xargs2$ymax <- paste(y, ".y.hi", sep="")
+          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomRibbon)]
+          drops <- c(drops, "colour")
+          out <- dte_ggshellAddGeom(.xargs2, d2, out,
+                                    ggplot2::geom_ribbon,
+                                    defaults = list(na.rm=TRUE,
+                                                    fill="grey", alpha=0.5),
+                                    drops = drops)
+          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomLine)]
+          drops <- c(drops, "alpha")
+          out <- dte_ggshellAddGeom(.xargs2, d2, out,
+                                    ggplot2::geom_line,
+                                    defaults = list(na.rm=TRUE),
+                                    drops = drops)
+
+        }
+        if(grepl("^y[.]", local)){
+          .stat <- function(x) { list(x.mid=stats::quantile(x, probs=.q[2], na.rm=TRUE, names=FALSE),
+                                      x.low=stats::quantile(x, probs=.q[1], na.rm=TRUE, names=FALSE),
+                                      x.hi=stats::quantile(x, probs=.q[3], na.rm=TRUE, names=FALSE)) }
+          d2 <- suppressWarnings(calcTubeStat(data, x, stat=.stat, by=
+                                                unique(c(.x,.by)[!c(.x,.by) %in% x])))
+          d2 <- d2[order(getTubeX(d2, y)),]
+          .xargs2 <- .xargs
+          .xargs2$x <- paste(x, ".x.mid", sep="")
+          .xargs2$xmin <- paste(x, ".x.low", sep="")
+          .xargs2$xmax <- paste(x, ".x.hi", sep="")
+          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomRibbon)]
+          drops <- c(drops, "colour")
+          out <- dte_ggshellAddGeom(.xargs2, d2, out,
+                                    ggplot2::geom_ribbon,
+                                    defaults = list(na.rm=TRUE,
+                                                    fill="grey", alpha=0.5),
+                                    drops = drops)
+          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomLine)]
+          drops <- c(drops, "alpha")
+          out <- dte_ggshellAddGeom(.xargs2, d2, out,
+                                    ggplot2::geom_path,
+                                    defaults = list(na.rm=TRUE),
+                                    drops = drops)
+        }
+      }
+
+
 
 #      ###########################
 #      # ghost needs more work if
@@ -512,7 +646,7 @@ ggplotTubeShell <-
     .xargs <- list(...)
     #what to do about this...?
     #using in tubePlot and ggplotTubeShell
-    names(.xargs)[names(.xargs)=="col"] <- "colour"
+    names(.xargs)[names(.xargs) %in% c("col", "color")] <- "colour"
     #trusting last rather than first version of any argument
     #   that is duplicated...
     .xargs <- .xargs[!duplicated(names(.xargs), fromLast=TRUE)]

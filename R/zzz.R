@@ -204,10 +204,13 @@ dte_ggshellAddGeom <- function(.xargs, data, ggplot,
 
 dte_GeomArgs <- function(GP){
   #for GeomPoint, etc
-  #not sure if this needs
-  #GP$optional_aes, GP$non_missing_aes as weel
-  unique(c(GP$required_aes, names(GP$default_aes), GP$extra_params,
-           "group"))
+  # not sure if this needs
+  #    GP$optional_aes, GP$non_missing_aes as well?
+  # like to have an option to add in stat args
+  t1 <- c(GP$required_aes, names(GP$default_aes), GP$extra_params,
+             "group")
+  t1 <- unlist(strsplit(t1, "[|]"))
+  unique(c(t1))
 }
 
 
