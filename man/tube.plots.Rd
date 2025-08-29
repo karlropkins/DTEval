@@ -20,7 +20,9 @@ build a plot using ggplot2.}
 \item{x, y}{The names of the data-series to plot on the
 X and Y axes, respectively, and assumed to be elements of \code{data}.}
 
-\item{plot.type}{The type of plot required.}
+\item{plot.type}{The type of plot required. Current options include:
+\code{'bar'} bar, \code{'box'} box-and-whisker, \code{hist},
+histogram \code{'point'} scatter, \code{'stat.ribbon'} statistical ribbon ...}
 
 \item{...}{Additional arguments. See details below.}
 }

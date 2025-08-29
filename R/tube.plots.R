@@ -23,7 +23,9 @@
 #' build a plot using ggplot2.
 #' @param x,y The names of the data-series to plot on the
 #'  X and Y axes, respectively, and assumed to be elements of \code{data}.
-#' @param plot.type The type of plot required.
+#' @param plot.type The type of plot required. Current options include:
+#' \code{'bar'} bar, \code{'box'} box-and-whisker, \code{hist},
+#' histogram \code{'point'} scatter, \code{'stat.ribbon'} statistical ribbon ...
 #' @param ... Additional arguments. See details below.
 
 #' @details In addition to \code{data}, the main data source for plots,
@@ -116,6 +118,14 @@
 # option rotate axes labels
 
 # control of scale free, free_x, free_y, etc...
+#     is currently by ggplotTubeShell that passes scales to the ggplot2::facet_[whatever]
+#         this is part of a facet... formals only do.call
+#         might fall over is scales is allowed but one of the geoms when used through
+#            tubePlot
+
+# see this about stat_... functions
+#     https://yjunechoe.github.io/posts/2020-09-26-demystifying-stat-layers-ggplot2/
+
 
 # think about extending palette to fill?
 #    [might now be done... via ggplotTUbeShell?]
@@ -209,6 +219,7 @@ tubePlot <-
     #      and assuming color hereafter...
     names(.xargs)[names(.xargs) %in% c("col", "color")] <- "colour"
     .xargs <- .xargs[!duplicated(names(.xargs), fromLast=TRUE)]
+
 
     #need this if facet source is also used for other args, e.g. col...
     if(!is.null(.xargs$facet)){
@@ -329,6 +340,50 @@ tubePlot <-
       #       or you'll get both all other any follow-on layers...
       # }
 
+
+      #bar chart
+      if(i=="bar"){
+        # largely untested
+        # local rules
+        #   if only one of x and y use geom_bar; if both use column
+        # TO LOOK INTO...
+        #   if x and y and no group might nee to make one group as well
+        #     check with both tubePlot and tubeTimePlot if changing this...
+        # difference in colouring of geom_bar and geom_col
+        #     check documentation on these
+
+        temp <- TRUE
+        .xargs2 <- .xargs # might want the group going to all
+        if(".default" %in% c(x,y)){
+          # this is a bar plot...
+          # might have to kill this is mixing with other plots???
+          if(x==".default"){
+            out$mapping$x <- NULL
+            .xargs2$x <- NULL
+          } else {
+            out$mapping$y <- NULL
+            .xargs2$y <- NULL
+          }
+          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomBar)]
+          out <- dte_ggshellAddGeom(.xargs2, data, out,
+                                    ggplot2::geom_bar,
+                                    defaults = list(na.rm=TRUE,
+                                                    colour="black", fill="grey"),
+                                    drops = drops)
+
+        } else {
+          #this is col...
+          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomCol)]
+          out <- dte_ggshellAddGeom(.xargs2, data, out,
+                                    ggplot2::geom_col,
+                                    defaults = list(na.rm=TRUE,
+                                                    colour="black", fill="grey"),
+                                    drops = drops)
+        }
+
+      }
+
+
       # box and whisker plot
       if(i=="box"){
         # largely untested
@@ -398,7 +453,8 @@ tubePlot <-
         drops <- drops[!drops %in% c("bins", "binwidth")]
         out <- dte_ggshellAddGeom(.xargs2, data, out,
                                   ggplot2::geom_histogram,
-                                  defaults = list(na.rm=TRUE, bins=30),
+                                  defaults = list(na.rm=TRUE, colour="black", fill="grey",
+                                                  bins=30),
                                   drops = drops)
       }
 
@@ -467,14 +523,15 @@ tubePlot <-
         #       so y and y hidden ...
         #           currently using unlist(strsplit(t1, "[|]")) to unhide these
         #                (in xxx.r dte_GeomArgs)
-        # NEED TO
-        #    sort group behaviour....
-        #    decide ribbon.ref handling
-        #    look at following
-        #         tubeTimePlot(dd,x="measurement", plot.type = "stat.ribbon",
-        #                      ribbon.refs=c(0.4,0.5,0.6), palette=c("yellow", "purple"))
-        #         seeing with fill... which should not be there...
-        #            also adding yell to ribbon edges...
+        #    grouping as copy of fill if group not there and but fill is data
+        #       might not be complete fix ... see below
+        # NEED TO LOOK AT following
+        #    this kills it
+        #         tubeTimePlot(dt.york, y="measurement", plot.type="stat.ribbon",
+        #                      ribbon.probs=c(0.1,0.5, 0.9), fill="factor(CalendarYear)",
+        #                      facet="month")
+        #             BUT resetting the group to the facet might save this... ??
+        #
         #     ribbons need both x and y
         #     check I have x.ribbon and y.stat.ribbon
         #          might be a simpler way of do this ???
@@ -491,14 +548,18 @@ tubePlot <-
           }
         }
         ##########################
-        # ribbon.ref will not be the final way this is handled
+        # using ribbon.probs because it aligns with the quantile error
         ##########################
-        .q <- if(is.null(.xargs$ribbon.refs)){
+        .q <- if(is.null(.xargs$ribbon.probs)){
           c(0, 0.5, 1)
         } else {
-          .xargs$ribbon.refs
+          .xargs$ribbon.probs
         }
         if(grepl("^x[.]", local)){
+          ##########################
+          # anything here needs to be duplicated above...
+          # (when sorted we should be able to rationalise a lot of these)
+          ##########################
           .stat <- function(x) { list(y.mid=stats::quantile(x, probs=.q[2], na.rm=TRUE, names=FALSE),
                                       y.low=stats::quantile(x, probs=.q[1], na.rm=TRUE, names=FALSE),
                                       y.hi=stats::quantile(x, probs=.q[3], na.rm=TRUE, names=FALSE)) }
@@ -506,6 +567,20 @@ tubePlot <-
                                                 unique(c(.x,.by)[!c(.x,.by) %in% y])))
           d2 <- d2[order(getTubeX(d2, x)),]
           .xargs2 <- .xargs
+          if("colour" %in% names(.xargs2) & !"group" %in% names(.xargs2)){
+            # if we have a fill we need a group
+            # BUT only copy if fill is in data copy fill
+            if(.xargs.test["colour"]=="data"){
+              .xargs2$group <- .xargs$colour
+            }
+          }
+          if("fill" %in% names(.xargs2) & !"group" %in% names(.xargs2)){
+            # if we have a fill we need a group
+            # BUT only copy if fill is in data copy fill
+            if(.xargs.test["fill"]=="data"){
+              .xargs2$group <- .xargs$fill
+            }
+          }
           .xargs2$y <- paste(y, ".y.mid", sep="")
           .xargs2$ymin <- paste(y, ".y.low", sep="")
           .xargs2$ymax <- paste(y, ".y.hi", sep="")
@@ -525,6 +600,10 @@ tubePlot <-
 
         }
         if(grepl("^y[.]", local)){
+          ##########################
+          # anything here needs to be duplicated above...
+          # (when sorted we should be able to rationalise a lot of these)
+          ##########################
           .stat <- function(x) { list(x.mid=stats::quantile(x, probs=.q[2], na.rm=TRUE, names=FALSE),
                                       x.low=stats::quantile(x, probs=.q[1], na.rm=TRUE, names=FALSE),
                                       x.hi=stats::quantile(x, probs=.q[3], na.rm=TRUE, names=FALSE)) }
@@ -532,6 +611,20 @@ tubePlot <-
                                                 unique(c(.x,.by)[!c(.x,.by) %in% x])))
           d2 <- d2[order(getTubeX(d2, y)),]
           .xargs2 <- .xargs
+          if("colour" %in% names(.xargs2) & !"group" %in% names(.xargs2)){
+            # if we have a col we need a group
+            # BUT only copy if col is in data copy col
+            if(.xargs.test["colour"]=="data"){
+              .xargs2$group <- .xargs$colour
+            }
+          }
+          if("fill" %in% names(.xargs2) & !"group" %in% names(.xargs2)){
+            # if we have a fill we need a group
+            # BUT only copy if fill is in data copy fill
+            if(.xargs.test["fill"]=="data"){
+              .xargs2$group <- .xargs$fill
+            }
+          }
           .xargs2$x <- paste(x, ".x.mid", sep="")
           .xargs2$xmin <- paste(x, ".x.low", sep="")
           .xargs2$xmax <- paste(x, ".x.hi", sep="")
@@ -830,7 +923,9 @@ ggplotTubeShell <-
     if("palette" %in% names(.xargs)){
       # colours might not be being mapped
       if(!"colour" %in% names(.xargs.test[.xargs.test=="data"])){
-        plt$mapping$colour <- "default"
+        ###########################
+        # testing removing - same in fill.palette
+        ##plt$mapping$colour <- "default"
         plt <- plt + ggplot2::scale_color_manual(values=.xargs$palette,
                                                  guide="none")
       } else {
@@ -860,7 +955,9 @@ ggplotTubeShell <-
     if("fill.palette" %in% names(.xargs)){
       # like colours might not be being mapped
       if(!"fill" %in% names(.xargs.test[.xargs.test=="data"])){
-        plt$mapping$fill <- "default"
+        #############################################
+        # testing removing - same in fill.palette
+        ##plt$mapping$fill <- "default"
         plt <- plt + ggplot2::scale_fill_manual(values=.xargs$fill.palette,
                                                  guide="none")
       } else {

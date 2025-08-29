@@ -1,7 +1,7 @@
 Package: DTEval
 Title: Diffusion Tube Evaluation Code
 Version: 0.0.12
-Date: 2025-08-28
+Date: 2025-08-29
 Description: R code used for the pro-processing, analysis and evaluation of diffusion tube (DT) data
            typically collected in air quality assessment exercises.
 Authors@R: person(given = "Karl", family = "Ropkins", role = c("aut", "cre"), email =
