@@ -182,6 +182,7 @@ dte_ggshellAddGeom <- function(.xargs, data, ggplot,
   }
   .xargs <- modifyList(defaults, .xargs)
   .xargs <- modifyList(.xargs, holds)
+
   .test <- dte_ggshellTestArgs(.xargs, data)
   .test <- .test[!names(.test) %in% drops]
   xx <- ggplot$mapping

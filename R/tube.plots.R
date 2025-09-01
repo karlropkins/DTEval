@@ -85,6 +85,10 @@
 
 # decide and document palette and fill.palette handling
 
+# decide and document rotate.x.axes
+
+# decide and document key.position and key.direction
+
 
 
 #############################
@@ -104,7 +108,11 @@
 #      tubeTimePlot(tagTube(dont.share::dt.bradford.2), y="measurement", plot.type = "point.count", size="measurement")
 #    and what I think it should look like...
 #       tubeTimePlot(tagTube(dont.share::dt.bradford.2), y="measurement", plot.type = "point.count", size=".latitude")
-
+#    related
+#       using stat for similar with bar plots
+#          see this about stat_... functions
+#          https://yjunechoe.github.io/posts/2020-09-26-demystifying-stat-layers-ggplot2/
+#       might be an easier option
 
 
 
@@ -123,8 +131,6 @@
 #         might fall over is scales is allowed but one of the geoms when used through
 #            tubePlot
 
-# see this about stat_... functions
-#     https://yjunechoe.github.io/posts/2020-09-26-demystifying-stat-layers-ggplot2/
 
 
 # think about extending palette to fill?
@@ -158,6 +164,8 @@
 # then tubeTimePlot a variation that by default sets x  to date
 # also think about making tubeSitePlot tubeMap without the map...
 
+
+
 #####################
 # notes
 #####################
@@ -182,19 +190,9 @@
 #    https://stackoverflow.com/questions/37529116/how-to-plot-a-heat-map-with-irregular-data-in-ordinates-in-ggplot
 
 # also
-#    tubePlot(dont.share::dt.bradford.2, plot.type="site", palette=c("white", "green")) + ggplot2::geom_density_2d_filled(breaks=10^(0:10)) +ggplot2::xlim(-2.5,-1) + ggplot2::ylim(53.7, 54)
-
-
-
-
-
-
-# looking at
-# tubePlot(dt.york, x=".start_date", y="measurement", plot.type="statribbon", palette="white")
-# not tracking groups ...
-# tubePlot(dt.york, x=".start_date", y="measurement", plot.type="statribbon", group="month", col="month")
-# this sort of works...
-# tubePlot(dt.york, x=".start_date", y="measurement", plot.type="statribbon", group="month", col="month")
+#    tubePlot(tagTube(dont.share::dt.bradford.2), x=".longitude", y=".latitude", palette=c("white", "green")) + ggplot2::geom_density_2d_filled(breaks=10^(0:10)) +ggplot2::xlim(-2.5,-1) + ggplot2::ylim(53.7, 54)
+#       # needs three colours because it is default fill.pallete because no fill in call...
+#           # and every if there were, the geom would ignore it because it uses a z term...
 
 # saw this on over.plotting
 # https://bookdown.dongzhuoer.com/hadley/ggplot2-book/overplotting
@@ -312,7 +310,8 @@ tubePlot <-
 
     # stuff ggplotTubeShell deals with...
     .ggshell <- c("facet", "facet.type", "xlab", "ylab",
-                  "auto.text", "palette", "fill.palette", "map.args")
+                  "auto.text", "palette", "fill.palette", "map.args",
+                  "key.position", "key.direction", "rotate.x.axes")
     #.safe <- .xargs[names(.xargs) %in% c(.ggshell, "colour", "group")]
     #.safe <- modifyList(list(data=data, x=x, y=y), .safe)
     .all <- modifyList(list(data=data, x=x, y=y,
@@ -341,16 +340,35 @@ tubePlot <-
       # }
 
 
+
+
       #bar chart
-      if(i=="bar"){
+      if(i %in% c("bar", "bar.count", "bar.mean", "bar.sum")){
         # largely untested
         # local rules
-        #   if only one of x and y use geom_bar; if both use column
+        #   if stat type not set e.g. bar not bar.[whatever]
+        #        only one of x or = bar.count
+        #        if both bar.sum
+        #   otherwise function forced by bar.[whatever if known]
+        #   IF STAYING
+        #        NEEDS documenting and possibly WARNINGS...
         # TO LOOK INTO...
-        #   if x and y and no group might nee to make one group as well
+        #   if x and y and no group might need to make one group as well
         #     check with both tubePlot and tubeTimePlot if changing this...
-        # difference in colouring of geom_bar and geom_col
-        #     check documentation on these
+        #   difference in colouring of geom_bar and geom_col
+        #       check documentation on these
+        #          NOW using geom_bar with different stats to avoid this...
+        #          BUT this handling might need documenting and warnings...
+        #   rescale x and y can kill this
+        #       see
+        #          tubePlot(dt.york, x="month", y="measurement",
+        #                   plot.type = "bar.count", fill="month") +
+        #          ggplot2::scale_y_continuous(limits=c(3000, 6000))
+        #   allowing/testing position = "dodge", "fill", "stack"
+        #       if staying this NEEDS documenting and maybe warning messages...
+        #          position = "identity" also an option That is the do nothing
+        #                  WHICH overplots bars....
+
 
         temp <- TRUE
         .xargs2 <- .xargs # might want the group going to all
@@ -359,29 +377,42 @@ tubePlot <-
           # might have to kill this is mixing with other plots???
           if(x==".default"){
             out$mapping$x <- NULL
-            .xargs2$x <- NULL
+            .xargs2$x <- "..dummy"
+            data$..dummy <- 1
           } else {
             out$mapping$y <- NULL
-            .xargs2$y <- NULL
+            .xargs2$y <- "..dummy"
+            data$..dummy <- 1
           }
-          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomBar)]
+          if(i=="bar"){
+            ..fun <- function(x) { length(x[!is.na(x)]) }
+          }
+        } else {
+          if(i=="bar"){
+            ..fun <- function(x) { sum(x[!is.na(x)]) }
+          }
+        }
+        if(i=="bar.mean"){
+          ..fun <- function(x) { mean(x[!is.na(x)]) }
+        }
+        if(i=="bar.count"){
+          ..fun <- function(x) { length(x[!is.na(x)]) }
+        }
+        if(i=="bar.sum"){
+          ..fun <- function(x) { sum(x[!is.na(x)]) }
+        }
+          .xargs2$stat <- "summary"
+          .xargs2$fun <- ..fun
+          drops <-  names(.xargs2)[!names(.xargs2) %in% c(dte_GeomArgs(ggplot2::GeomBar),
+                                                          "stat", "fun", "position")]
           out <- dte_ggshellAddGeom(.xargs2, data, out,
                                     ggplot2::geom_bar,
                                     defaults = list(na.rm=TRUE,
                                                     colour="black", fill="grey"),
                                     drops = drops)
 
-        } else {
-          #this is col...
-          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomCol)]
-          out <- dte_ggshellAddGeom(.xargs2, data, out,
-                                    ggplot2::geom_col,
-                                    defaults = list(na.rm=TRUE,
-                                                    colour="black", fill="grey"),
-                                    drops = drops)
-        }
-
       }
+
 
 
       # box and whisker plot
@@ -411,7 +442,7 @@ tubePlot <-
         drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomBoxplot)]
         out <- dte_ggshellAddGeom(.xargs2, data, out,
                                   ggplot2::geom_boxplot,
-                                  defaults = list(na.rm=TRUE),
+                                  defaults = list(na.rm=TRUE, fill="grey"),
                                   drops = drops)
       }
 
@@ -713,6 +744,11 @@ tubeTimePlot <-
            ...){
 
     data <- tagTubeDate(data, ...)
+    ###################
+    # time plot currently needs one of x or y set
+    # might be a few cases where this could/should be allowed?
+    #    tubeTimePlot(dt.york, plot.type = "bar", col="month")
+    #    others...
     if(is.null(x) & !is.null(y)){
       x <- ".date"
     }
@@ -1005,6 +1041,23 @@ ggplotTubeShell <-
       #     strip, scale, etc ???
       plt <- plt +  ggplot2::theme(axis.title.x = ggtext::element_markdown(),
                                    axis.title.y = ggtext::element_markdown())
+    }
+    if("rotate.x.axes" %in% names(.xargs)){
+      if(is.logical(.xargs$rotate.x.axes) && .xargs$rotate.x.axes){
+        .xargs$rotate.x.axes <- 90
+      }
+      if(is.numeric(.xargs$rotate.x.axes)){
+        # to do
+        # tidy vjust and hjust if not 90
+        plt <- plt + ggplot2::theme(axis.text.x = ggtext::element_markdown(angle=.xargs$rotate.x.axes[1],
+                                                                           vjust=0.5, hjust=1))
+      }
+    }
+    if(any(c("key.position", "key.direction") %in% names(.xargs))){
+      # to do
+      # guessing this might want tidying???
+      plt <- plt + ggplot2::theme(legend.position = .xargs$key.position,
+                                  legend.direction = .xargs$key.direction)
     }
     return(plt)
 
