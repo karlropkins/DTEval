@@ -430,17 +430,24 @@ tubePlot <-
         #     or allow via dte_ggshellAddGeom ???
         temp <- TRUE
         .xargs2 <- .xargs # might want the group going to all
+        data2 <- data
         if(!".default" %in% c(x,y)){
           if(!"group" %in% names(.xargs2)){
-            .xargs2$group <- if(is.numeric(getTubeX(data, x))){
-              y
+            ###########################
+            # note
+            ###########################
+            # this'll die if both are numeric...
+            .test <- unique(unlist(.xargs2[names(.xargs.test[.xargs.test=="data"])]))
+            if(is.numeric(getTubeX(data, x))){
+              data2$..group <- paste(getTubeX(data2, y), data2[[.test]])
             } else {
-              x
+              data2$..group <- paste(getTubeX(data2, x), data2[[.test]])
             }
+            .xargs2$group <- "..group"
           }
         }
         drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomBoxplot)]
-        out <- dte_ggshellAddGeom(.xargs2, data, out,
+        out <- dte_ggshellAddGeom(.xargs2, data2, out,
                                   ggplot2::geom_boxplot,
                                   defaults = list(na.rm=TRUE, fill="grey"),
                                   drops = drops)
@@ -542,6 +549,19 @@ tubePlot <-
                                  defaults = list(na.rm=TRUE),
                                  drops = drops)
         }
+      }
+
+      #smooth
+      if(i=="smooth"){
+        temp <- TRUE
+        .xargs2 <- .xargs
+        data2 <- data
+        drops <-  names(.xargs)[!names(.xargs) %in% dte_GeomArgs(ggplot2::GeomSmooth)]
+        out <- dte_ggshellAddGeom(.xargs, data, out,
+                                  ggplot2::geom_smooth,
+                                  defaults = list(na.rm=TRUE,
+                                                  formula = y ~ x, method = loess),
+                                  drops = drops)
       }
 
       #ribbons
