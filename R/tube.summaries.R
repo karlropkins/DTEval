@@ -144,6 +144,7 @@ tubeSummary <- function(data, ...){
 tubeSummarySample <- function(data, ...){
 
   #d2 should have all tags if data is recognisable dt data
+  .xargs <- list(...)
   d2 <- tagTube(data)
 
   #making summary report with data.table
@@ -157,7 +158,14 @@ tubeSummarySample <- function(data, ...){
   out <- as.data.frame(test)
   out$checksum <- out$missing.latitudes + out$missing.longitudes +
                   out$missing.start.dates + out$missing.end.dates
-  return(out)
+
+  if("output" %in% names(.xargs)){
+    if(tolower(.xargs$output) %in% c("report", "full.report")){
+      return(out)
+    }
+  }
+  #standard brief.report
+  return(data.frame(t(summary(factor(out$n)))))
 
 }
 
@@ -202,6 +210,7 @@ tubeSummarySample <- function(data, ...){
 
 tubeSummaryLatLon <- function(data, ...){
 
+  .xargs <- list(...)
   #d2 should have all tags if data is recognisable dt data
   d2 <- tagTube(data)
 
@@ -220,8 +229,15 @@ tubeSummaryLatLon <- function(data, ...){
   out <- out[order(out$distance.m, decreasing=TRUE),
              c(".sample_id", ".latitude", ".longitude", "distance.m")]
 
-  return(out)
-
+  if("output" %in% names(.xargs)){
+    if(tolower(.xargs$output) %in% c("report", "full.report")){
+      return(out)
+    }
+  }
+  #standard brief.report
+  #think about labelling for this ???
+  summary(cut(out$distance.m, breaks=c(0,1,10,100,1000,10000,100000,
+                                   1000000,10000000)))
 }
 
 

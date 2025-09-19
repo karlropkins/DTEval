@@ -1,9 +1,9 @@
 Package: DTEval
 Title: Diffusion Tube Evaluation Code
-Version: 0.0.12
-Date: 2025-08-29
-Description: R code used for the pro-processing, analysis and evaluation of diffusion tube (DT) data
-           typically collected in air quality assessment exercises.
+Version: 0.0.14
+Date: 2025-09-19
+Description: R code used for the pro-processing, analysis and evaluation of diffusion tube (DT)
+           data typically collected in air quality assessment exercises.
 Authors@R: person(given = "Karl", family = "Ropkins", role = c("aut", "cre"), email =
            "k.ropkins@its.leeds.ac.uk", comment = c(ORCID = "0000-0002-0294-6997"))
 Maintainer: Karl Ropkins <k.ropkins@its.leeds.ac.uk>
@@ -13,5 +13,5 @@ LazyData: true
 Depends: R (>= 4.1.0)
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
-Imports: methods, AQEval (>= 0.6.0), dplyr, data.table (>= 1.9.8), ggplot2, ggtext, leaflet,
+Imports: methods, AQEval (>= 0.6.0), dplyr, data.table (>= 1.9.8), ggplot2, ggtext, leaflet, metR, mgcv,
            OpenStreetMap, sf, splancs

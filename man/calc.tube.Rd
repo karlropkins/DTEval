@@ -3,7 +3,6 @@
 \name{calc.tube}
 \alias{calc.tube}
 \alias{calcTubeStat}
-\alias{calcTubeMean}
 \title{Common Diffusion Tube Calculations}
 \usage{
 calcTubeStat(data, tube = "measurement", by = NULL, stat = NULL, ...)
@@ -13,7 +12,7 @@ calcTubeStat(data, tube = "measurement", by = NULL, stat = NULL, ...)
 data-series of diffusion tube records.}
 
 \item{tube}{The name of the data-series (in \code{data}) to calculate,
-the respected statistic (or statistics) for (see \code{stat}),
+the requested statistic (or statistics) for (see \code{stat}),
 typically the DT NO2 concentrations (in ug/m3).}
 
 \item{by}{The name(s) of any grouping terms. If none are supplied,

@@ -216,6 +216,72 @@ dte_GeomArgs <- function(GP){
 
 
 
+
+#################################
+# dte_too.far
+#################################
+
+# maybe c++ version ???
+#    see
+#   https://gist.github.com/mikmart/fb191894f29af03f69d3a0705ef1ee48#file-matsums-c
+# this work like exclude
+
+## x<-rnorm(100);y<-rnorm(100) # some "data"
+## n<-40 # generate a grid....
+## mx<-seq(min(x),max(x),length=n)
+## my<-seq(min(y),max(y),length=n)
+## gx<-rep(mx,n);gy<-rep(my,rep(n,n))
+## tf<-mgcv::exclude.too.far(gx,gy,x,y,0.1)
+## plot(gx[!tf],gy[!tf],pch=".");points(x,y,col=2)
+## tf1<-dte_too.far(data.frame(a=gx,b=gy),data.frame(a=x,b=y),0.1)
+## plot(gx[!tf1],gy[!tf1],pch=".");points(x,y,col=2)
+
+
+dte_too.far <- function(d1, d2, dist=0.1){
+  # like mgcv::exclude.too.far but for n args
+  # d1 are the cases to test
+  #   assuming all named columns in d2 are to be tested
+  # d2 is the reference frame
+  #   assuming all names columns in d1 are also present in d2
+  #   and everything else is to be ignored
+
+  ## testing structures
+  .test <- names(d1)
+  if(!all(.test %in% names(d2))){
+    stop("[dte_too.far] d2 does not contain all named elements of d1")
+  }
+  #align d2 with d1
+  d2 <- d2[.test]
+
+  ## rescale d1 and d2
+  for(ii in names(d1)){
+    .m1 <- min(d1[, ii], na.rm=TRUE)
+    .m2 <- max(d1[, ii], na.rm=TRUE)
+    d2[,ii] <- (d2[, ii]-.m1)/(.m2-.m1)
+    d1[, ii] <- (d1[, ii]-.m1)/(.m2-.m1)
+  }
+  ans <- rep(NA, nrow(d1))
+  temp <- d2
+  sc <- paste(names(d1), collapse ="+")
+  for(jj in 1:nrow(d1)){
+    for(ii in names(d1)){
+      temp[,ii] <- (d1[jj,ii] - d2[,ii])^2
+    }
+    #temp2[1:length(temp2)] <- sqrt(rowSums(temp))
+    #ans[jj] <- all(temp2>dist)
+    ##ans[jj] <- all(sqrt(rowSums(temp))>dist)
+    ##ans[jj] <- all(sqrt(colSums(t(temp)))>dist)
+    ## fastest so far...
+    ans[jj] <- all(sqrt(with(temp,  eval(parse(text=sc))))>dist)
+  }
+  return(ans)
+}
+
+
+
+
+
+
 ##########################
 # testing removing...
 ##########################

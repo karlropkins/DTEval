@@ -8,6 +8,9 @@
 
 * Package pre-release 
 
+    * __v 0.0.14__ [2025-09-18] added fitTubeModel; added dsTubeData; 
+    importing mgcv. 
+    * __v 0.0.13__ [2025-09-01] added updated version of tubeMap.
     * __v 0.0.12__ [2025-08-29] (requested change) tagTubeDates renamed 
     tagTubeStartEnd; added updated version of tubePlot.  
     * __v 0.0.11__ [2025-08-14] (requested change) site_id to sample_id; 

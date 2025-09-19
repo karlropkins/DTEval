@@ -3,49 +3,31 @@
 \name{tube.maps}
 \alias{tube.maps}
 \alias{tubeMap}
-\alias{tubeMap_leaflet}
-\alias{tubeMap_ggplot2}
+\alias{leafletTubeMap}
 \title{Diffusion Tube maps}
 \usage{
-tubeMap(data, x = NULL, y = NULL, polygon = NULL, plot.type = "leaflet", ...)
+tubeMap(data, x = NULL, y = NULL, previous = NULL, ...)
 
-tubeMap_leaflet(
-  data,
-  x = NULL,
-  y = NULL,
-  polygon = NULL,
-  plot.type = "point",
-  ...
-)
-
-tubeMap_ggplot2(
-  data,
-  x = NULL,
-  y = NULL,
-  polygon = NULL,
-  plot.type = "point",
-  ...
-)
+leafletTubeMap(data, x = NULL, y = NULL, previous = NULL, ...)
 }
 \arguments{
 \item{data}{Data source, typically a data.frame or similar, to be used to
 build a plot using ggplot2.}
 
 \item{x, y}{The names of the data-series to plot on the
-X and Y axes, respectively.}
+X and Y axes, respectively, and assumed to be sampling point longitude and
+latitude.}
 
-\item{polygon}{(Optional) Polygon of boundary records, e.g.
-CAZ boundaries.}
-
-\item{plot.type}{Type of plot generated, current options are 'leaflet'
-(default) and 'ggplot2'.}
+\item{previous}{(Optional) a previous \code{tubeMap} output to add to,
+useful if you are plotting lots of different data on the same map and
+don't want to have to download the map layer every time.}
 
 \item{...}{Additional arguments. See Notes}
 }
 \value{
-\code{tubeMap_leaflet} and \code{tubeMap_ggplot2} return
-\code{leaftlet} and \code{ggplot2} maps, respectively. \code{tubeMap}
-is wrapper for both.
+\code{tubeMap} generates static maps using \code{ggplot2}
+and \code{OpenStreetMap}. \code{leafletTubeMap} generates interactive
+(HTML) maps using \code{leaflet}.
 }
 \description{
 \code{DTEval} currently provides static \code{ggplot2} and
@@ -57,4 +39,14 @@ In addition to \code{data}, the main data source for plots,
 }
 \note{
 These functions are in development, so may change.
+
+Addition arguments include:
+\itemize{
+\item \code{point} to add tube locations as points.
+\item \code{polygon} to add a polygon to the map.
+\item Common plotting arguments, e.g \code{col} for colour, etc. These
+typically applied to all plot elements (points, polygons, ect) that
+can apply them by can also be specified, e.g. \code{point.col='red'}
+to just colour points red.
+}
 }

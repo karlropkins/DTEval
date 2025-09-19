@@ -3,7 +3,7 @@
 #######################################################
 
 #' @name calc.tube
-#' @aliases calc.tube calcTubeMean
+#' @aliases calc.tube calcTubeStat
 #' @description Functions for common diffusion tube (DT)
 #' data calculations using \code{DTEval}.
 
@@ -19,7 +19,7 @@
 #' @param data Data source, typically a data.frame or similar, containing
 #' data-series of diffusion tube records.
 #' @param tube The name of the data-series (in \code{data}) to calculate,
-#' the respected statistic (or statistics) for (see \code{stat}),
+#' the requested statistic (or statistics) for (see \code{stat}),
 #' typically the DT NO2 concentrations (in ug/m3).
 #' @param by The name(s) of any grouping terms. If none are supplied,
 #' total sample statistic(s) are calculated for \code{data}.
@@ -58,6 +58,12 @@
 #     that understand tube tagging
 #         allows tube=c("measurement", "year_of_measurement")
 #         allows stat=function(x){c(mean = mean(x, na.rm=TRUE), med=median(x, na.rm=TRUE))}
+
+# functions has issue if tube includes a names with a comma in it
+#   Error in `[.data.table`(d2, , as.list(unlist(lapply(.SD, stat))), .SDcols = tube,  :
+#   'by' is a character vector length 3 but one or more items include a comma. Either pass
+#   'a vector of column names (which can contain spaces, but no commas), or pass a vector
+#   length 1 containing comma separated column names. See ?data.table for other possibilities.
 
 # currently does
 ###############################

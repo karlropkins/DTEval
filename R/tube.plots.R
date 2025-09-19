@@ -453,6 +453,8 @@ tubePlot <-
                                   drops = drops)
       }
 
+
+
       #histogram
       if(i=="hist"){
         # have to kill one of x or y for this
@@ -465,7 +467,7 @@ tubePlot <-
         #                 facet="month", fill="factor(CalendarYear)",
         #                 group="CalendarYear")
         # other axes currently labelled count by default...
-        #     need to tisy this if we ...
+        #     need to tidy this if we ...
 
         temp <- TRUE
         if(!".default" %in% c(x, y)){
@@ -563,6 +565,109 @@ tubePlot <-
                                                   formula = y ~ x, method = loess),
                                   drops = drops)
       }
+
+
+      #surface
+      # current test
+      ## dd <- tagTube(dont.share::dt.bradford.2); dd <- dd[dd$.longitude<0,]
+      ## tubePlot(dd, x="longitude", y="latitude", fill=".value", plot.type = "surface", too.far=0.1)
+      ## next is interesting .... it is keeping .value from the points...
+      ## maybe think about surface.fill ???
+      ## tubePlot(dd, x="longitude", y="latitude", fill=".value", plot.type = c("surface.new", "point"), too.far=0.1, palette=1:5)
+      ## raster gives a warning if you remove records
+      ## how about if you NA them and set na.col to transparent?
+      ## maybe turn off group...
+      ## look how I did it for the animations...
+      ##    I think that was better...
+      ## I would like the smooth function to be user set-able...
+      ##    So they can Krieg, etc...
+      ## I should add mgcv to imports if I keep too.far ???
+      ## expand the x and y ranges of the points ??? in case anyone does when fitting a surface ???
+      ## alpha not tracked by colour/fill legend...
+      if(i %in% c("surface")){
+        print(.xargs)
+        print(.by)
+        print(.x)
+        temp <- TRUE
+        .stat <- function(x) { list(smooth=mean(x, na.rm=TRUE)) }
+        d2 <- suppressWarnings(calcTubeStat(data, .x, stat=.stat, by =.by))
+        .xargs2 <- .xargs
+        .xargs2[.xargs2 %in% .x] <- paste(.xargs2[.xargs2 %in% .x], ".smooth", sep="")
+
+        ..x <- getTubeX(d2, .by[1])
+        ..x <- seq(min(..x, na.rm=TRUE), max(..x, na.rm=TRUE), length=200)
+        ..y <- getTubeX(d2, .by[2])
+        ..y <- seq(min(..y, na.rm=TRUE), max(..y, na.rm=TRUE), length=200)
+        .dd <- expand.grid(..x, ..y)
+        names(.dd) <- .by[1:2]
+        .tmp <- names(d2)[!names(d2) %in% .by[1:2]]
+        if(!"..facet" %in% names(d2)){
+          d2$..facet <- "default"
+        }
+        ans <- lapply(unique(d2$..facet), function(x){
+          .d2 <- d2[d2$..facet==x, ]
+          for(ii in c("z")){
+            if(ii %in% names(.xargs2)){
+              #.ff <- paste(.xargs2[[ii]], "~", paste(.by[1], .by[2], sep="+"), sep="")
+              .ff <- paste(.xargs2[[ii]], "~te(", paste(.by[1], .by[2], sep=","), ")", sep="")
+              print(.ff)
+              mod <- mgcv::gam(as.formula(.ff), data=.d2)
+              #.dd[[.xargs2[i]]] <- NA
+              .dd$.prd <- as.vector(predict(mod, newdata=.dd))
+              names(.dd)[names(.dd)==".prd"] <- .xargs2[[ii]]
+            }
+          }
+          if("too.far" %in% names(.xargs2)){
+            ex.tf <- mgcv::exclude.too.far(.dd[,.by[1]], .dd[,.by[2]], .d2[, .by[1]],
+                                           .d2[, .by[2]], dist = .xargs2$too.far)
+            #.dd$.value.mean[ex.tf] <- NA
+            .dd <- .dd[!ex.tf,]
+          }
+          .dd$..facet <- x
+          .dd
+        })
+        .dd <- do.call(rbind, ans)
+        print(names(.dd))
+
+
+        ## see also
+        ## geom_raster(interpolate=TRUE)
+        ## gets
+        ## Warning message:
+        ## Raster pixels are placed at uneven horizontal intervals and will be shifted
+        #  ℹ Consider using `geom_tile()` instead.
+
+        #turning off these at moment
+        # so plot is a dead end...
+
+        if("fill" %in% names(.xargs2)){
+          drops <-  names(.xargs2)[!names(.xargs2) %in% c(dte_GeomArgs(ggplot2::GeomTile))]
+          drops <- c(drops, "colour")
+          print(drops)
+          out <- dte_ggshellAddGeom(.xargs2, .dd, out,
+                                    ggplot2::geom_tile,
+                                    defaults = list(na.rm=TRUE),
+                                    drops = drops)
+        }
+
+        if("contour" %in% names(.xargs2)){
+          .xargs2$z <- .xargs2$fill
+          drops <-  names(.xargs2)[!names(.xargs2) %in% c(dte_GeomArgs(ggplot2::GeomContour), "z")]
+          drops <- c(drops, "fill", "alpha")
+          print(drops)
+          out <- dte_ggshellAddGeom(.xargs2, .dd, out,
+                                    ggplot2::geom_contour,
+                                    defaults = list(na.rm=TRUE),
+                                    drops = drops)
+          out <- dte_ggshellAddGeom(.xargs2, .dd, out,
+                                    metR::geom_text_contour,
+                                    defaults = list(na.rm=TRUE),
+                                    drops = drops)
+        }
+
+      }
+
+
 
       #ribbons
       if(grepl("stat.ribbon", i)){
@@ -975,26 +1080,33 @@ ggplotTubeShell <-
     # note
     ############################
     #   testing a colouring option
+    #      alpha control limited at moment
+    #      NB:need to make any changes for palette/colour and fill.palette/fill
     ############################
     if("palette" %in% names(.xargs)){
       # colours might not be being mapped
+      .value <- if("alpha" %in% names(.xargs)){
+        ggplot2::alpha(.xargs$palette, .xargs$alpha)
+      } else {
+        .xargs$palette
+      }
       if(!"colour" %in% names(.xargs.test[.xargs.test=="data"])){
         ###########################
         # testing removing - same in fill.palette
         ##plt$mapping$colour <- "default"
-        plt <- plt + ggplot2::scale_color_manual(values=.xargs$palette,
+        plt <- plt + ggplot2::scale_color_manual(values=.value,
                                                  guide="none")
       } else {
         #.pp <- data[[rlang::as_label(plt$mapping$colour)]]
         #.pp <- plt$mapping$colour
         .pp <- getTubeX(data, .xargs$colour)
         if(is.numeric(.pp)){
-          plt <- plt + ggplot2::scale_color_gradientn(colours=.xargs$palette)
+          plt <- plt + ggplot2::scale_color_gradientn(colours=.value)
         } else {
-          if(length(unique(.pp)) > length(.xargs$palette)){
-            .xargs$palette <- colorRampPalette(.xargs$palette)(length(unique(.pp)))
+          if(length(unique(.pp)) > length(.value)){
+            .values <- colorRampPalette(.value)(length(unique(.pp)))
           }
-          plt <- plt + ggplot2::scale_color_manual(values=.xargs$palette)
+          plt <- plt + ggplot2::scale_color_manual(values=.value)
         }
       }
     }
@@ -1004,32 +1116,40 @@ ggplotTubeShell <-
     # note
     ############################
     #   testing a colouring option
+    #      alpha control limited at moment
+    #      NB:need to make any changes for palette/colour and fill.palette/fill
     ############################
     if("palette" %in% names(.xargs) & ! "fill.palette" %in% names(.xargs)){
       .xargs$fill.palette <- .xargs$palette
     }
     if("fill.palette" %in% names(.xargs)){
+      .value <- if("alpha" %in% names(.xargs)){
+        ggplot2::alpha(.xargs$fill.palette, .xargs$alpha)
+      } else {
+        .xargs$fill.palette
+      }
       # like colours might not be being mapped
       if(!"fill" %in% names(.xargs.test[.xargs.test=="data"])){
         #############################################
         # testing removing - same in fill.palette
         ##plt$mapping$fill <- "default"
-        plt <- plt + ggplot2::scale_fill_manual(values=.xargs$fill.palette,
-                                                 guide="none")
+        plt <- plt + ggplot2::scale_fill_manual(values=.value,
+                                                guide="none")
       } else {
         #.pp <- data[[rlang::as_label(plt$mapping$colour)]]
         #.pp <- plt$mapping$colour
         .pp <- getTubeX(data, .xargs$fill)
         if(is.numeric(.pp)){
-          plt <- plt + ggplot2::scale_fill_gradientn(colours=.xargs$fill.palette)
+          plt <- plt + ggplot2::scale_fill_gradientn(colours=.value)
         } else {
           if(length(unique(.pp)) > length(.xargs$fill.palette)){
-            .xargs$fill.palette <- colorRampPalette(.xargs$fill.palette)(length(unique(.pp)))
+            .value <- colorRampPalette(.xargs$.value)(length(unique(.pp)))
           }
-          plt <- plt + ggplot2::scale_fill_manual(values=.xargs$fill.palette)
+          plt <- plt + ggplot2::scale_fill_manual(values=.value)
         }
       }
     }
+
 
 
 #########################
@@ -1046,6 +1166,7 @@ ggplotTubeShell <-
       if("fill" %in% names(.xargs)){
         plt <- plt + ggplot2::guides(fill=ggplot2::guide_legend())
       }
+
     }
 
     plt <- plt +
