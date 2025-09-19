@@ -41,9 +41,9 @@
 #' Addition arguments include:
 #' * \code{point} to add tube locations as points.
 #' * \code{polygon} to add a polygon to the map.
-#' * Common plotting arguments, e.g \code{col} for colour, etc. These
+#' * Common plotting arguments, e.g \code{col} for colour, etc. These are
 #' typically applied to all plot elements (points, polygons, ect) that
-#' can apply them by can also be specified, e.g. \code{point.col='red'}
+#' can apply them but they can also be specified, e.g. \code{point.col='red'}
 #' to just colour points red.
 
 

@@ -570,6 +570,8 @@ tubePlot <-
       #surface
       # current test
       ## dd <- tagTube(dont.share::dt.bradford.2); dd <- dd[dd$.longitude<0,]
+      ## tubePlot(dd, x="longitude", y="latitude", z=".value", plot.type = "surface", fill=".value", colour="white", too.far=0.1, alpha=0.5)
+
       ## tubePlot(dd, x="longitude", y="latitude", fill=".value", plot.type = "surface", too.far=0.1)
       ## next is interesting .... it is keeping .value from the points...
       ## maybe think about surface.fill ???
@@ -585,9 +587,6 @@ tubePlot <-
       ## expand the x and y ranges of the points ??? in case anyone does when fitting a surface ???
       ## alpha not tracked by colour/fill legend...
       if(i %in% c("surface")){
-        print(.xargs)
-        print(.by)
-        print(.x)
         temp <- TRUE
         .stat <- function(x) { list(smooth=mean(x, na.rm=TRUE)) }
         d2 <- suppressWarnings(calcTubeStat(data, .x, stat=.stat, by =.by))
@@ -611,6 +610,7 @@ tubePlot <-
               #.ff <- paste(.xargs2[[ii]], "~", paste(.by[1], .by[2], sep="+"), sep="")
               .ff <- paste(.xargs2[[ii]], "~te(", paste(.by[1], .by[2], sep=","), ")", sep="")
               print(.ff)
+              print(names(.d2))
               mod <- mgcv::gam(as.formula(.ff), data=.d2)
               #.dd[[.xargs2[i]]] <- NA
               .dd$.prd <- as.vector(predict(mod, newdata=.dd))
@@ -640,21 +640,21 @@ tubePlot <-
         #turning off these at moment
         # so plot is a dead end...
 
+        #this needs fill set
         if("fill" %in% names(.xargs2)){
           drops <-  names(.xargs2)[!names(.xargs2) %in% c(dte_GeomArgs(ggplot2::GeomTile))]
           drops <- c(drops, "colour")
-          print(drops)
           out <- dte_ggshellAddGeom(.xargs2, .dd, out,
                                     ggplot2::geom_tile,
                                     defaults = list(na.rm=TRUE),
                                     drops = drops)
         }
 
-        if("contour" %in% names(.xargs2)){
-          .xargs2$z <- .xargs2$fill
+        #this needs z set
+        if("colour" %in% names(.xargs2)){
+          #.xargs2$z <- .xargs2$fill
           drops <-  names(.xargs2)[!names(.xargs2) %in% c(dte_GeomArgs(ggplot2::GeomContour), "z")]
           drops <- c(drops, "fill", "alpha")
-          print(drops)
           out <- dte_ggshellAddGeom(.xargs2, .dd, out,
                                     ggplot2::geom_contour,
                                     defaults = list(na.rm=TRUE),
