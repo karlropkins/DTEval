@@ -215,6 +215,120 @@ dte_GeomArgs <- function(GP){
 }
 
 
+# could this go in test ???
+
+dte_ggshellTidyArgs <- function(args, type=NULL){
+
+  # tidy/rationalise args for dte_ggshell
+  ###############################
+
+  # check for type specific args
+  #     handle [plot.type].[arg]s etc...
+  args$..test <- "OK"
+  if(!is.null(type)){
+    args2 <- args[grepl(paste("^", type, "[.]", sep=""), names(args))]
+    names(args2) <- gsub(paste(type, "[.]", sep=""), "", names(args2))
+    args <- modifyList(args, args2)
+    #########################
+    # messy points=FALSE will slips through
+    if(type %in% names(args)){
+      if(is.logical(args[[type]]) && !all(args[[type]])){
+        args$..test <- "not OK"
+      }
+    }
+  }
+
+  # col/color/colour handling... after assume colour...
+  names(args)[names(args) %in% c("col", "color")] <- "colour"
+  args <- args[!duplicated(names(args), fromLast=TRUE)]
+
+  #out
+  args
+}
+
+dte_ggshellFacet <- function(plt, data, x, y, args){
+
+  #rebuild mapping for faceting
+  plt$data <- data
+  #plt$mapping$x <- data[[x]]
+  #plt$mapping$x <- rlang::parse_quo(x, env=environment())
+  #plt$mapping$y <- data[[y]]
+  #plt$mapping$x <- rlang::parse_quo(y, env=environment())
+
+
+  #don't need this if no facet plotting to worry about...
+  if(!"facet.type" %in% names(args)){
+    args$facet.type <- "wrap"
+  } else {
+    check <- c("wrap", "grid", "grid.col", "grid.row")
+    if(!args$facet.type %in% check){
+      warning("bad facet.type resetting to wrap")
+      args$facet.type <- "wrap"
+    }
+  }
+  #facet options
+  if("facet" %in% names(args)){
+    ## facet.type choices limited earlier
+    #####################
+    #tesing
+    # passing just ggplot2::facet... args forward
+    # names(formals(ggplot2::facet_grid)), etc....
+    # if you give it facet, rows or cols
+    #     these will override as well
+    # does the job but code is messy...
+    #####################
+    ..xargs <- if(args$facet.type=="wrap"){
+      args[names(args) %in% names(formals(ggplot2::facet_wrap))]
+    } else {
+      #must be a facet_grid
+      args[names(args) %in% names(formals(ggplot2::facet_grid))]
+    }
+    if(length(args$facet)== 1){
+      if(args$facet.type=="wrap"){
+        ..xargs <- modifyList(list(facets=ggplot2::vars(.data[[args$facet[1]]])),
+                              ..xargs)
+        plt <- plt + do.call(ggplot2::facet_wrap, ..xargs)
+        #plt <- plt + ggplot2::facet_wrap(facets=ggplot2::vars(.data[[.xargs$facet[1]]]))
+      }
+      if(args$facet.type %in% c("grid", "grid.row")){
+        ..xargs <- modifyList(list(rows=ggplot2::vars(.data[[args$facet[1]]])),
+                              ..xargs)
+        plt <- plt + do.call(ggplot2::facet_grid, ..xargs)
+        #plt <- plt + ggplot2::facet_grid(rows=ggplot2::vars(.data[[.xargs$facet[1]]]))
+      }
+      if(args$facet.type %in% c("grid.col")){
+        ..xargs <- modifyList(list(cols=ggplot2::vars(.data[[args$facet[1]]])),
+                              ..xargs)
+        plt <- plt + do.call(ggplot2::facet_grid, ..xargs)
+        #plt <- plt + ggplot2::facet_grid(cols=ggplot2::vars(.data[[.xargs$facet[1]]]))
+      }
+    } else{
+      if(args$facet.type %in% c("wrap")){
+        ..xargs <- modifyList(list(facets=c(ggplot2::vars(.data[[args$facet[1]]]),
+                                            ggplot2::vars(.data[[args$facet[2]]]))),
+                              ..xargs)
+        plt <- plt + do.call(ggplot2::facet_wrap, ..xargs)
+        #plt <- plt + ggplot2::facet_wrap(facets=c(ggplot2::vars(.data[[.xargs$facet[1]]]),
+        #                                 ggplot2::vars(.data[[.xargs$facet[2]]])))
+      }
+      if(args$facet.type %in% c("grid", "grid.row")){
+        plt <- plt + ggplot2::facet_grid(rows=ggplot2::vars(.data[[args$facet[1]]]),
+                                         cols=ggplot2::vars(.data[[args$facet[2]]]))
+      }
+      if(args$facet.type %in% c("grid.col")){
+        plt <- plt + ggplot2::facet_grid(cols=ggplot2::vars(.data[[args$facet[1]]]),
+                                         rows=ggplot2::vars(.data[[args$facet[2]]]))
+      }
+    }
+  }
+  print("Hi")
+  return(plt)
+}
+
+
+
+
+
 
 
 #################################
@@ -456,6 +570,161 @@ dte_too.far <- function(d1, d2, dist=0.1){
 #  invisible(out)
 #}
 
+
+
+
+# trying to get facetting to work...
+
+tubeMap2 <-
+  function(data, x=NULL, y=NULL, previous=NULL, ...){
+
+    #setup
+    ####################
+    d2 <- data
+    .xargs <- list(...)
+    #what to do about col/colour...?
+    #   currently using this cludge in both tubePlot and ggplotTubeShell
+    #      and assuming colour hereafter...
+    names(.xargs)[names(.xargs) %in% c("col", "color")] <- "colour"
+    .xargs <- .xargs[!duplicated(names(.xargs), fromLast=TRUE)]
+    if(is.null(x)){
+      x <- ".longitude"
+    }
+    if(is.null(y)){
+      y <- ".latitude"
+    }
+    .x <- getTubeX(d2, x, if.err="stop<<tubeMap>>x")
+    .y <- getTubeX(d2, y, if.err="stop<<tubeMap>>y")
+
+    #check for facet
+    if("facet" %in% names(args)){
+      d2 <- checkTubeData(d2, x=.xargs$facet, n.x=2,
+                          if.err = "stop<<ggplotTubeShell>>facet")
+    }
+
+    ##build map layer
+    ###################
+    if(is.null(previous)){
+      #map ranges
+      rng.lat <- range(.y, na.rm=TRUE)
+      rng.lon <- range(.x, na.rm=TRUE)
+      #adding border
+      exp <- function(rng, n=0.1){
+        temp <- (rng[2]-rng[1])*n
+        c(rng[1]-temp, rng[2]+temp)
+      }
+      rng.lon <- exp(rng.lon, 0.05)
+      rng.lat <- exp(rng.lat, 0.05)
+      dc <- OpenStreetMap::openmap(c(rng.lat[2], rng.lon[1]),
+                                   c(rng.lat[1],rng.lon[2]),
+                                   zoom = NULL,
+                                   type =  "esri",
+                                   mergeTiles = TRUE)
+      dc <- suppressMessages(suppressWarnings(
+        OpenStreetMap::openproj(dc,
+                                projection = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+      ))
+
+      ###############################
+      # modifying from OpenStreetMap
+      # map <- OpenStreetMap::autoplot.OpenStreetMap(dc)
+
+      p1 <- dc$bbox$p1
+      p2 <- dc$bbox$p2
+#      map <- ggplot2::ggplot(d2, ggplot2::aes(x=.data[[x]],
+#                                                y=.data[[y]]))
+      map <- ggplot2::ggplot(data = d2)
+      map <- map + ggplot2::expand_limits(x = c(p1[1], p2[1]),
+                                        y = c(p2[2], p1[2])) +
+        ggplot2::scale_x_continuous(expand = c(0, 0)) + ggplot2::scale_y_continuous(expand = c(0, 0))
+
+      for (tile in dc$tiles) {
+        p1 <- tile$bbox$p1
+        p2 <- tile$bbox$p2
+        yres <- tile$yres
+        xres <- tile$xres
+        rast <- as.raster(matrix(tile$colorData, nrow = tile$xres, byrow = TRUE))
+        annot <- ggplot2::annotation_raster(rast, p1[1] - 0.5 * abs(tile$bbox$p1[1] -
+                                                  tile$bbox$p2[1])/yres, p2[1] + 0.5 * abs(tile$bbox$p1[1] -
+                                                  tile$bbox$p2[1])/yres, p2[2] - 0.5 * abs(tile$bbox$p1[2] -
+                                                  tile$bbox$p2[2])/xres, p1[2] + 0.5 * abs(tile$bbox$p1[2] -
+                                                  tile$bbox$p2[2])/xres)
+
+        map <- map + annot
+      }
+      map + ggplot2::coord_equal()
+      #################################
+      # general map text, formatting and sizing
+      suppressMessages(suppressWarnings(
+        map <- map + ggplot2::geom_text(data=data.frame(),
+                                        ggplot2::aes(x=rng.lon[2], y=rng.lat[1]),
+                                        label="Map layer: (c) OpenStreetMap/ESRI contributors    ",
+                                        size=1.8, hjust=1, vjust=-0.5) +
+          ggplot2::coord_quickmap() +
+          ggplot2::theme_void()
+      ))
+    } else {
+      map <- previous
+    }
+
+
+    if(any(grepl("^polygon", names(.xargs)))){
+      ##########################
+      #tidy this
+      #    ALSO very sensitive to ordering
+      .xargs2 <- .xargs[grepl("^polygon[.]", names(.xargs))]
+      names(.xargs2) <- gsub("polygon[.]", "", names(.xargs2))
+      names(.xargs2)[names(.xargs2) %in% c("col", "color")] <- "colour"
+      .xargs2 <- .xargs2[!duplicated(names(.xargs2), fromLast=TRUE)]
+      .xargs2 <- modifyList(.xargs, .xargs2)
+      .xargs2 <- modifyList(list(x="X", y="Y"), .xargs2)
+      ##########################
+      # to think about...
+      #    this currently needs polygon to be a sf polygon...
+      #        BUT polygon could be a different object type ...
+      #        OR polygon could be true... then you would use the data as polygon source
+      #            can't colour a polygon by palette at moment
+      .xargs2$polygon <- as.data.frame(sf::st_coordinates(.xargs2$polygon))
+      drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPolygon)]
+      map <- dte_ggshellAddGeom(.xargs2, .xargs2$polygon, map,
+                                ggplot2::geom_polygon,
+                                defaults = list(na.rm=TRUE, colour="blue",
+                                                fill="blue", alpha=0.25),
+                                drops = drops)
+
+    }
+
+    if(any(grepl("^point", names(.xargs)))){
+      ##########################
+      #tidy this
+      #    ALSO very sensitive to ordering
+      .xargs2 <- .xargs[grepl("^point[.]", names(.xargs))]
+      names(.xargs2) <- gsub("point[.]", "", names(.xargs2))
+      names(.xargs2)[names(.xargs2) %in% c("col", "color")] <- "colour"
+      .xargs2 <- .xargs2[!duplicated(names(.xargs2), fromLast=TRUE)]
+      .xargs2 <- modifyList(.xargs, .xargs2)
+      .xargs2 <- modifyList(list(x=x, y=y), .xargs2)
+      ##########################
+      drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPoint)]
+      map <- dte_ggshellAddGeom(.xargs2, d2, map,
+                                ggplot2::geom_point,
+                                defaults = list(na.rm=TRUE),
+                                drops = drops)
+
+    }
+
+    ##################
+    # to do
+    #################
+    # point mean, count, etc...
+    # add faceting
+    # add grouping ???
+    # add surface layer
+    # add/tidy structure - palette, legend, ect...
+
+    #
+    return(map)
+  }
 
 
 

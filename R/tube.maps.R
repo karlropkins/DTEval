@@ -95,9 +95,11 @@ tubeMap <-
     .xargs <- list(...)
     #what to do about col/colour...?
     #   currently using this cludge in both tubePlot and ggplotTubeShell
-    #      and assuming color hereafter...
-    names(.xargs)[names(.xargs) %in% c("col", "color")] <- "colour"
-    .xargs <- .xargs[!duplicated(names(.xargs), fromLast=TRUE)]
+    #      and assuming colour hereafter...
+    #      dte_ggshellTidyArgs
+    #names(.xargs)[names(.xargs) %in% c("col", "color")] <- "colour"
+    #.xargs <- .xargs[!duplicated(names(.xargs), fromLast=TRUE)]
+    .xargs <- dte_ggshellTidyArgs(.xargs)
     if(is.null(x)){
       x <- ".longitude"
     }
@@ -106,6 +108,15 @@ tubeMap <-
     }
     .x <- getTubeX(d2, x, if.err="stop<<tubeMap>>x")
     .y <- getTubeX(d2, y, if.err="stop<<tubeMap>>y")
+
+#############################
+# without any this dies if length(names(.xargs)) > 1
+#############################
+    # currently not facetting tubeMaps
+    if(length(names(.xargs))>0 && any(grepl("^facet", names(.xargs)))){
+      stop("[tubeMap] Sorry, map facetting currently disabled",
+           call. = FALSE)
+    }
 
     ##build map layer
     ###################
@@ -145,47 +156,47 @@ tubeMap <-
 
     if(any(grepl("^polygon", names(.xargs)))){
       ##########################
-      #tidy this
-      #    ALSO very sensitive to ordering
-      .xargs2 <- .xargs[grepl("^polygon[.]", names(.xargs))]
-      names(.xargs2) <- gsub("polygon[.]", "", names(.xargs2))
-      names(.xargs2)[names(.xargs2) %in% c("col", "color")] <- "colour"
-      .xargs2 <- .xargs2[!duplicated(names(.xargs2), fromLast=TRUE)]
-      .xargs2 <- modifyList(.xargs, .xargs2)
-      .xargs2 <- modifyList(list(x="X", y="Y"), .xargs2)
-      ##########################
-      # to think about...
-      #    this currently needs polygon to be a sf polygon...
-      #        BUT polygon could be a different object type ...
-      #        OR polygon could be true... then you would use the data as polygon source
-      #            can't colour a polygon by palette at moment
-      .xargs2$polygon <- as.data.frame(sf::st_coordinates(.xargs2$polygon))
-      drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPolygon)]
-      map <- dte_ggshellAddGeom(.xargs2, .xargs2$polygon, map,
-                                ggplot2::geom_polygon,
-                                defaults = list(na.rm=TRUE, colour="blue",
-                                                fill="blue", alpha=0.25),
-                                drops = drops)
-
+      #testing this tidy
+      #    Holoding code because it is very sensitive to ordering
+      #.xargs2 <- .xargs[grepl("^polygon[.]", names(.xargs))]
+      #names(.xargs2) <- gsub("polygon[.]", "", names(.xargs2))
+      #names(.xargs2)[names(.xargs2) %in% c("col", "color")] <- "colour"
+      #.xargs2 <- .xargs2[!duplicated(names(.xargs2), fromLast=TRUE)]
+      #.xargs2 <- modifyList(.xargs, .xargs2)
+      .xargs2 <- dte_ggshellTidyArgs(.xargs, "polygon")
+      if(.xargs2$..test=="OK"){
+        .xargs2 <- modifyList(list(x="X", y="Y"), .xargs2)
+        ##########################
+        # to think about...
+        #    this currently needs polygon to be a sf polygon...
+        #        BUT polygon could be a different object type ...
+        #        OR polygon could be true... then you would use the data as polygon source
+        #            can't colour a polygon by palette at moment
+        .xargs2$polygon <- as.data.frame(sf::st_coordinates(.xargs2$polygon))
+        drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPolygon)]
+        map <- dte_ggshellAddGeom(.xargs2, .xargs2$polygon, map,
+                                  ggplot2::geom_polygon,
+                                  defaults = list(na.rm=TRUE, colour="blue",
+                                                  fill="blue", alpha=0.25),
+                                  drops = drops)
+        }
     }
+
+
 
     if(any(grepl("^point", names(.xargs)))){
       ##########################
-      #tidy this
-      #    ALSO very sensitive to ordering
-      .xargs2 <- .xargs[grepl("^point[.]", names(.xargs))]
-      names(.xargs2) <- gsub("point[.]", "", names(.xargs2))
-      names(.xargs2)[names(.xargs2) %in% c("col", "color")] <- "colour"
-      .xargs2 <- .xargs2[!duplicated(names(.xargs2), fromLast=TRUE)]
-      .xargs2 <- modifyList(.xargs, .xargs2)
-      .xargs2 <- modifyList(list(x=x, y=y), .xargs2)
-      ##########################
-      drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPoint)]
-      map <- dte_ggshellAddGeom(.xargs2, d2, map,
-                                ggplot2::geom_point,
-                                defaults = list(na.rm=TRUE),
-                                drops = drops)
-
+      # testing this tidy
+      .xargs2 <- dte_ggshellTidyArgs(.xargs, "point")
+      if(.xargs2$..test=="OK"){
+        .xargs2 <- modifyList(list(x=x, y=y), .xargs2)
+        ##########################
+        drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPoint)]
+        map <- dte_ggshellAddGeom(.xargs2, d2, map,
+                                  ggplot2::geom_point,
+                                  defaults = list(na.rm=TRUE),
+                                  drops = drops)
+      }
     }
 
     ##################
@@ -200,6 +211,9 @@ tubeMap <-
     #
     return(map)
   }
+
+
+
 
 
 
