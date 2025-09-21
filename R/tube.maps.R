@@ -87,19 +87,25 @@
 #' @export
 
 tubeMap <-
-  function(data, x=NULL, y=NULL, previous=NULL, ...){
+  function(data, x=NULL, y=NULL, ...){
 
     #setup
     ####################
-    d2 <- data
+    #args
     .xargs <- list(...)
-    #what to do about col/colour...?
-    #   currently using this cludge in both tubePlot and ggplotTubeShell
-    #      and assuming colour hereafter...
-    #      dte_ggshellTidyArgs
-    #names(.xargs)[names(.xargs) %in% c("col", "color")] <- "colour"
-    #.xargs <- .xargs[!duplicated(names(.xargs), fromLast=TRUE)]
     .xargs <- dte_ggshellTidyArgs(.xargs)
+    #data
+    if("ggplot" %in% class(data)){
+      previous <- data
+      d2 <- data$data
+    } else {
+      d2 <- data
+      previous <- NULL
+    }
+    if("newdata" %in% names(.xargs)) {
+      d2<-.xargs$newdata
+    }
+
     if(is.null(x)){
       x <- ".longitude"
     }
@@ -114,8 +120,13 @@ tubeMap <-
 #############################
     # currently not facetting tubeMaps
     if(length(names(.xargs))>0 && any(grepl("^facet", names(.xargs)))){
-      stop("[tubeMap] Sorry, map facetting currently disabled",
+      stop("[tubeMap] Sorry, map facet currently disabled",
            call. = FALSE)
+    }
+    ########################
+    #
+    if(!"grid.borders" %in% names(.xargs)){
+      .xargs$grid.borders <- 0.05
     }
 
     ##build map layer
@@ -129,8 +140,9 @@ tubeMap <-
         temp <- (rng[2]-rng[1])*n
         c(rng[1]-temp, rng[2]+temp)
       }
-      rng.lon <- exp(rng.lon, 0.05)
-      rng.lat <- exp(rng.lat, 0.05)
+      .gb <- .xargs$grid.borders
+      rng.lon <- exp(rng.lon, .gb)
+      rng.lat <- exp(rng.lat, .gb)
       dc <- OpenStreetMap::openmap(c(rng.lat[2], rng.lon[1]),
                                    c(rng.lat[1],rng.lon[2]),
                                    zoom = NULL,
@@ -150,6 +162,7 @@ tubeMap <-
                    ggplot2::coord_quickmap() +
                    ggplot2::theme_void()
       ))
+      map$data <- d2 # cludge because autoplay not using my data
     } else {
       map <- previous
     }
@@ -182,8 +195,58 @@ tubeMap <-
         }
     }
 
+    # add surface
+    if(any(grepl("^surface", names(.xargs)))){
+      .xargs2 <- dte_ggshellTidyArgs(.xargs, "surface")
+      .xargs2.test <- dte_ggshellTestArgs(.xargs2, d2)
+      .test <- names(.xargs2.test[.xargs2.test=="data"])
+      .test <- .test[.test %in% c("fill", "z", "colour", "contour")]
+      if(length(.test)>0){
+        .fit.args <- modifyList(list(data=d2, tube=.xargs2[[.test[1]]],
+                                     inputs=c(x,y), by=c(.xargs$group, .xargs$group),
+                                      simplify=TRUE, newdata="input.ranges"),
+                                .xargs2[names(.xargs2) %in% c("too.far",
+                                                              "grid.resolution",
+                                                              "grid.borders")])
+        .d2 <- do.call(fitTubeModel, .fit.args)
+        .xargs2[[.test[1]]] <- paste(.xargs2[[.test[1]]], ".pred", sep="")
+        if(.xargs2$..test=="OK"){
+          .xargs2 <- modifyList(list(x=x, y=y), .xargs2)
+          ##########################
+          # if fill in there
+          if("fill" %in% names(.xargs2)){
+            .xargs2$fill <- .xargs2[[.test[1]]]
+            drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomTile)]
+            drops <- c(drops, "col", "color", "colour")
+            map <- dte_ggshellAddGeom(.xargs2, .d2, map,
+                                      ggplot2::geom_tile,
+                                      defaults = list(na.rm=TRUE, alpha=0.5),
+                                      drops = drops)
+          }
+          if("contour" %in% names(.xargs2)){
+            .xargs2$z <- .xargs2[[.test[1]]]
+            drops <-  names(.xargs2)[!names(.xargs2) %in% c(dte_GeomArgs(ggplot2::GeomContour),
+                                                            "z")]
+            drops <- c(drops, "fill")
+            map <- dte_ggshellAddGeom(.xargs2, .d2, map,
+                                      ggplot2::geom_contour,
+                                      defaults = list(na.rm=TRUE,
+                                                      colour="white"),
+                                      drops = drops)
+            map <- dte_ggshellAddGeom(.xargs2, .d2, map,
+                                      metR::geom_text_contour,
+                                      defaults = list(na.rm=TRUE,
+                                                      colour="white"),
+                                      drops = drops)
+          }
 
+        }
 
+      }
+
+    }
+
+    #add point(s)
     if(any(grepl("^point", names(.xargs)))){
       ##########################
       # testing this tidy

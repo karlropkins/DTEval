@@ -135,7 +135,12 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
         } else {
           100
         }
-        seq(min(.temp, na.rm=TRUE), max(.temp, na.rm=TRUE), length=.gr)
+        .gb <- if("grid.borders" %in% names(.xargs)){
+          (max(.temp, na.rm=TRUE) - min(.temp, na.rm=TRUE)) * .xargs$grid.borders
+        } else {
+          0
+        }
+        seq(min(.temp, na.rm=TRUE)-.gb, max(.temp, na.rm=TRUE)+.gb, length=.gr)
       })
       names(ans) <- inputs
       .nd <- do.call(expand.grid, ans)
