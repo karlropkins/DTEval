@@ -12,7 +12,7 @@ fitTubeModel(
   by = NULL,
   model = NULL,
   simplify = FALSE,
-  newdata = NULL,
+  new.data = NULL,
   ...
 )
 }
@@ -35,7 +35,7 @@ sub-sample the data when build multiple models.}
 \item{simplify}{Option to simplify the \code{data} before fitting by
 averaging common inputs, default \code{FALSE}.}
 
-\item{newdata}{The type of prediction to generate. The default,
+\item{new.data}{The type of prediction to generate. The default,
 \code{NULL}, returns the supplied \code{data} with an extra column
 of the requested predictions added as \code{[tube].pred}. The alternative
 option \code{'input.ranges'} generates a \code{data.frame} of the model

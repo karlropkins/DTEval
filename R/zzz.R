@@ -5,7 +5,7 @@
 #' @importFrom stats as.formula end lm loess predict qt quantile sd start qnorm na.omit median
 #' @importFrom utils data modifyList
 #' @importFrom methods is
-#' @importFrom grDevices colorRampPalette
+#' @importFrom grDevices colorRampPalette as.raster
 
 ##########################
 # don't want full import

@@ -29,13 +29,15 @@
 #' \code{TO DOC}
 #' @param simplify Option to simplify the \code{data} before fitting by
 #' averaging common inputs, default \code{FALSE}.
-#' @param newdata The type of prediction to generate. The default,
+#' @param new.data The type of prediction to generate. The default,
 #' \code{NULL}, returns the supplied \code{data} with an extra column
 #' of the requested predictions added as \code{[tube].pred}. The alternative
 #' option \code{'input.ranges'} generates a \code{data.frame} of the model
 #' input ranges.
 #' @param ... additional arguments, currently passed on to \code{model} and
 #' used if recognised.
+
+# I know it is newdata in most model predicts...
 
 #' @details
 #' \code{fitTubeModel} attempts to fit a model to the supplied inputs.
@@ -85,7 +87,7 @@
 
 fitTubeModel <- function(data, tube = ".value", inputs = NULL,
                          by = NULL, model = NULL, simplify = FALSE,
-                         newdata = NULL, ...){
+                         new.data = NULL, ...){
 
   #setup
   .xargs <- list(...)
@@ -123,10 +125,10 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
   #using/adding index as multiple-column catch-all for by
   d2$..index <- as.vector(as.matrix(d2[,by]))
 
-  #newdata
+  #new.data
   .nd <- NULL
-  if(is.character(newdata)){
-    if(newdata=="input.ranges"){
+  if(is.character(new.data)){
+    if(new.data=="input.ranges"){
       ans <- lapply(inputs, function(ii){
         .temp <- d2[[ii]]
         #  reset for fit grid.resolution
@@ -146,11 +148,11 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
       .nd <- do.call(expand.grid, ans)
     }
   } else {
-    if(is.data.frame(newdata)){
+    if(is.data.frame(new.data)){
       #################
       # needs testing
       # needs a right-columns checks
-      .nd <- newdata
+      .nd <- new.data
     }
   }
 
@@ -161,19 +163,21 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
     .dd <- d2[d2$..index==x,]
     row.names(.dd) <- 1:nrow(.dd)
     mod <- mgcv::gam(.form, data=.dd)
-    if(is.null(newdata)){
+    if(is.null(new.data)){
       .nd <- .dd
     }
     if(!is.data.frame(.nd)){
-      stop("[fitTubeModel] newdata option not understood",
+      stop("[fitTubeModel] new.data option not understood",
            call. = FALSE)
     }
+    #NB: this one is newdata not new.data
+    #    because it is predict argument...
     .tmp <- mgcv::predict.gam(mod, newdata=.nd)
     .nd$..pred <- NA
     .nd$..pred[as.numeric(names(.tmp))] <- as.vector(.tmp)
     names(.nd)[names(.nd)=="..pred"] <- paste(tube, ".pred", sep="")
     .nd[c(by, "..index")] <- .dd[1, c(by, "..index")]
-    if("too.far" %in% names(.xargs) & !is.null(newdata)){
+    if("too.far" %in% names(.xargs) & !is.null(new.data)){
       df.ex <- if(length(inputs)==2){
         #using mgcv::exclude.too.far because it is faster
         mgcv::exclude.too.far(.nd[, inputs[1]], .nd[, inputs[2]],

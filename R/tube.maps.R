@@ -99,8 +99,8 @@ tubeMap <-
       d2 <- data
       previous <- NULL
     }
-    if("newdata" %in% names(.xargs)) {
-      d2<-.xargs$newdata
+    if("new.data" %in% names(.xargs)) {
+      d2<-.xargs$new.data
     }
 
     if(is.null(x)){
@@ -209,7 +209,7 @@ tubeMap <-
       if(length(.test)>0){
         .fit.args <- modifyList(list(data=d2, tube=.xargs2[[.test[1]]],
                                      inputs=c(x,y), by=c(.xargs$group, .xargs$group),
-                                      simplify=TRUE, newdata="input.ranges"),
+                                      simplify=TRUE, new.data="input.ranges"),
                                 .xargs2[names(.xargs2) %in% c("too.far",
                                                               "grid.resolution",
                                                               "grid.borders")])
@@ -325,23 +325,36 @@ tubeMap <-
 # draw maps of tubes using leaflet...
 
 leafletTubeMap <-
-  function(data, x=NULL, y=NULL, previous=NULL, ...){
+  function(data, x=NULL, y=NULL, ...){
 
     #plot only intended for tagged or tag-able data...
-    #do we need/want tagging ?
-    d2 <- tagTube(data)
+    d2 <- data
     .xargs <- list(...)
+    if("leaflet" %in% class(data)){
+      previous <- d2
+      d2 <- data$dte_data
+    } else {
+      d2 <- data
+      previous <- NULL
+    }
+    if("new.data" %in% names(.xargs)) {
+      d2<-.xargs$new.data
+    }
+    #do we need/want tagging ?
+    d2 <- tagTube(d2)
 
     ############################
     # x and y handling to enable
     ############################
 
     # avoiding %>%
-    m <- if(is.null(previous)){
-      leaflet::leaflet() |>
+    if(is.null(previous)){
+      m <- leaflet::leaflet() |>
         leaflet::addProviderTiles("CartoDB.Positron")
+        # yes, I am that lazy
+        m$dte_data <- d2
     } else {
-      previous
+      m <- previous
     }
 
     if("polygon" %in% names(.xargs)){

@@ -8,7 +8,7 @@
 \usage{
 tubeMap(data, x = NULL, y = NULL, ...)
 
-leafletTubeMap(data, x = NULL, y = NULL, previous = NULL, ...)
+leafletTubeMap(data, x = NULL, y = NULL, ...)
 }
 \arguments{
 \item{data}{Data source to be used to build a plot. This is typically a
