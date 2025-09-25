@@ -98,7 +98,7 @@ tubeSummary <- function(data, ...){
   n.samples <- length(unique(d2$.sample_id))
 
   #n.suspect
-  n.bad.tags <- nrow(subset(tubeSummarySample(d2), checksum>0))
+  n.bad.tags <- nrow(subset(tubeSummarySample(d2, output="full.report"), checksum>0))
 
   out <- data.frame(sampling.from, sampling.to,
                     n.total, n.samples, n.intervals, n.sites, n.bad.tags)
