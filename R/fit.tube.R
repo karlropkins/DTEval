@@ -3,7 +3,7 @@
 #######################################################
 
 #' @name fit.tube
-#' @aliases fit.tube fitTubeModel
+#' @aliases fit.tube fitTubeModel fitTubeModel_gam
 #' @description Functions for fitting diffusion tube (DT)
 #' data calculations using \code{DTEval}.
 
@@ -23,10 +23,7 @@
 #' @param inputs The name(s) of the model inputs.
 #' @param by The name(s) of hierarchical grouping terms. These are used to
 #' sub-sample the data when build multiple models.
-#'
-#' @param model The model to fit, by default:
-#'
-#' \code{TO DOC}
+#' @param model The model to fit, by default \code{fitTubeModel_gam}
 #' @param simplify Option to simplify the \code{data} before fitting by
 #' averaging common inputs, default \code{FALSE}.
 #' @param new.data The type of prediction to generate. The default,
@@ -105,7 +102,7 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
   # to do
   ###############################
   if(is.null(model)){
-    model <- function(x) { list(mean=mean(x, na.rm=TRUE)) }
+    model <- fitTubeModel_gam
   }
 
   #simplify
@@ -126,6 +123,9 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
   d2$..index <- as.vector(as.matrix(d2[,by]))
 
   #new.data
+  ###########################
+  # why do we need .nd ??
+  ###########################
   .nd <- NULL
   if(is.character(new.data)){
     if(new.data=="input.ranges"){
@@ -146,6 +146,9 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
       })
       names(ans) <- inputs
       .nd <- do.call(expand.grid, ans)
+    } else {
+      warning("[fitTubeModel] Sorry, did not understand input.range; ignoring...",
+              call. = FALSE)
     }
   } else {
     if(is.data.frame(new.data)){
@@ -155,27 +158,40 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
       .nd <- new.data
     }
   }
+  if(!is.null(.nd) & !is.data.frame(.nd)){
+    stop("[fitTubeModel] new.data option not understood",
+         call. = FALSE)
+  }
 
   #fit model per index (all by's) case
+  ################################
+  # force positive test
+  #  d2[[tube]] <- d2[[tube]]^0.5
+  #################################
   ans <- lapply(unique(d2$..index), function(x){
-    .form <- paste(tube, "~te(", paste(inputs, collapse =","), ")", sep="")
-    .form <- as.formula(.form)
+    #.form <- paste(tube, "~te(", paste(inputs, collapse =","), ")", sep="")
+    #.form <- as.formula(.form)
     .dd <- d2[d2$..index==x,]
-    row.names(.dd) <- 1:nrow(.dd)
-    mod <- mgcv::gam(.form, data=.dd)
-    if(is.null(new.data)){
-      .nd <- .dd
-    }
-    if(!is.data.frame(.nd)){
-      stop("[fitTubeModel] new.data option not understood",
-           call. = FALSE)
-    }
+    ##############################
+    # could try wrap next step
+    # and dump a NULL if it fails
+    ##############################
+    .nd <- model(.dd, tube, inputs, .nd)
+    #row.names(.dd) <- 1:nrow(.dd)
+    #mod <- mgcv::gam(.form, data=.dd)
+    #if(is.null(new.data)){
+    #  .nd <- .dd
+    #}
+    #if(!is.data.frame(.nd)){
+    #  stop("[fitTubeModel] new.data option not understood",
+    #       call. = FALSE)
+    #}
     #NB: this one is newdata not new.data
     #    because it is predict argument...
-    .tmp <- mgcv::predict.gam(mod, newdata=.nd)
-    .nd$..pred <- NA
-    .nd$..pred[as.numeric(names(.tmp))] <- as.vector(.tmp)
-    names(.nd)[names(.nd)=="..pred"] <- paste(tube, ".pred", sep="")
+    #.tmp <- mgcv::predict.gam(mod, newdata=.nd)
+    #.nd$..pred <- NA
+    #.nd$..pred[as.numeric(names(.tmp))] <- as.vector(.tmp)
+    #names(.nd)[names(.nd)=="..pred"] <- paste(tube, ".pred", sep="")
     .nd[c(by, "..index")] <- .dd[1, c(by, "..index")]
     if("too.far" %in% names(.xargs) & !is.null(new.data)){
       df.ex <- if(length(inputs)==2){
@@ -197,9 +213,54 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
   })
   ans <- do.call(rbind, ans)
   ans <- ans[names(ans) != "..index"]
-
+  ################
+  # force positive
+  # if tube there needs to be done for tube as well
+  #ans[[paste(tube, ".pred", sep="")]] <- ans[[paste(tube, ".pred", sep="")]]^(1/0.5)
+  ###############
   #output
   return(ans)
+}
+
+
+
+#################################
+# models
+#################################
+
+#' @rdname fit.tube
+#' @export
+
+fitTubeModel_gam <- function(data, tube, inputs, new.data = NULL, ...){
+
+  d <- data[c(tube, inputs)]
+  ###############################
+  # might want s(x1) + s(x2)...
+  #     instead of te(x1, x2, ...) ???
+  ################################
+  .form <- paste(tube, "~te(", paste(inputs, collapse =","), ")", sep="")
+  .form <- as.formula(.form)
+  row.names(d) <- 1:nrow(d)
+  mod <- mgcv::gam(.form, data=d)
+  if(is.null(new.data)){
+    new.data <- d
+  }
+  ########################
+  # should not need ???
+  ########################
+  if(!is.data.frame(new.data)){
+    stop("[fitTubeModel] new.data option not understood",
+         call. = FALSE)
+  }
+  .tmp <- mgcv::predict.gam(mod, newdata=new.data)
+  new.data$..pred <- NA
+  new.data$..pred[as.numeric(names(.tmp))] <- as.vector(.tmp)
+  ########################
+  # could do this in main function
+  #   and just once at end...
+  #######################
+  names(new.data)[names(new.data)=="..pred"] <- paste(tube, ".pred", sep="")
+  new.data
 }
 
 

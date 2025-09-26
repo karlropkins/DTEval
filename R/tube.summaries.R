@@ -192,15 +192,18 @@ tubeSummarySample <- function(data, ...){
 #   also other methods
 #        1. calculate center better or differently
 #              found a couple of methods but not sure they'll make much of a difference at these scales???
+#                  COULD try making the DT nearest the centre of the data, the centre for a second distance calc ???
+#                  COULD make the cluster centre, the centre for  distance calc???
 #        2. calculate in/out area based on a reference, bbox or circle etc
 #              (from misc.dt.lat.lon notes)
 #              these about 15 miles and 5 miles as metres
-#                   tubeMap(dt, polygon= sf::st_buffer(caz.brd, 24500), plot.type="leaflet")
-#                   tubeMap(dt, polygon= sf::st_buffer(caz.brd, 8200), plot.type="leaflet")
+#                   leafletTubeMap(dt, polygon= sf::st_buffer(caz.brd, 24500))
+#                   leafletTubeMap(dt, polygon= sf::st_buffer(caz.brd, 8200))
 #              but what could be used ?? above is 15 and 5 buffers about the caz...
 #   playing with as a plot summary
-#       ggplot2::ggplot(tubeSummaryLatLon(dt)) + ggplot2::geom_histogram(ggplot2::aes(x=distance.m), bins=220)
-#       (bins is nrow for output)
+#       ggplot2::ggplot(tubeSummaryLatLon(dont.share::dt.bradford.2, output="full.report")) +
+#                ggplot2::geom_histogram(ggplot2::aes(x=distance.m), bins=220)
+#       (bins might want to be number of sample locations?)
 
 # not sure this is staying
 

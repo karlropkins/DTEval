@@ -3,6 +3,7 @@
 \name{fit.tube}
 \alias{fit.tube}
 \alias{fitTubeModel}
+\alias{fitTubeModel_gam}
 \title{Fit Diffusion Tube Models}
 \usage{
 fitTubeModel(
@@ -15,6 +16,8 @@ fitTubeModel(
   new.data = NULL,
   ...
 )
+
+fitTubeModel_gam(data, tube = ".value", inputs = NULL, new.data = NULL, ...)
 }
 \arguments{
 \item{data}{Data source, typically a data.frame or similar, containing
@@ -28,9 +31,7 @@ to (see \code{model}), typically the DT NO2 concentrations (in ug/m3).}
 \item{by}{The name(s) of hierarchical grouping terms. These are used to
 sub-sample the data when build multiple models.}
 
-\item{model}{The model to fit, by default:
-
-\code{TO DOC}}
+\item{model}{The model to fit, by default \code{fitTubeModel_gam}}
 
 \item{simplify}{Option to simplify the \code{data} before fitting by
 averaging common inputs, default \code{FALSE}.}
