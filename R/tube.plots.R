@@ -342,7 +342,12 @@ tubePlot <-
         .fit.args <- modifyList(list(data=d2, tube=.xargs2[[.test[1]]],
                                      inputs=c(x,y), by=c(.xargs$group, .xargs$facet),
                                      simplify=TRUE, new.data="input.ranges"),
-                                .xargs2[names(.xargs2) %in% c("too.far",
+        #################################
+        # could generalise next bit ???
+        #################################
+                                .xargs2[names(.xargs2) %in% c("too.far", "model",
+                                                              "simplify",
+                                                              "force.positive",
                                                               "grid.resolution",
                                                               "grid.borders")])
         .d2 <- do.call(fitTubeModel, .fit.args)

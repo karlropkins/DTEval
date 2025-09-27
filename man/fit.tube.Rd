@@ -4,6 +4,7 @@
 \alias{fit.tube}
 \alias{fitTubeModel}
 \alias{fitTubeModel_gam}
+\alias{fitTubeModel_loess}
 \title{Fit Diffusion Tube Models}
 \usage{
 fitTubeModel(
@@ -17,7 +18,9 @@ fitTubeModel(
   ...
 )
 
-fitTubeModel_gam(data, tube = ".value", inputs = NULL, new.data = NULL, ...)
+fitTubeModel_gam(data, tube, inputs, new.data = NULL, ...)
+
+fitTubeModel_loess(data, tube, inputs, new.data = NULL, ...)
 }
 \arguments{
 \item{data}{Data source, typically a data.frame or similar, containing
