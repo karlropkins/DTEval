@@ -23,9 +23,14 @@
 #' @param inputs The name(s) of the model inputs.
 #' @param by The name(s) of hierarchical grouping terms. These are used to
 #' sub-sample the data when build multiple models.
-#' @param model The model to fit, by default \code{fitTubeModel_gam}
+#' @param model The model to fit, by default \code{fitTubeModel_loess}
 #' @param simplify Option to simplify the \code{data} before fitting by
 #' averaging common inputs, default \code{FALSE}.
+#' @param min.count The minimum data count required for a model build.
+#' The default, -1, disables this option.
+#' @param min.prop The minimum proportion of non-NA data required for a model
+#' build. The default, -1, disables this option and values higher than 1
+#' exclude all supplied data.
 #' @param new.data The type of prediction to generate. The default,
 #' \code{NULL}, returns the supplied \code{data} with an extra column
 #' of the requested predictions added as \code{[tube].pred}. The alternative
@@ -85,6 +90,7 @@
 
 fitTubeModel <- function(data, tube = ".value", inputs = NULL,
                          by = NULL, model = NULL, simplify = FALSE,
+                         min.count = -1, min.prop = -1,
                          new.data = NULL, ...){
 
   #setup
@@ -103,7 +109,7 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
   # to do
   ###############################
   if(is.null(model)){
-    model <- fitTubeModel_gam
+    model <- fitTubeModel_loess
   }
 
   #simplify
@@ -189,11 +195,28 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
     #.form <- paste(tube, "~te(", paste(inputs, collapse =","), ")", sep="")
     #.form <- as.formula(.form)
     .dd <- d2[d2$..index==x,]
+    ################################
+    #test min.count
+    #test min.prop
+    ################################
+    .tst <- .dd[[tube]]
+    if(min.count > 0 & length(.tst[!is.na(.tst)]) < min.count){
+      return(NULL)
+    }
+    if(min.prop > 0 & length(.tst[!is.na(.tst)])/length(.tst) < min.prop){
+      return(NULL)
+    }
     ##############################
     # could try wrap next step
     # and dump a NULL if it fails
     ##############################
-    .nd <- model(.dd, tube, inputs, .nd)
+    .nd <- try(model(.dd, tube, inputs, .nd),
+               silent=TRUE)
+    if(inherits(.nd, "try-error")){
+      return(NULL)
+    }
+
+
     #row.names(.dd) <- 1:nrow(.dd)
     #mod <- mgcv::gam(.form, data=.dd)
     #if(is.null(new.data)){
@@ -229,6 +252,10 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
     .nd
   })
   ans <- do.call(rbind, ans)
+  if(is.null(ans)){
+    stop("[fitTubeModel] no viable models...",
+         call.=FALSE)
+  }
   ans <- ans[names(ans) != "..index"]
   ################
   # force positive

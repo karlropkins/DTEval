@@ -14,6 +14,8 @@ fitTubeModel(
   by = NULL,
   model = NULL,
   simplify = FALSE,
+  min.count = -1,
+  min.prop = -1,
   new.data = NULL,
   ...
 )
@@ -34,10 +36,17 @@ to (see \code{model}), typically the DT NO2 concentrations (in ug/m3).}
 \item{by}{The name(s) of hierarchical grouping terms. These are used to
 sub-sample the data when build multiple models.}
 
-\item{model}{The model to fit, by default \code{fitTubeModel_gam}}
+\item{model}{The model to fit, by default \code{fitTubeModel_loess}}
 
 \item{simplify}{Option to simplify the \code{data} before fitting by
 averaging common inputs, default \code{FALSE}.}
+
+\item{min.count}{The minimum data count required for a model build.
+The default, -1, disables this option.}
+
+\item{min.prop}{The minimum proportion of non-NA data required for a model
+build. The default, -1, disables this option and values higher than 1
+exclude all supplied data.}
 
 \item{new.data}{The type of prediction to generate. The default,
 \code{NULL}, returns the supplied \code{data} with an extra column
