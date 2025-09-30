@@ -575,7 +575,209 @@ dte_too.far <- function(d1, d2, dist=0.1){
 
 # trying to get facetting to work...
 
-tubeMap2 <-
+tubeMap.old <-
+  function(data, x=NULL, y=NULL, ...){
+
+    #setup
+    ####################
+    #args
+    .xargs <- list(...)
+    .xargs <- dte_ggshellTidyArgs(.xargs)
+    #data
+    if("ggplot" %in% class(data)){
+      previous <- data
+      d2 <- data$data
+    } else {
+      d2 <- data
+      previous <- NULL
+    }
+    if("new.data" %in% names(.xargs)) {
+      d2<-.xargs$new.data
+    }
+
+    if(is.null(x)){
+      x <- ".longitude"
+    }
+    if(is.null(y)){
+      y <- ".latitude"
+    }
+    .x <- getTubeX(d2, x, if.err="stop<<tubeMap>>x")
+    .y <- getTubeX(d2, y, if.err="stop<<tubeMap>>y")
+
+    #############################
+    # without any this dies if length(names(.xargs)) > 1
+    #############################
+    # currently not facetting tubeMaps
+    if(length(names(.xargs))>0 && any(grepl("^facet", names(.xargs)))){
+      stop("[tubeMap] Sorry, map facet currently disabled",
+           call. = FALSE)
+    }
+    ########################
+    #
+    if(!"grid.borders" %in% names(.xargs)){
+      .xargs$grid.borders <- 0.05
+    }
+
+    ## build map layer
+    ## (if not already a plot...)
+    ###################
+    if(is.null(previous)){
+      #map ranges
+      rng.lat <- range(.y, na.rm=TRUE)
+      rng.lon <- range(.x, na.rm=TRUE)
+      #adding border
+      exp <- function(rng, n=0.1){
+        temp <- (rng[2]-rng[1])*n
+        c(rng[1]-temp, rng[2]+temp)
+      }
+      .gb <- .xargs$grid.borders
+      rng.lon <- exp(rng.lon, .gb)
+      rng.lat <- exp(rng.lat, .gb)
+      dc <- OpenStreetMap::openmap(c(rng.lat[2], rng.lon[1]),
+                                   c(rng.lat[1],rng.lon[2]),
+                                   zoom = NULL,
+                                   type =  "esri",
+                                   mergeTiles = TRUE)
+      dc <- suppressMessages(suppressWarnings(
+        OpenStreetMap::openproj(dc,
+                                projection = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+      ))
+      map <- OpenStreetMap::autoplot.OpenStreetMap(dc)
+      # general map text, formatting and sizing
+      suppressMessages(suppressWarnings(
+        map <- map + ggplot2::geom_text(data=data.frame(),
+                                        ggplot2::aes(x=rng.lon[2], y=rng.lat[1]),
+                                        label="Map layer: (c) OpenStreetMap/ESRI contributors    ",
+                                        size=1.8, hjust=1, vjust=-0.5) +
+          ggplot2::coord_quickmap() +
+          ggplot2::theme_void()
+      ))
+      map$data <- d2 # cludge because autoplay not using my data
+
+    } else {
+      map <- previous
+    }
+
+    # add polygon
+    if(any(grepl("^polygon", names(.xargs)))){
+      ##########################
+      #testing this tidy
+      #    Holding code because it is very sensitive to ordering
+      #.xargs2 <- .xargs[grepl("^polygon[.]", names(.xargs))]
+      #names(.xargs2) <- gsub("polygon[.]", "", names(.xargs2))
+      #names(.xargs2)[names(.xargs2) %in% c("col", "color")] <- "colour"
+      #.xargs2 <- .xargs2[!duplicated(names(.xargs2), fromLast=TRUE)]
+      #.xargs2 <- modifyList(.xargs, .xargs2)
+      .xargs2 <- dte_ggshellTidyArgs(.xargs, "polygon")
+      if(.xargs2$..test=="OK"){
+        .xargs2 <- modifyList(list(x="X", y="Y"), .xargs2)
+        ##########################
+        # to think about...
+        #    this currently needs polygon to be a sf polygon...
+        #        BUT polygon could be a different object type ...
+        #        OR polygon could be true... then you would use the data as polygon source
+        #            can't colour a polygon by palette at moment
+        .xargs2$polygon <- as.data.frame(sf::st_coordinates(.xargs2$polygon))
+        drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPolygon)]
+        map <- dte_ggshellAddGeom(.xargs2, .xargs2$polygon, map,
+                                  ggplot2::geom_polygon,
+                                  defaults = list(na.rm=TRUE, colour="blue",
+                                                  fill="blue", alpha=0.25),
+                                  drops = drops)
+      }
+    }
+
+    # add surface
+    ############################
+    # this need tidying for contour and col handling
+    # issue this error because col terms is fitted...
+    # tubeMap(a, point=T, surface.fill=".value", too.far=0.1, grid.resolution=400, contour=T, point.col=".value", polygon=dont.share::caz.bradford, grid.borders=0.05, col=".value")
+    #
+    if(any(grepl("^surface", names(.xargs)))){
+      #just arg should trigger this contour ??
+      .xargs2 <- dte_ggshellTidyArgs(.xargs, "surface")
+      .xargs2.test <- dte_ggshellTestArgs(.xargs2, d2)
+      .test <- names(.xargs2.test[.xargs2.test=="data"])
+      .test <- .test[.test %in% c("fill", "z", "colour", "contour")]
+      if(length(.test)>0){
+        .fit.args <- modifyList(list(data=d2, tube=.xargs2[[.test[1]]],
+                                     inputs=c(x,y), by=c(.xargs$group, .xargs$group),
+                                     simplify=TRUE, new.data="input.ranges"),
+                                .xargs2[names(.xargs2) %in% c("too.far",
+                                                              "grid.resolution",
+                                                              "grid.borders")])
+        .d2 <- do.call(fitTubeModel, .fit.args)
+        .xargs2[[.test[1]]] <- paste(.xargs2[[.test[1]]], ".pred", sep="")
+        if(.xargs2$..test=="OK"){
+          .xargs2 <- modifyList(list(x=x, y=y), .xargs2)
+          ##########################
+          # if fill in there
+          if("fill" %in% names(.xargs2)){
+            .xargs2$fill <- .xargs2[[.test[1]]]
+            drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomTile)]
+            drops <- c(drops, "col", "color", "colour")
+            map <- dte_ggshellAddGeom(.xargs2, .d2, map,
+                                      ggplot2::geom_tile,
+                                      defaults = list(na.rm=TRUE, alpha=0.5),
+                                      drops = drops)
+          }
+          if("contour" %in% names(.xargs2)){
+            ###################
+            # fix for contour.[whatever]
+            # maybe contour should be black if no fill and no col..?
+            .xargs2$z <- .xargs2[[.test[1]]]
+            drops <-  names(.xargs2)[!names(.xargs2) %in% c(dte_GeomArgs(ggplot2::GeomContour),
+                                                            "z")]
+            drops <- c(drops, "fill")
+            map <- dte_ggshellAddGeom(.xargs2, .d2, map,
+                                      ggplot2::geom_contour,
+                                      defaults = list(na.rm=TRUE,
+                                                      colour="white"),
+                                      drops = drops)
+            map <- dte_ggshellAddGeom(.xargs2, .d2, map,
+                                      metR::geom_text_contour,
+                                      defaults = list(na.rm=TRUE,
+                                                      colour="white"),
+                                      drops = drops)
+          }
+
+        }
+
+      }
+
+    }
+
+    #add point(s)
+    if(any(grepl("^point", names(.xargs)))){
+      ##########################
+      # testing this tidy
+      .xargs2 <- dte_ggshellTidyArgs(.xargs, "point")
+      if(.xargs2$..test=="OK"){
+        .xargs2 <- modifyList(list(x=x, y=y), .xargs2)
+        ##########################
+        drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPoint)]
+        map <- dte_ggshellAddGeom(.xargs2, d2, map,
+                                  ggplot2::geom_point,
+                                  defaults = list(na.rm=TRUE),
+                                  drops = drops)
+      }
+    }
+
+    ##################
+    # to do
+    #################
+    # point mean, count, etc...
+    # add faceting
+    #     might be a big job ...
+    #        the openstreetmap::auto.plot does not want to facet
+    # add grouping ???
+    # add/tidy structure - palette, legend, ect...
+
+    #
+    return(map)
+  }
+
+tubeMap.older <-
   function(data, x=NULL, y=NULL, previous=NULL, ...){
 
     #setup
@@ -620,6 +822,7 @@ tubeMap2 <-
                                    zoom = NULL,
                                    type =  "esri",
                                    mergeTiles = TRUE)
+
       dc <- suppressMessages(suppressWarnings(
         OpenStreetMap::openproj(dc,
                                 projection = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
@@ -631,18 +834,26 @@ tubeMap2 <-
 
       p1 <- dc$bbox$p1
       p2 <- dc$bbox$p2
-#      map <- ggplot2::ggplot(d2, ggplot2::aes(x=.data[[x]],
-#                                                y=.data[[y]]))
-      map <- ggplot2::ggplot(data = d2)
-      map <- map + ggplot2::expand_limits(x = c(p1[1], p2[1]),
+      map <- ggplot2::ggplot(d2, ggplot2::aes(x=.data[[x]],
+                                                y=.data[[y]]))
+#      map <- ggplot2::ggplot(data = d2)
+     map <- map + ggplot2::expand_limits(x = c(p1[1], p2[1]),
                                         y = c(p2[2], p1[2])) +
-        ggplot2::scale_x_continuous(expand = c(0, 0)) + ggplot2::scale_y_continuous(expand = c(0, 0))
+      ggplot2::scale_x_continuous(expand = c(0, 0)) + ggplot2::scale_y_continuous(expand = c(0, 0))
 
       for (tile in dc$tiles) {
         p1 <- tile$bbox$p1
+        print(p1)
         p2 <- tile$bbox$p2
+        print(p2)
         yres <- tile$yres
+        print(yres)
         xres <- tile$xres
+        print(xres)
+        xseries <- seq(p1[2], p2[2], length=xres)
+        yseries <- seq(p1[1], p2[1], length=yres)
+
+
         rast <- as.raster(matrix(tile$colorData, nrow = tile$xres, byrow = TRUE))
         annot <- ggplot2::annotation_raster(rast, p1[1] - 0.5 * abs(tile$bbox$p1[1] -
                                                   tile$bbox$p2[1])/yres, p2[1] + 0.5 * abs(tile$bbox$p1[1] -
@@ -652,7 +863,7 @@ tubeMap2 <-
 
         map <- map + annot
       }
-      map + ggplot2::coord_equal()
+      #map + ggplot2::coord_equal()
       #################################
       # general map text, formatting and sizing
       suppressMessages(suppressWarnings(
@@ -725,6 +936,12 @@ tubeMap2 <-
     #
     return(map)
   }
+
+
+
+
+
+
 
 
 

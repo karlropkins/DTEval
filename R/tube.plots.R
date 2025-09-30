@@ -372,7 +372,7 @@ tubePlot <-
             .xargs2$z <- .xargs2[[.test[1]]]
             drops <-  names(.xargs2)[!names(.xargs2) %in% c(dte_GeomArgs(ggplot2::GeomContour),
                                                             "z")]
-            drops <- c(drops, "fill")
+            drops <- c(drops, "fill", "alpha")
             plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
                                       ggplot2::geom_contour,
                                       defaults = list(na.rm=TRUE,
@@ -1131,6 +1131,7 @@ ggplotTubeShell <-
 
     #.xargs
     .xargs <- list(...)
+
     #what to do about this...?
     #using in tubePlot and ggplotTubeShell
     names(.xargs)[names(.xargs) %in% c("col", "color")] <- "colour"
