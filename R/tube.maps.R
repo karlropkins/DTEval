@@ -216,29 +216,33 @@ tubeMap <-
 
     if(any(grepl("^polygon", names(.xargs)))){
       ##########################
-      #tidy this
-      #    ALSO very sensitive to ordering
-      .xargs2 <- .xargs[grepl("^polygon[.]", names(.xargs))]
-      names(.xargs2) <- gsub("polygon[.]", "", names(.xargs2))
-      names(.xargs2)[names(.xargs2) %in% c("col", "color")] <- "colour"
-      .xargs2 <- .xargs2[!duplicated(names(.xargs2), fromLast=TRUE)]
-      .xargs2 <- modifyList(.xargs, .xargs2)
-      .xargs2 <- modifyList(list(x="X", y="Y"), .xargs2)
-      ##########################
-      # to think about...
-      #    this currently needs polygon to be a sf polygon...
-      #        BUT polygon could be a different object type ...
-      #        OR polygon could be true... then you would use the data as polygon source
-      #            can't colour a polygon by palette at moment
-      .xargs2$polygon <- as.data.frame(sf::st_coordinates(.xargs2$polygon))
-      drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPolygon)]
-      map <- dte_ggshellAddGeom(.xargs2, .xargs2$polygon, map,
-                                ggplot2::geom_polygon,
-                                defaults = list(na.rm=TRUE, colour="blue",
-                                                fill="blue", alpha=0.25),
-                                drops = drops)
-
+      #testing this tidy
+      #    Holding code because it is very sensitive to ordering
+      #.xargs2 <- .xargs[grepl("^polygon[.]", names(.xargs))]
+      #names(.xargs2) <- gsub("polygon[.]", "", names(.xargs2))
+      #names(.xargs2)[names(.xargs2) %in% c("col", "color")] <- "colour"
+      #.xargs2 <- .xargs2[!duplicated(names(.xargs2), fromLast=TRUE)]
+      #.xargs2 <- modifyList(.xargs, .xargs2)
+      .xargs2 <- dte_ggshellTidyArgs(.xargs, "polygon")
+      if(.xargs2$..test=="OK"){
+        .xargs2 <- modifyList(.xargs2, list(x="X", y="Y"))
+        ##########################
+        # to think about...
+        #    this currently needs polygon to be a sf polygon...
+        #        BUT polygon could be a different object type ...
+        #        OR polygon could be true... then you would use the data as polygon source
+        #            can't colour a polygon by palette at moment
+        .xargs2$polygon <- as.data.frame(sf::st_coordinates(.xargs2$polygon))
+        drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPolygon)]
+        map <- dte_ggshellAddGeom(.xargs2, .xargs2$polygon, map,
+                                  ggplot2::geom_polygon,
+                                  defaults = list(na.rm=TRUE, colour="blue",
+                                                  fill="blue", alpha=0.25),
+                                  drops = drops)
+      }
     }
+
+
 
     # add surface
     ############################
