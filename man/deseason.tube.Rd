@@ -22,7 +22,7 @@ sub-sample the data when deseasonalising data.}
 \value{
 All functions return the supplied \code{data.frame}
 with attached predicted time-series components: \code{..season},
-\code{..deseason}.
+\code{..deseason}, etc.
 }
 \description{
 Functions for seasonalising multiple year
@@ -39,7 +39,7 @@ And, extracts the seasonal component as response term for the day-of-year.
 }
 \note{
 \code{deseasonTubeData} and related functions assume that \code{data}
-is data set \code{DTEval} will recognise as Diffusion Tube data, so either
+is a data set \code{DTEval} will recognise as Diffusion Tube data, so either
 previously tagged tube data or data that is tag-able using a
 default call of \code{\link{tagTube}}
 }

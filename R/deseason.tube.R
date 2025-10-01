@@ -27,7 +27,7 @@
 #' And, extracts the seasonal component as response term for the day-of-year.
 #'
 #' @note \code{deseasonTubeData} and related functions assume that \code{data}
-#' is data set \code{DTEval} will recognise as Diffusion Tube data, so either
+#' is a data set \code{DTEval} will recognise as Diffusion Tube data, so either
 #' previously tagged tube data or data that is tag-able using a
 #' default call of \code{\link{tagTube}}
 
