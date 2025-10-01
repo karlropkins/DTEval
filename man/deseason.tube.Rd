@@ -2,10 +2,10 @@
 % Please edit documentation in R/deseason.tube.R
 \name{deseason.tube}
 \alias{deseason.tube}
-\alias{deseasonaliseTube}
+\alias{deseasonTubeData}
 \title{Deseasonalise Diffusion Tube Data}
 \usage{
-deseasonaliseTube(data, tube = "measurement", by = NULL, ...)
+deseasonTubeData(data, tube = ".value", by = NULL, ...)
 }
 \arguments{
 \item{data}{Data source, typically a data.frame or similar, containing
@@ -38,8 +38,8 @@ It builds a LOESS time-series model in the form:
 And, extracts the seasonal component as response term for the day-of-year.
 }
 \note{
-\code{deseasonaliseTube} and related functions assume that \code{data} is data
-\code{DTEval} will recognise as Diffusion Tube data, so either
+\code{deseasonTubeData} and related functions assume that \code{data}
+is data set \code{DTEval} will recognise as Diffusion Tube data, so either
 previously tagged tube data or data that is tag-able using a
 default call of \code{\link{tagTube}}
 }

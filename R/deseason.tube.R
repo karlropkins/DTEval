@@ -3,7 +3,7 @@
 #######################################################
 
 #' @name deseason.tube
-#' @aliases deseason.tube deseasonaliseTube
+#' @aliases deseason.tube deseasonTubeData
 #' @description Functions for seasonalising multiple year
 #' diffusion tube (DT) data time-series.
 
@@ -26,18 +26,17 @@
 #'
 #' And, extracts the seasonal component as response term for the day-of-year.
 #'
-#' @note \code{deseasonaliseTube} and related functions assume that \code{data} is data
-#' \code{DTEval} will recognise as Diffusion Tube data, so either
+#' @note \code{deseasonTubeData} and related functions assume that \code{data}
+#' is data set \code{DTEval} will recognise as Diffusion Tube data, so either
 #' previously tagged tube data or data that is tag-able using a
 #' default call of \code{\link{tagTube}}
 
 #' @return All functions return the supplied \code{data.frame}
 #' with attached predicted time-series components: \code{..season},
-#' \code{..deseason}.
+#' \code{..deseason}, etc.
 
 # document stl guidance on this...
 # it is not just a regular pattern you put from the data
-
 
 #############################
 # deseasonaliseTube
@@ -48,7 +47,7 @@
 # current test
 #    dd <- tagTube(dont.share::dt.bradford.2); dd <- dd[dd$.longitude<0,]
 #    dd <- tubeInXYPolygon(dd, dont.share::caz.bradford)
-#    ans <- deseasonaliseTube(dt, "bias_adjusted_measurement", by=c(".in_polygon"))
+#    ans <- deseasonTubeData(dd, "bias_adjusted_measurement", by=c(".in_polygon"))
 #    tubePlot(ans, x=".date", "..deseason", col=".in_polygon", plot.type="smooth")
 
 # TO DECIDE
@@ -60,6 +59,11 @@
 #  thinking about
 ##############################
 
+#   se reporting/handling
+#   model performance
+#   suspect models - there will be a lot given the sparsity of the data
+#                    with some of the modelling strategies
+
 # example????
 ##############################
 
@@ -67,7 +71,7 @@
 #' @rdname deseason.tube
 #' @export
 
-deseasonaliseTube <- function(data, tube="measurement", by=NULL, ...){
+deseasonTubeData <- function(data, tube=".value", by=NULL, ...){
 
   # setup
   data <- tagTube(data)
@@ -91,32 +95,39 @@ deseasonaliseTube <- function(data, tube="measurement", by=NULL, ...){
   ans <- lapply(.id, function(x){
     d2 <- .d[.d$..id==x,]
     row.names(d2) <- 1:nrow(d2)
-    mod <- loess(.y ~ jd + n, data=d2,...)
-    temp <- predict(mod, se=TRUE)
+    suppressWarnings(suppressWarnings(
+      mod <- try(loess(.y ~ jd + n, data=d2,...),
+                 silent = TRUE)
+    ))
+    if(inherits(mod, "try-error")){
+      NULL
+    } else {
+      suppressWarnings(suppressWarnings(
+        temp <- predict(mod, se=TRUE)
+      ))
+      d2$..fit <- NA
+      d2$..fit[as.numeric(names(temp$fit))] <- temp$fit
+      d2$..fit.se <- NA
+      d2$..fit.se[as.numeric(names(temp$se.fit))] <- temp$se.fit
+      temp <- d2
+      temp$jd <- mean(temp$jd)
+      suppressWarnings(suppressWarnings(
+        temp <- predict(mod, temp, se=TRUE)
+      ))
+      d2$..trend <- NA
+      d2$..trend[as.numeric(names(temp$fit))] <- temp$fit
+      d2$..trend.se <- NA
+      d2$..trend.se[as.numeric(names(temp$se.fit))] <- temp$se.fit
+      d2$..trend <- d2$..trend - mean(d2$..trend)
+      d2$..trend <- d2$..trend + mean(d2$..fit)
 
-    d2$..fit <- NA
-    d2$..fit[as.numeric(names(temp$fit))] <- temp$fit
-    d2$..fit.se <- NA
-    d2$..fit.se[as.numeric(names(temp$se.fit))] <- temp$se.fit
+      d2$..season <- d2$..fit - d2$..trend
+      d2$..deseason <- d2$.y- d2$..season
 
-    temp <- d2
-    temp$jd <- mean(temp$jd)
-    temp <- predict(mod, temp, se=TRUE)
-    d2$..trend <- NA
-    d2$..trend[as.numeric(names(temp$fit))] <- temp$fit
-    d2$..trend.se <- NA
-    d2$..trend.se[as.numeric(names(temp$se.fit))] <- temp$se.fit
-    d2$..trend <- d2$..trend - mean(d2$..trend)
-    d2$..trend <- d2$..trend + mean(d2$..fit)
-
-    d2$..season <- d2$..fit - d2$..trend
-    d2$..deseason <- d2$.y- d2$..season
-
-    d2 <- d2[order(d2$.date),]
-    d2
-
+      d2 <- d2[order(d2$.date),]
+      d2
+    }
   })
   ans <- do.call(rbind, ans)
   ans
-
 }
