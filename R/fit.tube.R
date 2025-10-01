@@ -127,7 +127,11 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
   }
 
   #using/adding index as multiple-column catch-all for by
-  d2$..index <- as.vector(as.matrix(d2[,by]))
+  d2$..index <- if(length(by)==1){
+    d2[, by]
+  } else {
+    apply(d2[, by], 1, function(x) paste(x, collapse = "*"))  
+  }
 
   #new.data
   ###########################

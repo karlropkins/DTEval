@@ -48,7 +48,7 @@
 #    dd <- tagTube(dont.share::dt.bradford.2); dd <- dd[dd$.longitude<0,]
 #    dd <- tubeInXYPolygon(dd, dont.share::caz.bradford)
 #    ans <- deseasonTubeData(dd, "bias_adjusted_measurement", by=c(".in_polygon"))
-#    tubePlot(ans, x=".date", "..deseason", col=".in_polygon", plot.type="smooth")
+#    tubePlot.old(ans, x=".date", "..deseason", col=".in_polygon", plot.type="smooth")
 
 # TO DECIDE
 
