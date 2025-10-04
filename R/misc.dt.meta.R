@@ -3,7 +3,7 @@
 ##################################################
 
 #' @name misc.dt.meta
-#' @aliases misc.dt.meta padTubeMeta addTubeMeta
+#' @aliases misc.dt.meta padTubeMeta extractTubeMeta addTubeMeta
 #' @description Miscellaneous code used to work with
 #' diffusion tube (DT) meta data.
 
@@ -27,24 +27,40 @@
 #' @param ... additional arguments, currently ignored.
 
 #' @details
-#' #' \code{addTubeMeta} attempts to merge \code{data} and \code{ref} using
-#' \code{by} as the common term. It is intended for use then
-
-#' \code{padTubeMeta} attempts to pad the \code{x} data-series by replacing
-#' any \code{NA}s with the non-\code{NA} entries from the same data-series.
-#' It is intended for use with meta-data data-series, e.g. a \code{latitude}
-#' (or \code{longitude column}) where value was only entered once. Meta-data
+#' \code{addTubeMeta} attempts to merge \code{data} and \code{ref} using
+#' \code{by} as the common term. It is intended for use with reference
+#' meta data or data extracted with \code{extractTubeMeta}.
+#'
+#' \code{extractTube} attempts to extract data that looks like meta
+#' information from the supplied \code{data}. Meta-data
 #' is only be expected to unique at a specific level of aggregation, e.g.
-#' \code{latitude} will be unique for a sample site. So, an additional
-#' identifier is required to group the data, \code{by}.
+#' \code{latitude} will be unique for a sample site. Although the function
+#' default is to look for known sample identifiers, this grouping term
+#' is set using the addition argument \code{by}. The function then extracts
+#' all data-series with only one unique non-\code{NA} value. By default,
+#' the function test all non-grouping data-series, but similarly
+#' testing/extraction can be limited to specific cases using \code{x}.
+#' Please remeber that this function extracts data-series that at the
+#' \code{by} grouping-level looks like meta information.
 #'
-#' The function returns the supplied data with the attempted fix applied,
-#' and is generally used in the form:
+#' \code{padTubeMeta} attempts to pad the \code{x} data-series by replacing
+#' any \code{NA}s with the first non-\code{NA} entry from the same data-series.
+#' It is intended for use with meta-data data-series, e.g. a \code{latitude}
+#' (or \code{longitude column}) where value was only entered once.
 #'
-#' \code{dt.data.new <- padTubeMeta(dt.data, "[meta.name]", "[by.name]")}
+#' The functions return the requested data, and are generally used in the
+#' form:
+#'
+#' \code{requested.data <- padTubeMeta(dt.data, "[meta.name]", "[by.name]")}
 #'
 #' @return \code{padTubeMeta} returns \code{data} with the requested fix,
 #' if it can be applied.
+#'
+#' \code{extractTube} returns a \code{data.frame} of data that looks like
+#' meta-data when grouped at the requested level.
+#'
+#' \code{padTubeMeta} returns the supplied \code{data} with the requested
+#' fix.
 
 
 ######################################
@@ -116,6 +132,45 @@ addTubeMeta <- function(data, ref=NULL, by=NULL,...){
 # addTubeMeta(dt.bradford, my.ref, "site")
 
 
+#################################
+# extractTubeMeta
+#################################
+
+# get information that looks like meta data
+# from supplied data...
+
+# revision using calcTubeStat
+
+# to think above
+#############################
+
+# compare this and older method in padTubeMeta
+# not sure which is best..?
+
+#' @rdname misc.dt.meta
+#' @export
+
+extractTubeMeta <- extraTubeMeta <- function (data, x = NULL, by = NULL, ...)
+{
+  if (is.null(by)) {
+    if (".sample_id" %in% names(data)) {
+      by <- ".sample_id"
+    }
+    else {
+      stop("[padTubeMeta] Sorry, need a valid 'by'", call. = FALSE)
+    }
+  }
+  if (is.null(x)) {
+    x <- names(data)[!names(data) %in% by]
+  }
+  test <- calcTubeStat(data, x, by, function(x){length(unique(x[!is.na(x)]))})
+  test <- x[apply(test[x],2, function(x) {all(x==1)})]
+  if(length(test)<1){
+    return(NULL)
+  } else {
+    calcTubeStat(data, test, by, function(x){unique(x[!is.na(x)])[1]})
+  }
+}
 
 
 
