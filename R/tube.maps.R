@@ -149,12 +149,12 @@ tubeMap <-
       ))
       p1 <- dc$bbox$p1
       p2 <- dc$bbox$p2
-      ick <- data.frame(x = c(p1[1], p2[1]),
+      .bb <- data.frame(x = c(p1[1], p2[1]),
                         y = c(p1[2], p2[2]))
-      names(ick) <- c(x,y)
+      names(.bb) <- c(x,y)
       if("facet" %in% names(.xargs)){
-        ick <- data.frame(ick, facet=rep(unique(d2[[.xargs$facet]]), each=2))
-        names(ick)[3] <- .xargs$facet
+        .bb <- data.frame(.bb, facet=rep(unique(d2[[.xargs$facet]]), each=2))
+        names(.bb)[3] <- .xargs$facet
       }
       .all <- modifyList(list(data=d2, x=x, y=y), .xargs)
       plt <- do.call(ggplotTubeShell, .all)
