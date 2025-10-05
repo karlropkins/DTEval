@@ -415,7 +415,11 @@ leafletTubeMap <-
     }
 
     if("polygon" %in% names(.xargs)){
-      m <- leaflet::addPolygons(m, data=.xargs$polygon)
+      # quick fix for quarto reports....
+      #  could not use leafletTubeMap in if in quarto
+      if(!is.null(.xargs$polygon)){
+        m <- leaflet::addPolygons(m, data=.xargs$polygon)
+      }
     }
 
     ##################
