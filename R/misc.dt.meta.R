@@ -3,7 +3,7 @@
 ##################################################
 
 #' @name misc.dt.meta
-#' @aliases misc.dt.meta padTubeMeta extractTubeMeta addTubeMeta
+#' @aliases misc.dt.meta addTubeMeta extractTubeMeta padTubeMeta
 #' @description Miscellaneous code used to work with
 #' diffusion tube (DT) meta data.
 
@@ -15,9 +15,9 @@
 #' @param ref (For \code{addTubeMeta} only) The meta data source, typically
 #' a data.frame or similar, containing meta-information associated with the
 #' diffusion tube records in \code{data}. See Details below.
-#' @param x (For \code{padTubeMeta} only) The name of a data-series in
-#' \code{data} or expression to be evaluated, supplied as a character string.
-#' See Details below.
+#' @param x (For \code{padTubeMeta} and \code{extractTubeMeta}) The name of
+#' a data-series in \code{data} or expression to be evaluated, supplied as
+#' a character string. See Details below.
 #' @param by The name of a data-series that can be used as a
 #' case identifier for meta information. For most diffusion tube meta data,
 #' this is often a site identifier, e.g. a site code or name. If \code{by}
@@ -48,19 +48,20 @@
 #' It is intended for use with meta-data data-series, e.g. a \code{latitude}
 #' (or \code{longitude column}) where value was only entered once.
 #'
-#' The functions return the requested data, and are generally used in the
+#' @return The functions return the requested data, and are generally used in the
 #' form:
 #'
 #' \code{requested.data <- padTubeMeta(dt.data, "[meta.name]", "[by.name]")}
 #'
-#' @return \code{padTubeMeta} returns \code{data} with the requested fix,
-#' if it can be applied.
+#' \code{addTubeMeta} returns the supplied \code{data} with \code{ref}
+#' merged at the requested level.
 #'
 #' \code{extractTube} returns a \code{data.frame} of data that looks like
 #' meta-data when grouped at the requested level.
 #'
-#' \code{padTubeMeta} returns the supplied \code{data} with the requested
-#' fix.
+#' \code{padTubeMeta} returns \code{data} with the requested fix,
+#' if it can be applied.
+#'
 
 
 ######################################
@@ -150,7 +151,7 @@ addTubeMeta <- function(data, ref=NULL, by=NULL,...){
 #' @rdname misc.dt.meta
 #' @export
 
-extractTubeMeta <- extraTubeMeta <- function (data, x = NULL, by = NULL, ...)
+extractTubeMeta <- function (data, x = NULL, by = NULL, ...)
 {
   if (is.null(by)) {
     if (".sample_id" %in% names(data)) {

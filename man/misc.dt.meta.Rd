@@ -3,8 +3,8 @@
 \name{misc.dt.meta}
 \alias{misc.dt.meta}
 \alias{addTubeMeta}
-\alias{padTubeMeta}
 \alias{extractTubeMeta}
+\alias{padTubeMeta}
 \title{Miscellaneous Diffusion Tube Meta Data}
 \usage{
 addTubeMeta(data, ref = NULL, by = NULL, ...)
@@ -30,19 +30,24 @@ Details below.}
 
 \item{...}{additional arguments, currently ignored.}
 
-\item{x}{(For \code{padTubeMeta} only) The name of a data-series in
-\code{data} or expression to be evaluated, supplied as a character string.
-See Details below.}
+\item{x}{(For \code{padTubeMeta} and \code{extractTubeMeta}) The name of
+a data-series in \code{data} or expression to be evaluated, supplied as
+a character string. See Details below.}
 }
 \value{
-\code{padTubeMeta} returns \code{data} with the requested fix,
-if it can be applied.
+The functions return the requested data, and are generally used in the
+form:
+
+\code{requested.data <- padTubeMeta(dt.data, "[meta.name]", "[by.name]")}
+
+\code{addTubeMeta} returns the supplied \code{data} with \code{ref}
+merged at the requested level.
 
 \code{extractTube} returns a \code{data.frame} of data that looks like
 meta-data when grouped at the requested level.
 
-\code{padTubeMeta} returns the supplied \code{data} with the requested
-fix.
+\code{padTubeMeta} returns \code{data} with the requested fix,
+if it can be applied.
 }
 \description{
 Miscellaneous code used to work with
@@ -69,9 +74,4 @@ Please remeber that this function extracts data-series that at the
 any \code{NA}s with the first non-\code{NA} entry from the same data-series.
 It is intended for use with meta-data data-series, e.g. a \code{latitude}
 (or \code{longitude column}) where value was only entered once.
-
-The functions return the requested data, and are generally used in the
-form:
-
-\code{requested.data <- padTubeMeta(dt.data, "[meta.name]", "[by.name]")}
 }
