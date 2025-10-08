@@ -1,9 +1,10 @@
 ##################################################
-#' @title Miscellaneous Diffusion Tube Meta Data
+#' @title Working with Diffusion Tube Meta Data
 ##################################################
 
-#' @name misc.dt.meta
-#' @aliases misc.dt.meta addTubeMeta extractTubeMeta padTubeMeta
+#' @name misc.tube.meta
+#' @aliases misc.tube.meta addTubeMeta checkTubeMeta extractTubeMeta
+#' padTubeMeta
 #' @description Miscellaneous code used to work with
 #' diffusion tube (DT) meta data.
 
@@ -15,43 +16,51 @@
 #' @param ref (For \code{addTubeMeta} only) The meta data source, typically
 #' a data.frame or similar, containing meta-information associated with the
 #' diffusion tube records in \code{data}. See Details below.
-#' @param x (For \code{padTubeMeta} and \code{extractTubeMeta}) The name of
-#' a data-series in \code{data} or expression to be evaluated, supplied as
-#' a character string. See Details below.
+#' @param x (For most \code{...TubeMeta} functions) The name of a data-series in
+#' \code{data} or expression to be evaluated, supplied as a character string.
+#' See Details below.
 #' @param by The name of a data-series that can be used as a
 #' case identifier for meta information. For most diffusion tube meta data,
 #' this is often a site identifier, e.g. a site code or name. If \code{by}
 #' is not supplied, the function will check for known \code{DTEval}
-#' \code{tags} and file details, but may still require user input. See
+#' \code{tags} and data set details, but may still require user input. See
 #' Details below.
 #' @param ... additional arguments, currently ignored.
 
 #' @details
 #' \code{addTubeMeta} attempts to merge \code{data} and \code{ref} using
-#' \code{by} as the common term. It is intended for use with reference
-#' meta data or data extracted with \code{extractTubeMeta}.
+#' \code{by} as the common merging-term. It is intended for use with reference
+#' meta data or data extracted with from a reliable source using
+#' \code{extractTubeMeta}.
 #'
-#' \code{extractTube} attempts to extract data that looks like meta
+#' \code{extractTubeMeta} attempts to extract data that looks like meta
 #' information from the supplied \code{data}. Meta-data
-#' is only be expected to unique at a specific level of aggregation, e.g.
-#' \code{latitude} will be unique for a sample site. Although the function
-#' default is to look for known sample identifiers, this grouping term
-#' is set using the addition argument \code{by}. The function then extracts
-#' all data-series with only one unique non-\code{NA} value. By default,
-#' the function test all non-grouping data-series, but similarly
-#' testing/extraction can be limited to specific cases using \code{x}.
-#' Please remeber that this function extracts data-series that at the
-#' \code{by} grouping-level looks like meta information.
+#' is expected to unique at a specific level of aggregation, e.g. all
+#' \code{latitude} records should be identical for a given sample site.
+#' Although the function default is to look for known sample identifiers,
+#' this grouping term can be set using the addition argument \code{by}.
+#' The function then extracts all data-series with only one unique
+#' non-\code{NA} value for case of \code{by}. By default, the function
+#' tests all non-grouping data-series, but similarly testing/extraction
+#' can be limited to specific cases using \code{x}. Please remember that
+#' this function extracts data-series that at the \code{by} grouping-level
+#' looks like meta information. This is no unambiguous test to identify a
+#' data-series as meta-data. So, this function needs to be handled with care,
+#' especially if you have any concerns about the quality of your data sets.
 #'
 #' \code{padTubeMeta} attempts to pad the \code{x} data-series by replacing
 #' any \code{NA}s with the first non-\code{NA} entry from the same data-series.
 #' It is intended for use with meta-data data-series, e.g. a \code{latitude}
-#' (or \code{longitude column}) where value was only entered once.
+#' (or \code{longitude column}) where value was only entered once. Again, care
+#' should be taken using this function.
 #'
-#' @return The functions return the requested data, and are generally used in the
-#' form:
+#' @return These functions are generally intented to be used in the form:
+#'
+#' \code{updated.data <- addTubeMeta(dt.data, ref, "[by.name]")}
 #'
 #' \code{requested.data <- padTubeMeta(dt.data, "[meta.name]", "[by.name]")}
+#'
+#' ... etc
 #'
 #' \code{addTubeMeta} returns the supplied \code{data} with \code{ref}
 #' merged at the requested level.
@@ -64,13 +73,13 @@
 #'
 
 
+
 ######################################
 # to think about
 ######################################
 
-# would like a getTubeMeta if possible
-#     maybe call it extractTubeMeta
-#     but maybe need a testAsTubeMeta as part of the setup
+#
+
 
 
 
@@ -91,7 +100,7 @@
 #    but be a big job... because I'll need to go through the package and do the lot...
 
 
-#' @rdname misc.dt.meta
+#' @rdname misc.tube.meta
 #' @export
 
 addTubeMeta <- function(data, ref=NULL, by=NULL,...){
@@ -133,6 +142,51 @@ addTubeMeta <- function(data, ref=NULL, by=NULL,...){
 # addTubeMeta(dt.bradford, my.ref, "site")
 
 
+
+
+
+###############################
+# checkTubeMeta
+###############################
+
+# might want to check through getTubeX
+
+# notes
+#############################
+
+
+#' @rdname misc.tube.meta
+#' @export
+
+checkTubeMeta <- function(data, x=NULL, by=NULL, ...){
+
+  .d <- tagTube(data)
+
+  if(by==".location"){
+    .d$.location <- paste(.d$.latitude, .d$.longitude, sep=",")
+  }
+
+  out <- calcTubeStat(.d, x, by,
+                      function(x) {list(
+                        count = length(unique(x, na.rm=FALSE)),
+                        options = paste("'", sort(unique(x, na.rm=FALSE)), "'",
+                                        sep="", collapse = "|")
+                      )})
+  #out <- subset(out, out[,paste(x, ".count", sep="")]!=1)
+  out <- out[order(out[,paste(x, ".count", sep="")], decreasing = TRUE),]
+  out
+}
+
+
+
+
+
+
+
+
+
+
+
 #################################
 # extractTubeMeta
 #################################
@@ -148,7 +202,7 @@ addTubeMeta <- function(data, ref=NULL, by=NULL,...){
 # compare this and older method in padTubeMeta
 # not sure which is best..?
 
-#' @rdname misc.dt.meta
+#' @rdname misc.tube.meta
 #' @export
 
 extractTubeMeta <- function (data, x = NULL, by = NULL, ...)
@@ -201,7 +255,7 @@ extractTubeMeta <- function (data, x = NULL, by = NULL, ...)
 #    see in-code notes
 #
 
-#' @rdname misc.dt.meta
+#' @rdname misc.tube.meta
 #' @export
 
 padTubeMeta <- function(data, x=NULL, by=NULL,...){
@@ -247,4 +301,8 @@ padTubeMeta <- function(data, x=NULL, by=NULL,...){
 # compare
 # testTubePrecision(dt.bradford)
 # testTubePrecision(dat2)
+
+
+
+
 
