@@ -74,7 +74,7 @@
 # testTubeMeta
 #############################
 
-# might want to check through getTubeX
+# might want to check through getTubeX/checkTubeData
 
 # notes
 #############################
@@ -86,6 +86,7 @@
 testTubeMeta <- function(data, x=NULL, by=NULL, ...){
 
   #setup
+  .xargs <- modifyList(list(plot.type = 1), list(...))
   .d <- tagTube(data)
   if(is.null(x)){
     x <- names(.d)
@@ -104,63 +105,121 @@ testTubeMeta <- function(data, x=NULL, by=NULL, ...){
   .d$..sample <- .d$.sample_id
   .d$..all <- 1
 
-  loc.fun <- function(x){
-    if(length(unique(x))==1){
-      as.integer(length(x[!is.na(x)]))
-    } else {
-      as.integer(0)
+  if(.xargs$plot.type==1){
+
+    # standard plot
+    ######################
+    loc.fun <- function(x){
+      if(length(unique(x))==1){
+        as.integer(length(x[!is.na(x)]))
+      } else {
+        as.integer(0)
+      }
     }
+    #build levels
+    .test <- calcTubeStat(.d, x, "..all", loc.fun)
+    .test$ref<- "all.data"
+    .test <- .test[names(.test)!="..all"]
+    out <- data.table::as.data.table(.test)
+    .test <- calcTubeStat(.d, x, "..sample", loc.fun)
+    .test$ref<- "sample"
+    out <- data.table::rbindlist(list(out, .test[names(.test)!="..sample"]),
+                                 fill=TRUE)
+    .test <- calcTubeStat(.d, x, "..date", loc.fun)
+    .test$ref<- "date"
+    out <- data.table::rbindlist(list(out, .test[names(.test)!="..date"]),
+                                 fill=TRUE)
+    .test <- calcTubeStat(.d, x, "..location", loc.fun)
+    .test$ref<- "location"
+    out <- data.table::rbindlist(list(out, .test[names(.test)!="..location"]),
+                                 fill=TRUE)
+    stat <- function(x) sum(x, na.rm=TRUE)
+    tube <- names(out)[names(out) != "ref"]
+    out <- out[, as.list(unlist(lapply(.SD, stat))), .SDcols = tube,
+               by = "ref"]
+
+    # summary
+    out <- as.data.frame(data.table::melt(out, id.vars="ref"))
+    out$value <- out$value/nrow(.d) * 100
+    out$ref <- factor(out$ref, levels=rev(c("all.data", "sample",
+                                            "location", "date")))
+
+    # plot
+    # flip legend list ?
+    plt <- ggplot2::ggplot(out) +
+      ggplot2::geom_col(ggplot2::aes(x=value, y=ref, fill=ref),
+                        position="dodge") +
+      ggplot2::geom_vline(xintercept = 100, linetype="dashed") +
+      ggplot2::facet_wrap(.~variable) +
+      ggplot2::xlab("") + ggplot2::ylab("") +
+      ggplot2::theme_bw() +
+      ggplot2::theme(strip.background = ggplot2::element_rect(fill=NA))
+
+    return(plt)
+  } else {
+
+    # alternative plot
+    #################################
+    # as above but making two column
+    loc.fun <- function(x){
+      list(count = length(x),
+           type = if(length(unique(x))==1){
+                if(is.na(unique(x))) "grey" else "green"
+             } else {
+                if(length(unique(x[!is.na(x)]))==1) "amber" else "red"
+             }
+          )
+    }
+    .test <- calcTubeStat(.d, x, "..all", loc.fun)
+    .test$ref<- "all.data"
+    .test <- .test[names(.test)!="..all"]
+    out <- data.table::as.data.table(.test)
+    .test <- calcTubeStat(.d, x, "..sample", loc.fun)
+    .test$ref<- "sample"
+    out <- data.table::rbindlist(list(out, .test[names(.test)!="..sample"]),
+                                 fill=TRUE)
+    .test <- calcTubeStat(.d, x, "..date", loc.fun)
+    .test$ref<- "date"
+    out <- data.table::rbindlist(list(out, .test[names(.test)!="..date"]),
+                                 fill=TRUE)
+    .test <- calcTubeStat(.d, x, "..location", loc.fun)
+    .test$ref<- "location"
+    .dt <- data.table::rbindlist(list(out, .test[names(.test)!="..location"]),
+                                 fill=TRUE)
+    .nm <- c(names(.dt)[grep("[.]count$", names(.dt))], "ref")
+    .test <- .dt[,.nm, with=FALSE]
+    names(.test) <- gsub("[.]count$", "", names(.test))
+    out <- as.data.frame(data.table::melt(.test, id.vars="ref"))
+    .nm <- c(names(.dt)[grep("[.]type$", names(.dt))], "ref")
+    .test <- .dt[,.nm, with=FALSE]
+    names(.test) <- gsub("[.]type$", "", names(.test))
+    .test <- as.data.frame(data.table::melt(.test, id.vars="ref"))
+    out$value <- as.numeric(out$value)/nrow(.d) * 100
+    out$..type <- factor(.test$value, levels= c("red", "amber", "green", "grey"))
+    out$ref <- factor(out$ref, levels=rev(c("all.data", "sample",
+                                            "location", "date")))
+    #####################
+    # might be worth
+    #    summing in data.frame and send smaller data.frame to ggplot???
+
+    plt <- ggplot2::ggplot(out) +
+      ggplot2::geom_col(ggplot2::aes(x=value, y=ref, fill=..type),
+                        position="stack", show.legend = TRUE) +
+      ggplot2::geom_vline(xintercept = 100, linetype="dashed") +
+      ggplot2::facet_wrap(.~variable) +
+      ggplot2::xlab("") + ggplot2::ylab("") +
+      ggplot2::scale_fill_manual(name="",
+                                 values=c("red" ="pink",
+                                          "amber"  = "lightyellow",
+                                          "green" = "green",
+                                          "grey" = grey(0.85)),
+                                 drop = FALSE) +
+      ggplot2::theme_bw() +
+      ggplot2::theme(strip.background = ggplot2::element_rect(fill=NA))
+
+    return(plt)
+
   }
-
-  #################################################
-  # count meta-like
-  #################################################
-  # think there will be a quicker
-  #   way of doing this ???
-  # currently does...
-  #   how many unique length 1 w/o NAs
-  # like to also know...
-  #   how many unique length 1 & NA
-  #   how many unique length 2 & NA + something else
-  #################################################
-  .test <- calcTubeStat(.d, x, "..all", loc.fun)
-  .test$ref<- "all.data"
-  .test <- .test[names(.test)!="..all"]
-  out <- data.table::as.data.table(.test)
-  .test <- calcTubeStat(.d, x, "..sample", loc.fun)
-  .test$ref<- "sample"
-  out <- data.table::rbindlist(list(out, .test[names(.test)!="..sample"]),
-                               fill=TRUE)
-  .test <- calcTubeStat(.d, x, "..date", loc.fun)
-  .test$ref<- "date"
-  out <- data.table::rbindlist(list(out, .test[names(.test)!="..date"]),
-                               fill=TRUE)
-  .test <- calcTubeStat(.d, x, "..location", loc.fun)
-  .test$ref<- "location"
-  out <- data.table::rbindlist(list(out, .test[names(.test)!="..location"]),
-                               fill=TRUE)
-  stat <- function(x) sum(x, na.rm=TRUE)
-  tube <- names(out)[names(out) != "ref"]
-  out <- out[, as.list(unlist(lapply(.SD, stat))), .SDcols = tube,
-             by = "ref"]
-
-  out <- as.data.frame(data.table::melt(out, id.vars="ref"))
-  out$ref <- factor(out$ref, levels=rev(c("all.data", "sample",
-                                          "location", "date")))
-
-  ##############################
-  # plot
-  ##############################
-  # flip legend list ?
-  # make x-axis percentage
-  ggplot2::ggplot(out) +
-    ggplot2::geom_col(ggplot2::aes(x=value, y=ref, fill=ref),
-                      position="dodge") +
-    ggplot2::geom_vline(xintercept = nrow(.d), linetype="dashed") +
-    ggplot2::facet_wrap(.~variable) +
-    ggplot2::xlab("") + ggplot2::ylab("") +
-    ggplot2::theme_bw() +
-    ggplot2::theme(strip.background = ggplot2::element_rect(fill=NA))
 }
 
 
