@@ -5,7 +5,7 @@
 #' @importFrom stats as.formula end lm loess predict qt quantile sd start qnorm na.omit median
 #' @importFrom utils data modifyList
 #' @importFrom methods is
-#' @importFrom grDevices colorRampPalette as.raster
+#' @importFrom grDevices colorRampPalette as.raster grey
 
 ##########################
 # don't want full import
@@ -14,13 +14,14 @@
 #' @importFrom data.table as.data.table .SD :=
 
 
-
-
 #undefined globals
 utils::globalVariables(c(".data", ".mean",".n", ".tube",".y", ".yhigh",
                          ".ylow", "latitude", "longitude", ".", ".value",
                          ".latitude", ".longitude", ".start_date",
-                         ".end_date", "X", "Y", "checksum"))
+                         ".end_date", "X", "Y", "checksum",
+                         "..type", "ref", "value"))
+
+                          # like to be able to drop a fe of the above...
 
 
 ###########################

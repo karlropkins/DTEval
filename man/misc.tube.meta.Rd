@@ -33,7 +33,7 @@ Details below.}
 
 \item{...}{additional arguments, currently ignored.}
 
-\item{x}{(For \code{...TubeMeta} functions) The name of a data-series in
+\item{x}{(For most \code{...TubeMeta} functions) The name of a data-series in
 \code{data} or expression to be evaluated, supplied as a character string.
 See Details below.}
 }
