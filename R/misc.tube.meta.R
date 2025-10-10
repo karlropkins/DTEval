@@ -447,8 +447,9 @@ repairTubeMeta <- function(data, x=NULL, by=NULL, options=NULL, ...){
   for(i in .ref){
     .ops <- sort(unique(.d[.d[[by]]==i, x]))
     .ts <- options[options %in% .ops]
-    if(length(.ts)==1){
+    if(length(.ts)==1 & length(.ops)>1){
       # have a valid option to update
+      # (and something that needs updating)
       .d[.d[[by]]==i, x] <- .ts
       .n.rep[1] <- .n.rep[1] + 1
     }
