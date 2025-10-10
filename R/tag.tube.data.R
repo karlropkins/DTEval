@@ -4,7 +4,7 @@
 
 #' @name tag.tube.data
 #' @aliases tag.tube.data tagTube tagTubeStartEnd tagTubeLatLon tagTubeSampleID
-#' TagTubeValue tagTubeDate
+#' TagTubeValue tagTubeDate tagTubeLocation
 
 #' @description Pre-processing diffusion tube (DT) data for use with
 #' \code{DTEval}. Coded methods to standardise DT data collected using
@@ -102,8 +102,8 @@
 #' one method: \code{method=1} assigning all same-location-and-time DTs as
 #' replicates, and is added to \code{data} as \code{.sample_id}.
 #'
-#' \code{tagTubeValue} identifies the diffusion tube measurements. it currently
-#' uses one method: \code{method=1} to
+#' \code{tagTubeValue} identifies the diffusion tube measurements,
+#' tagging these as \code{.value}.
 #'
 #' \code{tagTube} is a wrapper that runs \code{tagTubeStartEnd},
 #' \code{tagTubeLatLon}, \code{tagTubeSampleID} and \code{tagTubeValue}.
@@ -127,6 +127,10 @@
 #' end dates, it runs \code{tagTubeStartEnd} if these are not already
 #' tagged.
 #'
+#' \code{tagTubeLocation} attempts to assign a representative location
+#' to each sampling record (\code{data} row). This is typically made by
+#' merging the latitude and longitude tags, and uses \code{tagTubeLatLon}
+#' to get these if not already tagged.
 
 
 
@@ -633,3 +637,59 @@ tagTubeDate <- function(data, method=2, force=FALSE, ...){
 
 }
 
+
+
+
+
+#############################
+# tagTubelocation
+#############################
+
+# minor tag; only used when needed
+
+# location of tube
+#   default: make a lat,long case...
+#   needs tagTubeLatLon run...
+
+# currently doing
+###############################
+#
+
+# think about
+##############################
+#  handling for different outputs??
+#       vector name
+#       vector elements/type
+#  for overwrite/force handling???
+#       does this need a hidden date.force ???
+
+
+#' @rdname tag.tube.data
+#' @export
+
+tagTubeLocation <- function(data, method=1, force=FALSE, ...){
+
+  .xargs <- list(...)
+  if("location.force" %in% names(.xargs)){
+    force <- .xargs$date.force
+  }
+  if("location.method" %in% names(.xargs)){
+    method <- .xargs$date.method
+  }
+  if(".location" %in% names(data) && !force){
+    return(data)
+  }
+  data <- tagTubeLatLon(data, ...)
+  check <- 1
+  if(!method %in% check){
+    stop("[setTubeLocation] Unknown method, maybe try one of: ", paste(check, collapse=","),
+         call.=FALSE)
+  }
+  if(method==1){
+    temp <- paste("{", data$.latitude, ",", data$.longitude, "}", sep="")
+  }
+  data$.location <- temp
+
+  return(data)
+
+}

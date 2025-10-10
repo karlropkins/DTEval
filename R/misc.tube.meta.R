@@ -4,7 +4,7 @@
 
 #' @name misc.tube.meta
 #' @aliases misc.tube.meta addTubeMeta checkTubeMeta extractTubeMeta
-#' padTubeMeta
+#' padTubeMeta repairTubeMeta
 #' @description Miscellaneous code used to work with
 #' diffusion tube (DT) meta data.
 
@@ -26,6 +26,10 @@
 #' \code{tags} and data set details, but may still require user input. See
 #' Details below.
 #' @param ... additional arguments, currently ignored.
+#' @param options (for \code{repairTUbeMeta} only) a vector of valid options
+#' for \code{x}. These are used to a guide when attempting to repair
+#' \code{x}/\code{by} combinations with multiple values associated. See Details
+#' below
 
 #' @details
 #' \code{addTubeMeta} attempts to merge \code{data} and \code{ref} using
@@ -33,18 +37,24 @@
 #' meta data or data extracted with from a reliable source using
 #' \code{extractTubeMeta}.
 #'
+#' \code{checkTubeMeta} attempts to identfied all unique values for an
+#' \code{x}/\code{by} combination. Meta-data is expected to unique at a
+#' specific level of aggregation, e.g. all \code{latitude} records should
+#' be identical for a given sample site. So, finding multiple values
+#' and/or unexpected values as options for \code{x} suggests the data-series
+#' is not meta-data at that level or it has been corrupted. (See also
+#' \code{repairTubeMeta} below.)
+#'
 #' \code{extractTubeMeta} attempts to extract data that looks like meta
-#' information from the supplied \code{data}. Meta-data
-#' is expected to unique at a specific level of aggregation, e.g. all
-#' \code{latitude} records should be identical for a given sample site.
+#' information from the supplied \code{data}.
 #' Although the function default is to look for known sample identifiers,
 #' this grouping term can be set using the addition argument \code{by}.
 #' The function then extracts all data-series with only one unique
 #' non-\code{NA} value for case of \code{by}. By default, the function
 #' tests all non-grouping data-series, but similarly testing/extraction
-#' can be limited to specific cases using \code{x}. Please remember that
-#' this function extracts data-series that at the \code{by} grouping-level
-#' looks like meta information. This is no unambiguous test to identify a
+#' can be limited to specific data-series using \code{x}. Please remember that
+#' this function extracts data-series that looks like meta information at
+#' the \code{by} grouping-level. There is no unambiguous test to identify a
 #' data-series as meta-data. So, this function needs to be handled with care,
 #' especially if you have any concerns about the quality of your data sets.
 #'
@@ -54,23 +64,42 @@
 #' (or \code{longitude column}) where value was only entered once. Again, care
 #' should be taken using this function.
 #'
-#' @return These functions are generally intented to be used in the form:
+#' \code{repairTubeMeta} attempts to repair what looks like bad
+#' meta-information. It uses an extra argument \code{options}, a list of
+#' valid options for \code{x}, as a reference to rationalise multiple value
+#' \code{by} subsets.
+#'
+
+# will need to document this further if it stays...
+
+#' @return These functions are generally intended to be used in the form:
 #'
 #' \code{updated.data <- addTubeMeta(dt.data, ref, "[by.name]")}
 #'
-#' \code{requested.data <- padTubeMeta(dt.data, "[meta.name]", "[by.name]")}
+#' \code{requested.data <- checkTubeMeta(dt.data, "[meta.name]", "[by.name]")}
 #'
 #' ... etc
 #'
 #' \code{addTubeMeta} returns the supplied \code{data} with \code{ref}
 #' merged at the requested level.
 #'
-#' \code{extractTube} returns a \code{data.frame} of data that looks like
-#' meta-data when grouped at the requested level.
+#' \code{checkTubeMeta} returns a \code{data.frame} of values associated with
+#' found when grouping \code{x} data at the requested level. More than one
+#' value and/or unexpected values indicate that \code{x} may not be meta-data
+#' or, if it is, that the meta-data has been corrupted.
+#'
+#' \code{extractTubeMeta} returns a \code{data.frame} of data that looks like
+#' meta-data when grouped at the requested level. (NB: data-series have to be
+#' unique at the grouping level requested to generate an output with
+#' \code{extractTubeMeta}. So, any \code{x}/\code{by} combinations that
+#' \code{checkTubeMeta} reports as having multiple outputs will be ignored by
+#' this function.)
 #'
 #' \code{padTubeMeta} returns \code{data} with the requested fix,
 #' if it can be applied.
 #'
+#' \code{repairTubeMeta} like \code{padTubeMeta}, returns the fixed \code{data},
+#' if the repair can be made.
 
 
 
@@ -78,7 +107,9 @@
 # to think about
 ######################################
 
-#
+# pad/repairTubeMeta
+#    should probably drop padTubeMeta or replace with a
+#        repairTubeMeta wrapper (see notes)
 
 
 
@@ -99,6 +130,8 @@
 #    Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.
 #    but be a big job... because I'll need to go through the package and do the lot...
 
+# need by because
+#   it strips all non-by data-series in ref from data before merging...
 
 #' @rdname misc.tube.meta
 #' @export
@@ -149,7 +182,12 @@ addTubeMeta <- function(data, ref=NULL, by=NULL,...){
 # checkTubeMeta
 ###############################
 
-# might want to check through getTubeX
+# check the checkTube(s) doing x but not by....
+#     but think at least some of the should be
+#     merged in require-tags-only variation on tagTube
+#     or allow for a dummyTube() function that allows you to
+#     pass untagged files to a tube function (at you own risk)
+# (same for repairTubeMeta)
 
 # notes
 #############################
@@ -160,21 +198,45 @@ addTubeMeta <- function(data, ref=NULL, by=NULL,...){
 
 checkTubeMeta <- function(data, x=NULL, by=NULL, ...){
 
+  #setup
   .d <- tagTube(data)
-
+  .xargs <- list(...)
+  if(is.null(x) | is.null(by)){
+    stop("[checkTubeMeta] need both 'x' and 'by'",
+         call.=FALSE)
+  }
+  .d <- checkTubeData(.d, x, if.err="stop<<checkTubeMeta>>x")
+  #####################
+  # should be a better way of doing b=next bit...
   if(by==".location"){
-    .d$.location <- paste(.d$.latitude, .d$.longitude, sep=",")
+    .d <- tagTubeLocation(.d)
+  }
+  if(by==".date"){
+    .d <- tagTubeDate(.d)
   }
 
+  #main check
   out <- calcTubeStat(.d, x, by,
                       function(x) {list(
                         count = length(unique(x, na.rm=FALSE)),
                         options = paste("'", sort(unique(x, na.rm=FALSE)), "'",
                                         sep="", collapse = "|")
                       )})
-  #out <- subset(out, out[,paste(x, ".count", sep="")]!=1)
   out <- out[order(out[,paste(x, ".count", sep="")], decreasing = TRUE),]
-  out
+  #output
+  if("output" %in% names(.xargs)){
+    # full report
+    if(tolower(.xargs$output) %in% c("report", "full.report")){
+      return(out)
+    }
+  }
+  # summary report
+  # think about labelling
+  #    this is option.count, options (as string), and number of locations
+  #    this NEEDS calcTubeStat to work with datasets that are NOT tagged
+  calcTubeStat(out, tube = by, by = paste(x, c("count", "options"), sep="."),
+               stat=function(x) list(length(x)))
+
 }
 
 
@@ -210,8 +272,7 @@ extractTubeMeta <- function (data, x = NULL, by = NULL, ...)
   if (is.null(by)) {
     if (".sample_id" %in% names(data)) {
       by <- ".sample_id"
-    }
-    else {
+    } else {
       stop("[padTubeMeta] Sorry, need a valid 'by'", call. = FALSE)
     }
   }
@@ -303,6 +364,107 @@ padTubeMeta <- function(data, x=NULL, by=NULL,...){
 # testTubePrecision(dat2)
 
 
+
+
+
+
+###############################
+# repairTubeMeta
+###############################
+
+# might want to check through all getTubeX/checkTubeData handling
+
+# this may need careful documentation...
+
+# currently only one repair method
+
+# options = all known valid options for x.
+# functions assumes x is meta-information at the by-aggregated level
+#    AND that all valid options are known
+#        example: options = c('Valid', 'Invalid')
+#           for non-unique level 'Valid' | '' | 'Unknown' => 'Valid'
+#           for unique level 'Valid' => 'Valid' [or strictly no change]
+#           for non-unique level 'Valid' | 'Invalid' => [suffix all '.SUSPECT']
+#           for non-unique level '' | 'Unknown' => [no changes]
+#           for non-unique level 'Invalid' | '' | 'Unknown' => 'Invalid'
+#           etc ...
+
+# caveat
+# this assumes that e.g. location based meta-info does not change, e.g. a Valid
+#     site does not become Invalid...
+
+# notes
+#############################
+
+
+# think about
+############################
+
+# function options argument is currently specific....
+#     do we want to drop to making all lower case for this...?
+
+# this might be better/safer than current padTubeMeta
+#   I think repairTubeMeta(data, x, by, options=unqiue(data[[x]]))
+#        would do similar but with not use first unique(x) if there
+#        were multiple... (NB: pad... uses unique(x)[1]... )
+
+# might want option to silence warnings/messages
+
+#' @rdname misc.tube.meta
+#' @export
+
+repairTubeMeta <- function(data, x=NULL, by=NULL, options=NULL, ...){
+
+  #setup
+  if(is.null(options)){
+    stop("[repairTubeMeta] need 'options' to work with...",
+         call.=FALSE)
+  }
+  .d <- tagTube(data)
+  .xargs <- list(...)
+  if(is.null(x) | is.null(by)){
+    stop("[repairTubeMeta] need both 'x' and 'by'",
+         call.=FALSE)
+  }
+  .d <- checkTubeData(.d, x, if.err="stop<<checkTubeMeta>>x")
+  #####################
+  # should be a better way of doing b=next bit...
+  if(by==".location"){
+    .d <- tagTubeLocation(.d)
+  }
+  if(by==".date"){
+    .d <- tagTubeDate(.d)
+  }
+
+  #main loop
+  ###################################
+  # Keep an eye on the speed of this
+  # thought it would a lot slower
+  #    BUT may still slow down dramatically
+  #    on very big data.frames
+  .ref <- unique(.d[[by]])
+  .n.rep <- c(0,0)
+  for(i in .ref){
+    .ops <- sort(unique(.d[.d[[by]]==i, x]))
+    .ts <- options[options %in% .ops]
+    if(length(.ts)==1){
+      # have a valid option to update
+      .d[.d[[by]]==i, x] <- .ts
+      .n.rep[1] <- .n.rep[1] + 1
+    }
+    if(length(.ts)>1){
+      # have multiple valid options, tag as suspect
+      .d[.d[[by]]==i, x] <- paste(.d[.d[[by]]==i, x], ".SUSPECT", sep="")
+      .n.rep[2] <- .n.rep[2] + 1
+    }
+  }
+  if(.n.rep[1]>1 | .n.rep[2]>1){
+    message("[repairTubeMeta] ", .n.rep[1], " repair(s) made; ", .n.rep[2],
+            " suspect(s) subsets identified.")
+  }
+  return(.d)
+
+}
 
 
 

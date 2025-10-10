@@ -59,14 +59,12 @@
 #' @seealso [checkTubeMeta()] and related functions for working with and
 #' fixing Diffusion Tube meta-data.
 
+# check about link to checkTubeMeta works...
+
 
 ######################################
 # to think about
 ######################################
-
-# would like a getTubeMeta if possible
-#     maybe call it extractTubeMeta
-#     but maybe need a testAsTubeMeta as part of the setup
 
 
 
@@ -78,6 +76,19 @@
 
 # notes
 #############################
+
+#     have undocumented plot.type=2
+#        document if keeping
+#            grey = just NAs
+#            green = all identical and NOT NAs
+#            amber = all either identical or NA
+#            red = multiple terms either with NAs removed
+#            (grey and red need manual fixing; and possible provider input)
+#            (green look sense/probably fine - usual meta-data assessment caveat)
+#            (grey we can probably fix )
+
+#     included a palette arg in .xargs BUT should
+#        think about rewriting to use ggplotShell, etc...
 
 
 #' @rdname tube.meta
@@ -100,7 +111,7 @@ testTubeMeta <- function(data, x=NULL, by=NULL, ...){
 
   # add temp versions of all, sample, location, date...
   #   currently need these BUT don't keep them
-  .d$..location <- paste(.d$.latitude, .d$.longitude, sep=",")
+  .d$..location <- tagTubeLocation(.d)$.location
   .d$..date <- tagTubeDate(.d)$.date
   .d$..sample <- .d$.sample_id
   .d$..all <- 1
@@ -115,6 +126,16 @@ testTubeMeta <- function(data, x=NULL, by=NULL, ...){
       } else {
         as.integer(0)
       }
+    }
+    #cols for plot.type 1
+    plt.cols <- if("palette" %in% names(.xargs)){
+      rep(.xargs$palette, 4)[1:4]
+    } else {
+      # https://stackoverflow.com/questions/8197559/emulate-ggplot2-default-color-palette
+      # gg_color_hue <- function(n) {
+      #     hues = seq(15, 375, length = n + 1)
+      #     hcl(h = hues, l = 65, c = 100)[1:n]}
+      c("#F8766D", "#7CAE00", "#00BFC4", "#C77CFF")
     }
     #build levels
     .test <- calcTubeStat(.d, x, "..all", loc.fun)
@@ -145,12 +166,18 @@ testTubeMeta <- function(data, x=NULL, by=NULL, ...){
                                             "location", "date")))
 
     # plot
-    # flip legend list ?
+    # flip legend list order?
     plt <- ggplot2::ggplot(out) +
       ggplot2::geom_col(ggplot2::aes(x=value, y=ref, fill=ref),
                         position="dodge") +
       ggplot2::geom_vline(xintercept = 100, linetype="dashed") +
       ggplot2::facet_wrap(.~variable) +
+      ggplot2::scale_fill_manual(name="",
+                                 values=c("all.data" = plt.cols[1],
+                                          "sample"  = plt.cols[2],
+                                          "location" = plt.cols[3],
+                                          "date" = plt.cols[4]),
+                                 drop = FALSE) +
       ggplot2::xlab("") + ggplot2::ylab("") +
       ggplot2::theme_bw() +
       ggplot2::theme(strip.background = ggplot2::element_rect(fill=NA))
@@ -169,6 +196,16 @@ testTubeMeta <- function(data, x=NULL, by=NULL, ...){
                 if(length(unique(x[!is.na(x)]))==1) "amber" else "red"
              }
           )
+    }
+    #cols for plot.type 2
+    plt.cols <- if("palette" %in% names(.xargs)){
+      rep(.xargs$palette, 4)[1:4]
+    } else {
+      # https://stackoverflow.com/questions/8197559/emulate-ggplot2-default-color-palette
+      # gg_color_hue <- function(n) {
+      #     hues = seq(15, 375, length = n + 1)
+      #     hcl(h = hues, l = 65, c = 100)[1:n]}
+      c(grey(0.85), "green", "lightyellow", "pink")
     }
     .test <- calcTubeStat(.d, x, "..all", loc.fun)
     .test$ref<- "all.data"
@@ -201,6 +238,8 @@ testTubeMeta <- function(data, x=NULL, by=NULL, ...){
     #####################
     # might be worth
     #    summing in data.frame and send smaller data.frame to ggplot???
+    #        could also retry the transparent red, amber and grey bands
+    #        if this speed thinks up...
 
     plt <- ggplot2::ggplot(out) +
       ggplot2::geom_col(ggplot2::aes(x=value, y=ref, fill=..type),
@@ -209,10 +248,10 @@ testTubeMeta <- function(data, x=NULL, by=NULL, ...){
       ggplot2::facet_wrap(.~variable) +
       ggplot2::xlab("") + ggplot2::ylab("") +
       ggplot2::scale_fill_manual(name="",
-                                 values=c("red" ="pink",
-                                          "amber"  = "lightyellow",
-                                          "green" = "green",
-                                          "grey" = grey(0.85)),
+                                 values=c("red" = plt.cols[4],
+                                          "amber"  = plt.cols[3],
+                                          "green" = plt.cols[2],
+                                          "grey" = plt.cols[1]),
                                  drop = FALSE) +
       ggplot2::theme_bw() +
       ggplot2::theme(strip.background = ggplot2::element_rect(fill=NA))

@@ -6,6 +6,7 @@
 \alias{checkTubeMeta}
 \alias{extractTubeMeta}
 \alias{padTubeMeta}
+\alias{repairTubeMeta}
 \title{Working with Diffusion Tube Meta Data}
 \usage{
 addTubeMeta(data, ref = NULL, by = NULL, ...)
@@ -15,6 +16,8 @@ checkTubeMeta(data, x = NULL, by = NULL, ...)
 extractTubeMeta(data, x = NULL, by = NULL, ...)
 
 padTubeMeta(data, x = NULL, by = NULL, ...)
+
+repairTubeMeta(data, x = NULL, by = NULL, options = NULL, ...)
 }
 \arguments{
 \item{data}{Data source, typically a data.frame or similar, containing
@@ -36,24 +39,41 @@ Details below.}
 \item{x}{(For most \code{...TubeMeta} functions) The name of a data-series in
 \code{data} or expression to be evaluated, supplied as a character string.
 See Details below.}
+
+\item{options}{(for \code{repairTUbeMeta} only) a vector of valid options
+for \code{x}. These are used to a guide when attempting to repair
+\code{x}/\code{by} combinations with multiple values associated. See Details
+below}
 }
 \value{
-These functions are generally intented to be used in the form:
+These functions are generally intended to be used in the form:
 
 \code{updated.data <- addTubeMeta(dt.data, ref, "[by.name]")}
 
-\code{requested.data <- padTubeMeta(dt.data, "[meta.name]", "[by.name]")}
+\code{requested.data <- checkTubeMeta(dt.data, "[meta.name]", "[by.name]")}
 
 ... etc
 
 \code{addTubeMeta} returns the supplied \code{data} with \code{ref}
 merged at the requested level.
 
-\code{extractTube} returns a \code{data.frame} of data that looks like
-meta-data when grouped at the requested level.
+\code{checkTubeMeta} returns a \code{data.frame} of values associated with
+found when grouping \code{x} data at the requested level. More than one
+value and/or unexpected values indicate that \code{x} may not be meta-data
+or, if it is, that the meta-data has been corrupted.
+
+\code{extractTubeMeta} returns a \code{data.frame} of data that looks like
+meta-data when grouped at the requested level. (NB: data-series have to be
+unique at the grouping level requested to generate an output with
+\code{extractTubeMeta}. So, any \code{x}/\code{by} combinations that
+\code{checkTubeMeta} reports as having multiple outputs will be ignored by
+this function.)
 
 \code{padTubeMeta} returns \code{data} with the requested fix,
 if it can be applied.
+
+\code{repairTubeMeta} like \code{padTubeMeta}, returns the fixed \code{data},
+if the repair can be made.
 }
 \description{
 Miscellaneous code used to work with
@@ -65,18 +85,24 @@ diffusion tube (DT) meta data.
 meta data or data extracted with from a reliable source using
 \code{extractTubeMeta}.
 
+\code{checkTubeMeta} attempts to identfied all unique values for an
+\code{x}/\code{by} combination. Meta-data is expected to unique at a
+specific level of aggregation, e.g. all \code{latitude} records should
+be identical for a given sample site. So, finding multiple values
+and/or unexpected values as options for \code{x} suggests the data-series
+is not meta-data at that level or it has been corrupted. (See also
+\code{repairTubeMeta} below.)
+
 \code{extractTubeMeta} attempts to extract data that looks like meta
-information from the supplied \code{data}. Meta-data
-is expected to unique at a specific level of aggregation, e.g. all
-\code{latitude} records should be identical for a given sample site.
+information from the supplied \code{data}.
 Although the function default is to look for known sample identifiers,
 this grouping term can be set using the addition argument \code{by}.
 The function then extracts all data-series with only one unique
 non-\code{NA} value for case of \code{by}. By default, the function
 tests all non-grouping data-series, but similarly testing/extraction
-can be limited to specific cases using \code{x}. Please remember that
-this function extracts data-series that at the \code{by} grouping-level
-looks like meta information. This is no unambiguous test to identify a
+can be limited to specific data-series using \code{x}. Please remember that
+this function extracts data-series that looks like meta information at
+the \code{by} grouping-level. There is no unambiguous test to identify a
 data-series as meta-data. So, this function needs to be handled with care,
 especially if you have any concerns about the quality of your data sets.
 
@@ -85,4 +111,9 @@ any \code{NA}s with the first non-\code{NA} entry from the same data-series.
 It is intended for use with meta-data data-series, e.g. a \code{latitude}
 (or \code{longitude column}) where value was only entered once. Again, care
 should be taken using this function.
+
+\code{repairTubeMeta} attempts to repair what looks like bad
+meta-information. It uses an extra argument \code{options}, a list of
+valid options for \code{x}, as a reference to rationalise multiple value
+\code{by} subsets.
 }

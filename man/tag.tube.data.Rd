@@ -8,6 +8,7 @@
 \alias{tagTubeSampleID}
 \alias{TagTubeValue}
 \alias{tagTubeDate}
+\alias{tagTubeLocation}
 \alias{tagTubeValue}
 \title{Diffusion Tube Pro-processing}
 \usage{
@@ -22,6 +23,8 @@ tagTubeSampleID(data, method = -1, force = FALSE, ...)
 tagTubeValue(data, method = -1, force = FALSE, ...)
 
 tagTubeDate(data, method = 2, force = FALSE, ...)
+
+tagTubeLocation(data, method = 1, force = FALSE, ...)
 }
 \arguments{
 \item{data}{Data source, typically a
@@ -113,8 +116,8 @@ format coordinates.
 one method: \code{method=1} assigning all same-location-and-time DTs as
 replicates, and is added to \code{data} as \code{.sample_id}.
 
-\code{tagTubeValue} identifies the diffusion tube measurements. it currently
-uses one method: \code{method=1} to
+\code{tagTubeValue} identifies the diffusion tube measurements,
+tagging these as \code{.value}.
 
 \code{tagTube} is a wrapper that runs \code{tagTubeStartEnd},
 \code{tagTubeLatLon}, \code{tagTubeSampleID} and \code{tagTubeValue}.
@@ -137,4 +140,9 @@ intended for use when plotting time-series: options: 1 (start date),
 2 (default; mid-point date); 3 (end date). Because it uses start and
 end dates, it runs \code{tagTubeStartEnd} if these are not already
 tagged.
+
+\code{tagTubeLocation} attempts to assign a representative location
+to each sampling record (\code{data} row). This is typically made by
+merging the latitude and longitude tags, and uses \code{tagTubeLatLon}
+to get these if not already tagged.
 }
