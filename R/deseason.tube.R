@@ -4,7 +4,7 @@
 
 #' @name deseason.tube
 #' @aliases deseason.tube deseasonTubeData
-#' @description Functions for seasonalising multiple year
+#' @description Functions for deseasonalising multiple year
 #' diffusion tube (DT) data time-series.
 
 #  see notes on value of deseasonalisation
@@ -18,7 +18,7 @@
 #' @param ... additional arguments, currently ignored.
 
 #' @details
-#' \code{deseasonaliseTube} attempts to deseasonalise the supplied time-series.
+#' \code{deseasonTubeData} attempts to deseasonalise the supplied time-series.
 #'
 #' It builds a LOESS time-series model in the form:
 #'
