@@ -21,8 +21,8 @@
 #                may then hull or whatever to make into a polygon...
 
 
-#' @name misc.dt.lat.lon
-#' @aliases misc.dt.lat.lon tubeInXYPolygon
+#' @name misc.tube.lat.lon
+#' @aliases misc.tube.lat.lon tubeInXYPolygon
 #' @description Miscellaneous functions for use with Latitude and Longtitude
 #' data. By default, these are setup for use with \code{DTEval}, so
 #' expects tagged data (see \code{\link{tagTube}}).
@@ -81,13 +81,21 @@
 
 #  thinking about
 ##############################
+#  coordinate handling
+#     added st_transform to polygon handling because some of supplied
+#         polygons are not lat/lon (like-wot-was-requested)
+#     MIGHT have to do similar elsewhere...
+#  handling for different inputs ??
+#     currently allows you to rename
+#         data latitude and longitude names using lat and lon
+#         polygon x and y names using x and y
 #  handling for different outputs??
 #       vector name
 #       vector elements/type
 #  handling grouping/subsets within polygon
 #      for multiple polygon files and for buffering
 
-#' @rdname misc.dt.lat.lon
+#' @rdname misc.tube.lat.lon
 #' @export
 
 tubeInXYPolygon <- function(data, polygon, ...){
@@ -123,7 +131,11 @@ tubeInXYPolygon <- function(data, polygon, ...){
 
   # set up df2 - x/y poly source
   if(class(polygon)[1]=="sf"){
-    polygon <- as.data.frame(sf::st_coordinates(polygon))
+    polygon <- as.data.frame(
+      # added in the transform because some of data being provided
+      #    use other coordinate systems...
+      sf::st_coordinates(sf::st_transform(polygon, "WGS84"))
+      )
   }
   # polygon x,y
   x <- if("x" %in% names(.xargs)){
@@ -141,11 +153,16 @@ tubeInXYPolygon <- function(data, polygon, ...){
   names(df2) <- c("x", "y")
 
   #test
-  df1$.in_polygon <- splancs::inout(df1, df2)
-  df1 <- df1[c("x", "y", ".in_polygon")]
-  names(df1) <- c(lon, lat, ".in_polygon")
+  .name <- if("rename" %in% names(.xargs)){
+    .xargs$rename
+  } else {
+    ".in_polygon"
+  }
+  df1[[.name]] <- splancs::inout(df1, df2)
+  df1 <- df1[c("x", "y", .name)]
+  names(df1) <- c(lon, lat, .name)
 
-  #currently output is hard coded as data + .in_polygon (the T/F/NA column)
+  #currently output is data + .in_polygon (or rename) (the T/F/NA column)
   # if we start using merge.data.table for this we need to check dim in versus dim out
   out <- merge(data, df1)
 
