@@ -121,45 +121,69 @@ tubeInXYPolygon <- function(data, polygon, ...){
   # x and y
   df1 <- checkTubeData(df1, c(lon, lat), if.err="stop<<tubeInXYPolygon>>data lat/lon")
   df1 <- df1[c(lon, lat)]
-  names(df1) <- c("x", "y")
   # remove any NAs...
-  df1 <- df1[!is.na(df1$x),]
-  df1 <- df1[!is.na(df1$y),]
+  ###########################
+  # in the DT source files
+  #     but sf doesn't like them
+  #     ALSO guessing stupid lat/longs will kill this...
+  #        but hopefully we'll catch them before here...
+  ###########################
+  df1 <- df1[!is.na(df1[[lon]]),]
+  df1 <- df1[!is.na(df1[[lat]]),]
   # only need to do unique lat/lon combinations...
   #     merging them back onto dataset
-  df1 <- df1[!duplicated(paste(df1$x, df1$y)),]
+  df1 <- df1[!duplicated(paste(df1[[lon]], df1[[lat]])),]
+  #########################################
+  # flipped previous code
+  #   now df1 and polygon sf
+  #   so I can force everything to latlong
+  #   also swithing splanc::inout to sf::st_within
+  #   then switching back to data.frame
+  #       :(
+  #########################################
+  df1 <- sf::st_as_sf(df1, coords=c(lon, lat), crs="WGS84")
 
   # set up df2 - x/y poly source
-  if(class(polygon)[1]=="sf"){
-    polygon <- as.data.frame(
-      # added in the transform because some of data being provided
-      #    use other coordinate systems...
-      sf::st_coordinates(sf::st_transform(polygon, "WGS84"))
-      )
-  }
-  # polygon x,y
-  x <- if("x" %in% names(.xargs)){
-    .xargs$x
+  if(class(polygon)[1]!="sf"){
+    ##############################
+    # not tested since shift to sf
+    #    ....
+    ##############################
+    x <- if("x" %in% names(.xargs)){
+      .xargs$x
+    } else {
+      "X"
+    }
+    y <- if("y" %in% names(.xargs)){
+      .xargs$y
+    } else {
+      "Y"
+    }
+    crs <- if("crs" %in% names(.xargs)){
+      .xargs$crs
+    } else {
+      "WGS84"
+    }
+    df2 <- checkTubeData(polygon, c(x,y),
+                         if.err="stop<<tubeInXYPolygon>>poly x/y")
+    df2 <- sf::st_cast(
+      sf::st_transform(
+        sf::st_as_sf(df2, coords=c(x, y), crs=crs),
+        crs="WGS84"),
+      "MULTIPOLYGON")
   } else {
-    "X"
+    df2 <- sf::st_cast(sf::st_transform(polygon, crs="WGS84"), "MULTIPOLYGON")
   }
-  y <- if("y" %in% names(.xargs)){
-    .xargs$y
-  } else {
-    "Y"
-  }
-  df2 <- checkTubeData(polygon, c(x,y), if.err="stop<<tubeInXYPolygon>>poly x/y")
-  df2 <- df2[c(x,y)]
-  names(df2) <- c("x", "y")
 
-  #test
+  #output common name
   .name <- if("rename" %in% names(.xargs)){
     .xargs$rename
   } else {
     ".in_polygon"
   }
-  df1[[.name]] <- splancs::inout(df1, df2)
-  df1 <- df1[c("x", "y", .name)]
+  .tt <- sf::st_within(df1, df2)
+  df1 <- as.data.frame(sf::st_coordinates(sf::st_transform(df1, "WGS84")))
+  df1[[.name]] <- do.call(c, lapply(.tt, function(x){any(x>0)}))
   names(df1) <- c(lon, lat, .name)
 
   #currently output is data + .in_polygon (or rename) (the T/F/NA column)
