@@ -61,12 +61,6 @@
 
 
 
-
-
-
-
-
-
 #############################
 # tubeInXYPolygon
 #############################
@@ -81,17 +75,25 @@
 
 #  thinking about
 ##############################
+
 #  coordinate handling
 #     added st_transform to polygon handling because some of supplied
 #         polygons are not lat/lon (like-wot-was-requested)
 #     MIGHT have to do similar elsewhere...
+
 #  handling for different inputs ??
 #     currently allows you to rename
 #         data latitude and longitude names using lat and lon
 #         polygon x and y names using x and y
+
 #  handling for different outputs??
-#       vector name
+#       time-series/column name added to return data.frame
+#           currently default .in_polygon; or rename to reset
 #       vector elements/type
+#            currently returning TRUE/FALSE/NA as .in_polygon(/rename)
+#            currently returning polygon.index/NA as .in_polygon(/rename).id
+#            could extended this to content of matched polygon ???
+
 #  handling grouping/subsets within polygon
 #      for multiple polygon files and for buffering
 
@@ -100,7 +102,8 @@
 
 tubeInXYPolygon <- function(data, polygon, ...){
 
-  .xargs <- list(...)
+  .xargs <- modifyList(list(output="ans"), list(...))
+  # could also add lat, lon, x, y, crs defaults here...
 
   # do we need/want to force tagging..??
   #    data <- tagTube(data)
@@ -183,12 +186,47 @@ tubeInXYPolygon <- function(data, polygon, ...){
   }
   .tt <- sf::st_within(df1, df2)
   df1 <- as.data.frame(sf::st_coordinates(sf::st_transform(df1, "WGS84")))
-  df1[[.name]] <- do.call(c, lapply(.tt, function(x){any(x>0)}))
-  names(df1) <- c(lon, lat, .name)
+  names(df1)[1:2] <- c(lon, lat)
+  #################################
+  # the next bit still needs work
+  #################################
+  .tt <- do.call(c, lapply(.tt, function(x){ifelse(any(x>0), x, NA)}))
+  if("ans" %in% .xargs$output){
+    df1[[.name]] <- !is.na(.tt)
+  }
+  if("id" %in% .xargs$output){
+    df1[[paste(.name, ".id", sep="")]] <- .tt
+  }
+  .ref <- names(df2)
+  .ref <- .ref[!.ref %in% c("name","geom")]
+  for(i in .ref){
+    if(i %in% .xargs$output){
+      df1[[i]] <- df2[[i]][.tt]
+    }
+  }
 
-  #currently output is data + .in_polygon (or rename) (the T/F/NA column)
+
+#  df1[[paste(.name, ".id", sep="")]] <- do.call(c, lapply(.tt, function(x){ifelse(any(x>0), x, NA)}))
+#  names(df1) <- c(lon, lat, .name, paste(.name, ".id", sep=""))
+  ##############################
+  # could track arguments from df2 using something like...
+  #   df1$$RUC21NM_adj <- df2$RUC21NM_adj[df1$.in_polygon.id]
+  #   maybe do as output = c("ans", "id", "all") or names ....
+  #        just not sure how wise copying all would be ???
+  #             e.g. LAT and LONG from the polygon could confuse things...
+  #                  also increasing the chance of another copy name...
+  #        all would be names(df2)[!names(df2) %in% c("name" "geom")]
+  #        then for each of those the track argument
+
+  # currently default output is data + .in_polygon (or rename) (T/F/NA column)
+  #   output arg to modify this
+  #      default output = "ans"
+  #      output = "id" .in_polygon.id as NA or polygon index in df2/polygon
+
+  # not done all...
   # if we start using merge.data.table for this we need to check dim in versus dim out
-  out <- merge(data, df1)
+
+  out <- merge(data, df1, by=c(lon, lat))
 
   return(out)
 
