@@ -97,7 +97,7 @@
 #' @rdname calc.tube
 #' @export
 
-calcTubeStat <- function(data, tube = "measurement", by = NULL, stat = NULL, ...){
+calcTubeStat <- function(data, tube = ".value", by = NULL, stat = NULL, ...){
 
   # tag data
   # NB: checking if we need tagging for this

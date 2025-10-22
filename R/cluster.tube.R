@@ -77,7 +77,7 @@
 
 # this uses cluster package...
 
-clusterTubeData <- function(data, tube="measurement", by="site",
+clusterTubeData <- function(data, tube=".value", by="site",
                             clusters=2, method=2, ...){
 
   #setup

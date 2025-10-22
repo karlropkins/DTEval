@@ -116,7 +116,7 @@
 #' @export
 testTubeAccuracy <-
   function(data, data.ref = NULL,
-           tube = "measurement", ref = "no2",
+           tube = ".value", ref = "no2",
            method = 1, max.distance = 10,
            nearest.only = FALSE,
            show = c("plot", "summary.report"), ...){

@@ -145,7 +145,7 @@
 
 testTubePrecision <-
   function(data,
-           tube = "measurement",
+           tube = ".value",
            n = 3,
            method = 2,
            show = c("plot", "summary.report"),

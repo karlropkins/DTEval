@@ -8,7 +8,8 @@
 
 * Package pre-release 
 
-    * __v 0.0.15__ [2025-10-14] added clusterTubeData;importing cluster. 
+    * __v 0.0.15__ [2025-10-20] added clusterTubeData;importing cluster, 
+    removing splancs. 
     * __v 0.0.14__ [2025-10-10] added fitTubeModel, deseasonTubeData, 
     extractTubeMeta, checkTubeMeta, repairTubeMeta;importing mgcv. 
     * __v 0.0.13__ [2025-09-01] added updated version of tubeMap.
