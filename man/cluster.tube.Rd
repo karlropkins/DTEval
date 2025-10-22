@@ -7,7 +7,7 @@
 \usage{
 clusterTubeData(
   data,
-  tube = "measurement",
+  tube = ".value",
   by = "site",
   clusters = 2,
   method = 2,

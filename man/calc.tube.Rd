@@ -5,7 +5,7 @@
 \alias{calcTubeStat}
 \title{Common Diffusion Tube Calculations}
 \usage{
-calcTubeStat(data, tube = "measurement", by = NULL, stat = NULL, ...)
+calcTubeStat(data, tube = ".value", by = NULL, stat = NULL, ...)
 }
 \arguments{
 \item{data}{Data source, typically a data.frame or similar, containing

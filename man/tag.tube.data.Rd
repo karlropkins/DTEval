@@ -9,10 +9,13 @@
 \alias{TagTubeValue}
 \alias{tagTubeDate}
 \alias{tagTubeLocation}
+\alias{tagTubeRequired}
 \alias{tagTubeValue}
 \title{Diffusion Tube Pro-processing}
 \usage{
 tagTube(data, ...)
+
+tagTubeRequired(data, ...)
 
 tagTubeStartEnd(data, method = -1, force = FALSE, ...)
 
@@ -145,4 +148,7 @@ tagged.
 to each sampling record (\code{data} row). This is typically made by
 merging the latitude and longitude tags, and uses \code{tagTubeLatLon}
 to get these if not already tagged.
+
+\code{tagTubeRequired} is a variation on \code{tagTube} that attempts
+to add any listed in an optional argument, \code{required}.
 }

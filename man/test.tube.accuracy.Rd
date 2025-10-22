@@ -8,7 +8,7 @@
 testTubeAccuracy(
   data,
   data.ref = NULL,
-  tube = "measurement",
+  tube = ".value",
   ref = "no2",
   method = 1,
   max.distance = 10,
