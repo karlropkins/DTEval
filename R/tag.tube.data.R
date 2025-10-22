@@ -4,7 +4,7 @@
 
 #' @name tag.tube.data
 #' @aliases tag.tube.data tagTube tagTubeStartEnd tagTubeLatLon tagTubeSampleID
-#' TagTubeValue tagTubeDate tagTubeLocation
+#' TagTubeValue tagTubeDate tagTubeLocation tagTubeRequired
 
 #' @description Pre-processing diffusion tube (DT) data for use with
 #' \code{DTEval}. Coded methods to standardise DT data collected using
@@ -131,6 +131,9 @@
 #' to each sampling record (\code{data} row). This is typically made by
 #' merging the latitude and longitude tags, and uses \code{tagTubeLatLon}
 #' to get these if not already tagged.
+#'
+#' \code{tagTubeRequired} is a variation on \code{tagTube} that attempts
+#' to add any listed in an optional argument, \code{required}.
 
 
 
@@ -140,11 +143,7 @@
 
 # JOBS:
 
-# do we want/need a tagTube[function] for the tube measurement ??
-#     if so might need to check/sort testTube... functions
-#          e.g. I think they make a .tube
-#               if we want to use that as the name could use .value in these ???
-#
+# do we want/need a tagTubeLight to check/add just the tags that are needed
 
 
 # stops/warns/messages need rationalising
@@ -158,18 +157,20 @@
 
 
 
+
+
+
 ################################
 # tagTube
 ################################
 
 # in development wrapper for main diffusion tube info tagging
 # applies in order tagTubeStartEnd, tagTubeLatLon, tagTubeSampleId
-
-# used by testTubePrecision,
-#      ANY OTHERS...
+#                  tagTubeValue
 
 
-
+# used by testTubePrecision, testTubeAccuracy
+#
 
 #' @rdname tag.tube.data
 #' @export
@@ -191,6 +192,52 @@ tagTube <-
   }
 
 
+
+
+
+
+################################
+# tagTubeRequired
+################################
+
+# in development variation of tagTube that just adds what is asked for...
+
+
+#' @rdname tag.tube.data
+#' @export
+tagTubeRequired <-
+  function(data, ...){
+
+    .xargs <- list(...)
+    if(!"required" %in% names(.xargs)){
+      return(data)
+    }
+    .ref <- .xargs$required
+    for(i in .ref){
+      if(i %in% c(".start_date", ".end_date")){
+        data <- tagTubeStartEnd(data, ...)
+      }
+      if(i %in% c(".date")){
+        data$.date <- tagTubeDate(data, ...)$.date
+      }
+      if(i %in% c(".latitude", ".longitude")){
+        data <- tagTubeLatLon(data, ...)
+      }
+      if(i %in% c(".location")){
+        data$.location <- tagTubeLocation(data, ...)$.location
+      }
+      if(i %in% c(".sample_id")){
+        data <- tagTubeSampleID(data, ...)
+      }
+      if(i %in% c(".value")){
+        data <- tagTubeValue(data, ...)
+      }
+    }
+    return(data)
+  }
+
+
+
 ################################
 # tagTubeStartEnd
 ################################
@@ -208,6 +255,9 @@ tagTube <-
 # to think about
 ####################################
 
+# should .date be regenerated if there and .start_date and .end_date are
+#     added or changed ???
+# if doing this, same for location and Lat/Lon....
 
 #' @rdname tag.tube.data
 #' @export
