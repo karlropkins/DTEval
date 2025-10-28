@@ -68,6 +68,10 @@
 #  thinking about
 ##############################
 
+# cluster analysis for profile corrlation to write up
+#     see also fig 4.21 code 108 eco eval test (by conc and location)
+#        also check research emails - there should be a couple refs there....
+
 # example????
 ##############################
 

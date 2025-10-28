@@ -72,6 +72,24 @@
 # need to
 #######################
 
+###############################
+# added
+# tidy what follows when done
+###############################
+
+# start these functiions again...
+#    merge ggplotTubeShell and tubePlot...
+#         see notes
+
+# stat args for geoms maybe come from stat_[...] functions
+#    but be careful - there is a lot there...
+
+
+
+
+##
+
+
 #    reference and link to ggplot2... and/or plotting more generally in R
 
 #    think about default colours
