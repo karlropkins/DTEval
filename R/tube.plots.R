@@ -234,6 +234,497 @@
 #' @export
 
 tubePlot <-
+  function(data, x=NULL, y=NULL, plot.type=NULL, ...){
+
+    #setup
+    ####################
+
+    #args
+    .xargs <- modifyList(list(grid.borders = 0.05,
+                              auto.text = FALSE),
+                         list(...))
+    .xargs <- dte_ggshellTidyArgs(.xargs)
+
+    #data
+    if("ggplot" %in% class(data)){
+      plt <- data
+      d2 <- data$data
+    } else {
+      d2 <- data
+      plt <- NULL
+    }
+    if("new.data" %in% names(.xargs)) {
+      d2<-.xargs$new.data
+    }
+
+    # check/add any requested tags if missing
+    d2 <- tagTubeRequired(d2,
+                          required = c(x, y, unlist(.xargs[sapply(.xargs, is.character)])))
+    .xargs.test <- dte_ggshellTestArgs(.xargs, d2)
+    .check <- .xargs.test[.xargs.test=="data"]
+    .check <- .xargs[names(.xargs) %in% names(.check)]
+    d2 <- checkTubeData(d2, x= unlist(.check))
+    .xargs.test <- dte_ggshellTestArgs(.xargs, d2)
+
+    #test main plot terms
+    if(is.null(x) & is.null(y)){
+      stop("[plotTube]> Sorry, need at least one of: x,y \n",
+           call.=FALSE)
+    }
+    if(is.null(y)){
+      d2$.index <- 1:nrow(d2)
+      y <- ".index"
+    } else {
+      if(is.null(x)){
+        d2$.index <- 1:nrow(d2)
+        x <- ".index"
+      }
+    }
+    d2[, x] <- getTubeX(d2, x, if.err = "stop<<ggplotTubeShell>>x")
+    d2[, y] <- getTubeX(d2, y, if.err = "stop<<ggplotTubeShell>>x")
+    if(!is.null(.xargs$group)){
+      d2 <- checkTubeData(d2, x=.xargs$group, n.x=1,
+                            if.err = "stop<<ggplotTubeShell>>group")
+    }
+    if(!is.null(.xargs$facet)){
+      d2 <- checkTubeData(d2, x=.xargs$facet, n.x=2,
+                            if.err = "stop<<ggplotTubeShell>>facet")
+    }
+
+    ## (if not already a plot...) build first layer
+    ###################
+    if(is.null(plt)){
+      plt <- ggplot2::ggplot(d2,
+                             ggplot2::aes(x=.data[[x]],
+                                          y=.data[[y]])
+                             )
+        #annotation
+        if(!"xlab" %in% names(.xargs)){
+          .xargs$xlab <- x
+        }
+        if(!"ylab" %in% names(.xargs)){
+          .xargs$ylab <- y
+        }
+      plt <- plt + ggplot2::theme_bw() +
+        ggplot2::theme(strip.background = ggplot2::element_rect(fill="transparent"))
+    }
+
+    # plot.type
+    # this is so sloppy it is fun
+    .check <- c("point", "surface", "smooth", "polygon")
+    .tt <- c(plot.type, names(.xargs))
+    for(i in .check){
+      .tt[grepl(paste("^", i, "[.]", sep=""), .tt)] <- i
+    }
+    plot.type <- unique(.tt[.tt %in% .check])
+    if(length(plot.type)==0){
+      plot.type <- "point"
+    }
+
+
+    for(i in plot.type){
+
+      # add the plot layers
+
+      #point
+      #################################
+      # overplot options/stat ???
+      # mean and count to add back in ???
+      if("point" %in% i){
+        ##########################
+        # testing this tidy
+        .xargs2 <- dte_ggshellTidyArgs(.xargs, "point")
+        if(.xargs2$..test=="OK"){
+          .xargs2 <- modifyList(list(x=x, y=y), .xargs2)
+          ##########################
+          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPoint)]
+          plt <- dte_ggshellAddGeom(.xargs2, d2, plt,
+                                    ggplot2::geom_point,
+                                    defaults = list(na.rm=TRUE),
+                                    drops = drops)
+        }
+      }
+
+      #polygon
+      if("polygon" %in% i){
+        ##########################
+        #testing this tidy
+        #    Holding code because it is very sensitive to ordering
+        #.xargs2 <- .xargs[grepl("^polygon[.]", names(.xargs))]
+        #names(.xargs2) <- gsub("polygon[.]", "", names(.xargs2))
+        #names(.xargs2)[names(.xargs2) %in% c("col", "color")] <- "colour"
+        #.xargs2 <- .xargs2[!duplicated(names(.xargs2), fromLast=TRUE)]
+        #.xargs2 <- modifyList(.xargs, .xargs2)
+        .xargs2 <- dte_ggshellTidyArgs(.xargs, "polygon")
+        if(.xargs2$..test=="OK"){
+          .xargs2 <- modifyList(.xargs2, list(x="X", y="Y"))
+          ##########################
+          # to think about...
+          #    this currently needs polygon to be a sf polygon...
+          #        BUT polygon could be a different object type ...
+          #        OR polygon could be true... then you would use the data as polygon source
+          #            can't colour a polygon by palette at moment
+          .xargs2$polygon <- as.data.frame(sf::st_coordinates(.xargs2$polygon))
+          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPolygon)]
+          plt <- dte_ggshellAddGeom(.xargs2, .xargs2$polygon, plt,
+                                    ggplot2::geom_polygon,
+                                    defaults = list(na.rm=TRUE, colour="blue",
+                                                    fill="blue", alpha=0.25),
+                                    drops = drops)
+        }
+      }
+
+      #polygon
+      if("polygon" %in% i){
+        ##########################
+        #testing this tidy
+        #    Holding code because it is very sensitive to ordering
+        #.xargs2 <- .xargs[grepl("^polygon[.]", names(.xargs))]
+        #names(.xargs2) <- gsub("polygon[.]", "", names(.xargs2))
+        #names(.xargs2)[names(.xargs2) %in% c("col", "color")] <- "colour"
+        #.xargs2 <- .xargs2[!duplicated(names(.xargs2), fromLast=TRUE)]
+        #.xargs2 <- modifyList(.xargs, .xargs2)
+        .xargs2 <- dte_ggshellTidyArgs(.xargs, "polygon")
+        if(.xargs2$..test=="OK"){
+          .xargs2 <- modifyList(.xargs2, list(x="X", y="Y"))
+          ##########################
+          # to think about...
+          #    this currently needs polygon to be a sf polygon...
+          #        BUT polygon could be a different object type ...
+          #        OR polygon could be true... then you would use the data as polygon source
+          #            can't colour a polygon by palette at moment
+          .xargs2$polygon <- as.data.frame(sf::st_coordinates(.xargs2$polygon))
+          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPolygon)]
+          plt <- dte_ggshellAddGeom(.xargs2, .xargs2$polygon, plt,
+                                    ggplot2::geom_polygon,
+                                    defaults = list(na.rm=TRUE, colour="blue",
+                                                    fill="blue", alpha=0.25),
+                                    drops = drops)
+        }
+      }
+
+      #smooth
+      if("smooth" %in% i){
+        ##########################
+        # testing this tidy
+        .xargs2 <- dte_ggshellTidyArgs(.xargs, "smooth")
+        if(.xargs2$..test=="OK"){
+          .xargs2 <- modifyList(list(x=x, y=y), .xargs2)
+          ##########################
+          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomSmooth)]
+          drops <- drops[drops!="k"]
+          print(drops)
+          plt <- dte_ggshellAddGeom(.xargs2, d2, plt,
+                                    ggplot2::geom_smooth,
+                                    defaults = list(na.rm=TRUE, method=NULL),
+                                    drops = drops)
+        }
+      }
+
+      #surface
+      if("surface" %in% i){
+        #just arg should trigger this contour ??
+        .xargs2 <- dte_ggshellTidyArgs(.xargs, "surface")
+        .xargs2.test <- dte_ggshellTestArgs(.xargs2, d2)
+        .test <- names(.xargs2.test[.xargs2.test=="data"])
+        .test <- .test[.test %in% c("fill", "z", "colour", "contour")]
+        if(length(.test)>0){
+          .fit.args <- modifyList(list(data=d2, tube=.xargs2[[.test[1]]],
+                                       inputs=c(x,y), by=c(.xargs$group, .xargs$facet),
+                                       simplify=TRUE, new.data="input.ranges"),
+                                  #################################
+                                  # could generalise next bit ???
+                                  #################################
+                                  .xargs2[names(.xargs2) %in% c("too.far", "model",
+                                                                "simplify",
+                                                                "force.positive",
+                                                                "grid.resolution",
+                                                                "grid.borders")])
+          .d2 <- do.call(fitTubeModel, .fit.args)
+          .xargs2[[.test[1]]] <- paste(.xargs2[[.test[1]]], ".pred", sep="")
+          if(.xargs2$..test=="OK"){
+            .xargs2 <- modifyList(list(x=x, y=y), .xargs2)
+            ##########################
+            # if fill in there
+            if("fill" %in% names(.xargs2)){
+              .xargs2$fill <- .xargs2[[.test[1]]]
+              drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomTile)]
+              drops <- c(drops, "col", "color", "colour")
+              plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
+                                        ggplot2::geom_tile,
+                                        defaults = list(na.rm=TRUE),
+                                        drops = drops)
+            }
+            if("contour" %in% names(.xargs2)){
+              ###################
+              # fix for contour.[whatever]
+              # maybe contour should be black if no fill and no col..?
+              .xargs2$z <- .xargs2[[.test[1]]]
+              drops <-  names(.xargs2)[!names(.xargs2) %in% c(dte_GeomArgs(ggplot2::GeomContour),
+                                                              "z")]
+              drops <- c(drops, "fill", "alpha")
+              plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
+                                        ggplot2::geom_contour,
+                                        defaults = list(na.rm=TRUE,
+                                                        colour="white"),
+                                        drops = drops)
+              plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
+                                        metR::geom_text_contour,
+                                        defaults = list(na.rm=TRUE,
+                                                        colour="white"),
+                                        drops = drops)
+            }
+          }
+        }
+      }
+
+    }
+
+
+    #any facetting?
+    if("facet" %in% names(.xargs)){
+      #don't need facet.type if no facet...
+      if(!"facet.type" %in% names(.xargs)){
+        .xargs$facet.type <- "wrap"
+      } else {
+        check <- c("wrap", "grid", "grid.col", "grid.row")
+        if(!.xargs$facet.type %in% check){
+          warning("bad facet.type resetting to wrap")
+          .xargs$facet.type <- "wrap"
+        }
+      }
+      ## facet.type choices limited earlier
+      #####################
+      #tesing
+      # passing just ggplot2::facet... args forward
+      # names(formals(ggplot2::facet_grid)), etc....
+      # if you give it facet, rows or cols
+      #     these will override as well
+      # does the job but code is messy...
+      #####################
+      ..xargs <- if(.xargs$facet.type=="wrap"){
+        .xargs[names(.xargs) %in% names(formals(ggplot2::facet_wrap))]
+      } else {
+        #most be a facet_grid
+        .xargs[names(.xargs) %in% names(formals(ggplot2::facet_grid))]
+      }
+      if(length(.xargs$facet)== 1){
+        if(.xargs$facet.type=="wrap"){
+          ..xargs <- modifyList(list(facets=ggplot2::vars(.data[[.xargs$facet[1]]])),
+                                ..xargs)
+          plt <- plt + do.call(ggplot2::facet_wrap, ..xargs)
+          #plt <- plt + ggplot2::facet_wrap(facets=ggplot2::vars(.data[[.xargs$facet[1]]]))
+        }
+        if(.xargs$facet.type %in% c("grid", "grid.row")){
+          ..xargs <- modifyList(list(rows=ggplot2::vars(.data[[.xargs$facet[1]]])),
+                                ..xargs)
+          plt <- plt + do.call(ggplot2::facet_grid, ..xargs)
+          #plt <- plt + ggplot2::facet_grid(rows=ggplot2::vars(.data[[.xargs$facet[1]]]))
+        }
+        if(.xargs$facet.type %in% c("grid.col")){
+          ..xargs <- modifyList(list(cols=ggplot2::vars(.data[[.xargs$facet[1]]])),
+                                ..xargs)
+          plt <- plt + do.call(ggplot2::facet_grid, ..xargs)
+          #plt <- plt + ggplot2::facet_grid(cols=ggplot2::vars(.data[[.xargs$facet[1]]]))
+        }
+      } else{
+        if(.xargs$facet.type %in% c("wrap")){
+          ..xargs <- modifyList(list(facets=c(ggplot2::vars(.data[[.xargs$facet[1]]]),
+                                              ggplot2::vars(.data[[.xargs$facet[2]]]))),
+                                ..xargs)
+          plt <- plt + do.call(ggplot2::facet_wrap, ..xargs)
+          #plt <- plt + ggplot2::facet_wrap(facets=c(ggplot2::vars(.data[[.xargs$facet[1]]]),
+          #                                 ggplot2::vars(.data[[.xargs$facet[2]]])))
+        }
+        if(.xargs$facet.type %in% c("grid", "grid.row")){
+          plt <- plt + ggplot2::facet_grid(rows=ggplot2::vars(.data[[.xargs$facet[1]]]),
+                                           cols=ggplot2::vars(.data[[.xargs$facet[2]]]))
+        }
+        if(.xargs$facet.type %in% c("grid.col")){
+          plt <- plt + ggplot2::facet_grid(cols=ggplot2::vars(.data[[.xargs$facet[1]]]),
+                                           rows=ggplot2::vars(.data[[.xargs$facet[2]]]))
+        }
+      }
+    }
+
+    #palette
+    #palette
+    ############################
+    # note
+    ############################
+    #   testing a colouring option
+    #      alpha control limited at moment
+    #      NB:need to make any changes for palette/colour and fill.palette/fill
+    ############################
+    #test for map-able fills
+    .tt <- names(.xargs.test[.xargs.test=="data"])
+    .tt <- c(.tt[.tt %in% c("col", "color", "colour")],
+             grep("[.]col|[.]color|[.]colour", .tt, value=TRUE))
+    .pp <- c()
+    if(length(.tt)>0) {
+      .pp <- getTubeX(data, .xargs[[.tt[1]]])
+    }
+    if(!"palette" %in% names(.xargs) & length(.pp)>0){
+      .xargs$palette <- if(is.numeric(.pp)){
+        c("#132B43", "#56B1F7")
+      } else {
+        if(length(unique(.pp)) > length(.xargs$fill.palette)){
+          colorRampPalette(1:5)(length(unique(.pp)))
+        } else{
+          1:5
+        }
+      }
+
+    }
+    if("palette" %in% names(.xargs)){
+      # colours might not be being mapped
+      .value <- if("alpha" %in% names(.xargs)){
+        ggplot2::alpha(.xargs$palette, .xargs$alpha)
+      } else {
+        .xargs$palette
+      }
+      if(length(.pp)==0){
+        ###########################
+        # testing removing - same in fill.palette
+        ##plt$mapping$colour <- "default"
+        plt <- plt + ggplot2::scale_color_manual(values=.value,
+                                                 guide="none")
+      } else {
+        #.pp <- data[[rlang::as_label(plt$mapping$colour)]]
+        #.pp <- plt$mapping$colour
+        if(is.numeric(.pp)){
+          plt <- plt + ggplot2::scale_color_gradientn(colours=.value)
+        } else {
+          if(length(unique(.pp)) > length(.value)){
+            .values <- colorRampPalette(.value)(length(unique(.pp)))
+          }
+          plt <- plt + ggplot2::scale_color_manual(values=.value)
+        }
+      }
+    }
+
+    #fill.palette
+    ############################
+    # note
+    ############################
+    #   testing a colouring option
+    #      alpha control limited at moment
+    #      NB:need to make any changes for palette/colour and fill.palette/fill
+    ############################
+
+    #test for map-able fills
+    .tt <- names(.xargs.test[.xargs.test=="data"])
+    .tt <- c(.tt[.tt=="fill"], grep("[.]fill", .tt, value=TRUE))
+    .pp <- c()
+    if(length(.tt)>0) {
+      .pp <- getTubeX(data, .xargs[[.tt[1]]])
+    }
+    if("palette" %in% names(.xargs) & ! "fill.palette" %in% names(.xargs)){
+      .xargs$fill.palette <- .xargs$palette
+    }
+    if(!"fill.palette" %in% names(.xargs) & length(.pp)>0){
+      .xargs$fill.palette <- if(is.numeric(.pp)){
+        c("#132B43", "#56B1F7")
+      } else {
+        if(length(unique(.pp)) > length(.xargs$fill.palette)){
+          colorRampPalette(1:5)(length(unique(.pp)))
+        } else{
+          1:5
+        }
+      }
+
+    }
+    if("fill.palette" %in% names(.xargs)){
+      .value <- if("alpha" %in% names(.xargs)){
+        # NB: alpha just updates, not a multiple,
+        #     alpha(alpha(cols, 0.5), 0.5) == alpha(cols, 0.5)
+        ggplot2::alpha(.xargs$fill.palette, .xargs$alpha)
+      } else {
+        .xargs$fill.palette
+      }
+      # like colours might not be being mapped
+      # could also be a [whatever].fill
+      if(length(.pp)==0){
+        #############################################
+        # testing removing - same in fill.palette
+        ##plt$mapping$fill <- "default"
+        plt <- plt + ggplot2::scale_fill_manual(values=.value,
+                                                guide="none")
+      } else {
+        #.pp <- data[[rlang::as_label(plt$mapping$colour)]]
+        #.pp <- plt$mapping$colour
+        .pp <- getTubeX(data, .xargs[[.tt[1]]])
+        if(is.numeric(.pp)){
+          plt <- plt + ggplot2::scale_fill_gradientn(colours=.value)
+        } else {
+          if(length(unique(.pp)) > length(.xargs$fill.palette)){
+            .value <- colorRampPalette(.xargs$.value)(length(unique(.pp)))
+          }
+          plt <- plt + ggplot2::scale_fill_manual(values=.value)
+        }
+      }
+    }
+
+    #########################
+    #force legend together if multiple are mapped
+    #messy.... should only be if mapped to the same arg...
+    ########################
+    if(length(names(.xargs)[names(.xargs) %in% c("colour", "size", "fill")]) >1){
+      if("colour" %in% names(.xargs)){
+        plt <- plt + ggplot2::guides(colour=ggplot2::guide_legend())
+      }
+      if("size" %in% names(.xargs)){
+        plt <- plt + ggplot2::guides(size=ggplot2::guide_legend())
+      }
+      if("fill" %in% names(.xargs)){
+        plt <- plt + ggplot2::guides(fill=ggplot2::guide_legend())
+      }
+
+    }
+
+    #annotation
+    if("xlab" %in% names(.xargs)){
+      plt <- plt + ggplot2::xlab(dte_quickText(.xargs$xlab, .xargs$auto.text))
+
+    }
+    if("ylab" %in% names(.xargs)){
+      plt <- plt + ggplot2::ylab(dte_quickText(.xargs$ylab, .xargs$auto.text))
+    }
+
+    if(.xargs$auto.text){
+      plt <- plt +  ggplot2::theme(axis.title.x = ggtext::element_markdown(),
+                                   axis.title.y = ggtext::element_markdown())
+    }
+
+    if("rotate.x.axes" %in% names(.xargs)){
+      if(is.logical(.xargs$rotate.x.axes) && .xargs$rotate.x.axes){
+        .xargs$rotate.x.axes <- 90
+      }
+      if(is.numeric(.xargs$rotate.x.axes)){
+        # to do
+        # tidy vjust and hjust if not 90
+        plt <- plt + ggplot2::theme(axis.text.x = ggtext::element_markdown(angle=.xargs$rotate.x.axes[1],
+                                                                           vjust=0.5, hjust=1))
+      }
+    }
+
+    if(any(c("key.position", "key.direction") %in% names(.xargs))){
+      # to do
+      # guessing this might want tidying???
+      plt <- plt + ggplot2::theme(legend.position = .xargs$key.position,
+                                  legend.direction = .xargs$key.direction)
+    }
+
+    return(plt)
+
+  }
+
+
+
+
+
+
+tubePlot.2 <-
   function(data, x=NULL, y=NULL, ...){
 
     #setup
@@ -439,6 +930,9 @@ tubePlot <-
     return(plt)
 
   }
+
+
+
 
 
 tubePlot.old <-
