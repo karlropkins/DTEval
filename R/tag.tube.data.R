@@ -220,6 +220,12 @@ tagTubeRequired <-
       if(i %in% c(".date")){
         data$.date <- tagTubeDate(data, ...)$.date
       }
+      if(i %in% c(".month")){
+        data$.month <- tagTubeMonth(data, ...)$.month
+      }
+      if(i %in% c(".year")){
+        data$.year <- tagTubeYear(data, ...)$.year
+      }
       if(i %in% c(".latitude", ".longitude")){
         data <- tagTubeLatLon(data, ...)
       }
@@ -582,7 +588,8 @@ tagTubeValue <-
   function(data, method = -1, force=FALSE, ...){
 
     # higher level force and method overwrites
-    .xargs <- modifyList(list(value="measurement"),
+    .xargs <- modifyList(list(value=c("bias_adjusted_measurement",
+                                      "measurement")),
                          list(...))
     if("value.force" %in% names(.xargs)){
       force <- .xargs$value.force
@@ -686,6 +693,103 @@ tagTubeDate <- function(data, method=2, force=FALSE, ...){
   return(data)
 
 }
+
+
+#############################
+# tagTubeMonth
+#############################
+
+# minor tag; only used when needed
+
+# add and format .month based on .date
+
+# think about
+##############################
+# make a code wrapper for some of these ???
+
+#' @rdname tag.tube.data
+#' @export
+
+tagTubeMonth <- function(data, method=1, force=FALSE, ...){
+
+  .xargs <- list(...)
+  if("month.force" %in% names(.xargs)){
+    force <- .xargs$month.force
+  }
+  if("month.method" %in% names(.xargs)){
+    method <- .xargs$month.method
+  }
+  if(".month" %in% names(data) && !force){
+    return(data)
+  }
+  .temp <- tagTubeDate(data, ...)
+  check <- 1
+  if(!method %in% check){
+    stop("[setTubeMonth] Unknown method, maybe try one of: ", paste(check, collapse=","),
+         call.=FALSE)
+  }
+  if(method==1){
+    temp <- format(.temp$.date, "%b")
+    temp <- factor(temp, levels=month.abb)
+  }
+  data$.month <- temp
+
+  return(data)
+
+}
+
+
+
+
+
+
+
+
+#############################
+# tagTubeYear
+#############################
+
+# minor tag; only used when needed
+
+# add and format .year based on .date
+
+# think about
+##############################
+# make a code wrapper for some of these ???
+
+#' @rdname tag.tube.data
+#' @export
+
+tagTubeYear <- function(data, method=1, force=FALSE, ...){
+
+  .xargs <- list(...)
+  if("year.force" %in% names(.xargs)){
+    force <- .xargs$year.force
+  }
+  if("year.method" %in% names(.xargs)){
+    method <- .xargs$year.method
+  }
+  if(".year" %in% names(data) && !force){
+    return(data)
+  }
+  .temp <- tagTubeDate(data, ...)
+  check <- 1
+  if(!method %in% check){
+    stop("[setTubeYear] Unknown method, maybe try one of: ", paste(check, collapse=","),
+         call.=FALSE)
+  }
+  if(method==1){
+    temp <- format(.temp$.date, "%Y")
+    temp <- factor(temp)
+  }
+  data$.year <- temp
+
+  return(data)
+
+}
+
+
+
 
 
 

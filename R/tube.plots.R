@@ -426,9 +426,18 @@ tubePlot <-
       #bad.smooth
       if("smooth" %in% i){
         .xargs2 <- dte_ggshellTidyArgs(.xargs, "smooth")
+        # needs groups
+        # if fill or col declared...
+        #     tracking in order fill, then colour
+        if(!"group" %in% names(.xargs2)){
+          .test <- c(.xargs2$fill, .xargs2$colour)
+          if(length(.test)>0){
+            .xargs2$group <- .test[1]
+          }
+        }
         .xargs2.test <- dte_ggshellTestArgs(.xargs2, d2)
         .fit.args <- modifyList(list(data=d2, tube=y,
-                                     inputs=x, by=c(.xargs$group, .xargs$facet),
+                                     inputs=x, by=c(.xargs2$group, .xargs2$facet),
                                      simplify=FALSE,
                                      model = function(data, tube, inputs, new.data = NULL, ...){
 
