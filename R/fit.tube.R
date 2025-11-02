@@ -122,15 +122,15 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
 
   ## subsetting
   if(is.null(by)){
-    d2$..index <- "default"
-    by <- "..index"
+    d2$..dummy <- "default"
+    by <- "..dummy"
   }
 
   #using/adding index as multiple-column catch-all for by
   d2$..index <- if(length(by)==1){
     d2[, by]
   } else {
-    apply(d2[, by], 1, function(x) paste(x, collapse = "*"))  
+    apply(d2[, by], 1, function(x) paste(x, collapse = "*"))
   }
 
   #new.data
@@ -189,9 +189,9 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
   if("force.positive" %in% names(.xargs)){
     if(.xargs$force.positive){
       .fp <- 0.5
+      d2[[tube]] <- d2[[tube]]^.fp
     }
   }
-  d2[[tube]] <- d2[[tube]]^.fp
   #################################
 
   #fit model per index (all by's) case
@@ -263,12 +263,16 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
   ans <- ans[names(ans) != "..index"]
   ################
   # force positive
-  if(tube %in% names(ans)){
-    ans[[tube]] <- ans[[tube]]^(1/.fp)
+  #   can't force positive on non-numeric (e.g. date/time)
+  if("force.positive" %in% names(.xargs)){
+    if(tube %in% names(ans)){
+      ans[[tube]] <- ans[[tube]]^(1/.fp)
+    }
+    if("..pred" %in% names(ans)){
+      ans$..pred <- ans$..pred^(1/.fp)
+    }
   }
-  if("..pred" %in% names(ans)){
-    ans$..pred <- ans$..pred^(1/.fp)
-  }
+
   names(ans)[names(ans)=="..pred"] <- paste(tube, ".pred", sep="")
   ###############
   #output

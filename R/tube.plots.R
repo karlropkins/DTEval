@@ -23,6 +23,7 @@
 #' build a plot using ggplot2.
 #' @param x,y The names of the data-series to plot on the
 #'  X and Y axes, respectively, and assumed to be elements of \code{data}.
+#' @param plot.type The type of plot(s) to produce, defaults \code{'point'}.
 #' @param ... Additional arguments. See details below.
 
 #' @details In addition to \code{data}, the main data source for plots,
@@ -177,15 +178,20 @@
 # common plots wrapper
 
 ########################
-# second draft ???
+# third draft ???
 ########################
 
-# re-built ggplotTubeShell to better handle mapping/aes terms
+# merging tubePlot and ggplotTubeShell to simplify object handling...
 
 # proposing making tubePlot the standard plot
 # then tubeTimePlot a variation that by default sets x  to date
 # also think about making tubeSitePlot tubeMap without the map...
 
+
+#test <- function(x, ...){ qs <- quantile(as.numeric(x), c(0.45, 0.5, 0.55), na.rm=T)
+#names(qs)<- c("ymin", "y", "ymax")
+#qs
+#}
 
 
 #####################
@@ -204,6 +210,20 @@
 #     we should be able to simplify/automate a lot of this
 
 # playing with
+
+# for quantile ribbon
+# test <- function(x, ...){ qs <- quantile(as.numeric(x), c(0.45, 0.5, 0.55), na.rm=T)
+# names(qs)<- c("ymin", "y", "ymax")
+# qs
+# }
+# a <- tubePlot(dd[dd$.start_date>"2021-12-31",], ".date", "measurement", plot.type="none")
+# a + ggplot2::geom_smooth(ggplot2::aes(group=month, fill=month), stat="summary", fun.data=test, alpha=0.5)
+# also see
+# geom_smooth(method="gam", formula = y ~ s(x, bs = "cs", k=5))
+# can I get k from the data ??? maybe check in each case ???
+# a + ggplot2::geom_smooth(ggplot2::aes(group=month, fill=month), alpha=0.5, formula=y~s(x, k=4), method="gam")
+# BUT you need to know k and it is different for each group....
+
 
 # nice visualizations....
 #    https://www.nature.com/articles/s41467-018-03297-7
@@ -310,8 +330,8 @@ tubePlot <-
     }
 
     # plot.type
-    # this is so sloppy it is fun
-    .check <- c("point", "surface", "smooth", "polygon")
+    # this is so sloppy but it gives me pleasure...
+    .check <- c("point", "surface", "smooth", "polygon", "none", "ggsmooth")
     .tt <- c(plot.type, names(.xargs))
     for(i in .check){
       .tt[grepl(paste("^", i, "[.]", sep=""), .tt)] <- i
@@ -320,7 +340,6 @@ tubePlot <-
     if(length(plot.type)==0){
       plot.type <- "point"
     }
-
 
     for(i in plot.type){
 
@@ -403,8 +422,79 @@ tubePlot <-
         }
       }
 
-      #smooth
+
+      #bad.smooth
       if("smooth" %in% i){
+        .xargs2 <- dte_ggshellTidyArgs(.xargs, "testing")
+        .xargs2.test <- dte_ggshellTestArgs(.xargs2, d2)
+        .fit.args <- modifyList(list(data=d2, tube=y,
+                                     inputs=x, by=c(.xargs$group, .xargs$facet),
+                                     simplify=FALSE,
+                                     model = function(data, tube, inputs, new.data = NULL, ...){
+
+                                       data$..y. <- as.numeric(data[[tube]])
+                                       data$..x. <- as.numeric(data[[inputs[1]]]) # only handling first
+                                       ..k <- unique(data$..x.)
+                                       ..k <- length(..k[!is.na(..k)])
+                                       if(..k > 10){
+                                         ..k = - 1
+                                       }
+                                       if(is.null(new.data)){
+                                         new.data <- data.frame(seq(min(data[[inputs[1]]], na.rm=TRUE),
+                                                                    max(data[[inputs[1]]], na.rm=TRUE),
+                                                                    length.out=100))
+                                         names(new.data) <- inputs[1]
+                                         new.data$..x. <- as.numeric(new.data[[inputs[1]]])
+                                       }
+                                       row.names(data) <- 1:nrow(data)
+                                       ######################
+                                       # think about
+                                       # formula = 'y ~ s(x, bs = "cs")'
+                                       ###################
+                                       mod <- mgcv::gam(..y. ~ s(..x., k=..k), data=data)
+                                       .tmp <- mgcv::predict.gam(mod, newdata=new.data, se.fit=TRUE)
+                                       new.data$..pred <- NA
+                                       new.data$..pred[as.numeric(names(.tmp$fit))] <- as.vector(.tmp$fit)
+                                       new.data$..s.err <- NA
+                                       new.data$..s.err[as.numeric(names(.tmp$se.fit))] <- as.vector(.tmp$se.fit)
+                                       new.data <- new.data[names(new.data) != "..x."]
+                                       new.data
+                                     }
+        ),
+        #################################
+        # could generalise next bit ???
+        #    should loose force.positive
+        #        it kills models if x or y not numeric...
+        #################################
+        .xargs2[names(.xargs2) %in% c("too.far", "model",
+                                      "simplify",
+                                      "force.positive",
+                                      "grid.resolution")])
+        .d2 <- do.call(fitTubeModel, .fit.args)
+        #.xargs2[[y]] <- paste(y, ".pred", sep="")
+        if(.xargs2$..test=="OK"){
+          #########################
+          # tidy this....
+          #########################
+          y <- paste(y, ".pred", sep="")
+          .d2$..ymax. <- .d2[[y]] + .d2[["..s.err"]]
+          .d2$..ymin. <- .d2[[y]] - .d2[["..s.err"]]
+          .xargs2 <- modifyList(list(x=x, y=y, ymax="..ymax.", ymin="..ymin."), .xargs2)
+          #.xargs2$fill <- .xargs2[[.test[1]]]
+          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomRibbon)]
+          plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
+                                    ggplot2::geom_ribbon,
+                                    defaults = list(na.rm=TRUE, alpha=0.5),
+                                    drops = c(drops, "col", "color", "colour"))
+          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomLine)]
+          plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
+                                    ggplot2::geom_line,
+                                    defaults = list(na.rm=TRUE),
+                                    drops = c(drops, "fill"))
+        }
+      }
+
+      if("ggsmooth" %in% i){
         ##########################
         # testing this tidy
         .xargs2 <- dte_ggshellTidyArgs(.xargs, "smooth")
@@ -413,13 +503,18 @@ tubePlot <-
           ##########################
           drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomSmooth)]
           drops <- drops[drops!="k"]
-          print(drops)
+          #########################
+          # null to force the gam...
+          #  trying to set k to set the knots...
+          # not working!!!!
+          #########################
           plt <- dte_ggshellAddGeom(.xargs2, d2, plt,
                                     ggplot2::geom_smooth,
                                     defaults = list(na.rm=TRUE, method=NULL),
                                     drops = drops)
         }
       }
+
 
       #surface
       if("surface" %in% i){
@@ -477,6 +572,7 @@ tubePlot <-
           }
         }
       }
+
 
     }
 
