@@ -261,7 +261,7 @@ tubePlot <-
 
     #args
     .xargs <- modifyList(list(grid.borders = 0.05,
-                              auto.text = FALSE),
+                              auto.text = TRUE),
                          list(...))
     .xargs <- dte_ggshellTidyArgs(.xargs)
 
@@ -425,7 +425,7 @@ tubePlot <-
 
       #bad.smooth
       if("smooth" %in% i){
-        .xargs2 <- dte_ggshellTidyArgs(.xargs, "testing")
+        .xargs2 <- dte_ggshellTidyArgs(.xargs, "smooth")
         .xargs2.test <- dte_ggshellTestArgs(.xargs2, d2)
         .fit.args <- modifyList(list(data=d2, tube=y,
                                      inputs=x, by=c(.xargs$group, .xargs$facet),
@@ -497,7 +497,7 @@ tubePlot <-
       if("ggsmooth" %in% i){
         ##########################
         # testing this tidy
-        .xargs2 <- dte_ggshellTidyArgs(.xargs, "smooth")
+        .xargs2 <- dte_ggshellTidyArgs(.xargs, "ggsmooth")
         if(.xargs2$..test=="OK"){
           .xargs2 <- modifyList(list(x=x, y=y), .xargs2)
           ##########################
