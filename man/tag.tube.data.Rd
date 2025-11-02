@@ -8,9 +8,12 @@
 \alias{tagTubeSampleID}
 \alias{TagTubeValue}
 \alias{tagTubeDate}
+\alias{tageTubeMonth}
+\alias{tagTubeYear}
 \alias{tagTubeLocation}
 \alias{tagTubeRequired}
 \alias{tagTubeValue}
+\alias{tagTubeMonth}
 \title{Diffusion Tube Pro-processing}
 \usage{
 tagTube(data, ...)
@@ -26,6 +29,10 @@ tagTubeSampleID(data, method = -1, force = FALSE, ...)
 tagTubeValue(data, method = -1, force = FALSE, ...)
 
 tagTubeDate(data, method = 2, force = FALSE, ...)
+
+tagTubeMonth(data, method = 1, force = FALSE, ...)
+
+tagTubeYear(data, method = 1, force = FALSE, ...)
 
 tagTubeLocation(data, method = 1, force = FALSE, ...)
 }
@@ -143,6 +150,11 @@ intended for use when plotting time-series: options: 1 (start date),
 2 (default; mid-point date); 3 (end date). Because it uses start and
 end dates, it runs \code{tagTubeStartEnd} if these are not already
 tagged.
+
+\code{tagTubeMonth} and \code{tagTubeYear} attempt to assign
+representative months and years to each sampling record
+(\code{data} row). By default, these extract and format values
+from dates generated using \code{tagTubedate}.
 
 \code{tagTubeLocation} attempts to assign a representative location
 to each sampling record (\code{data} row). This is typically made by

@@ -7,7 +7,7 @@
 \alias{ggplotTubeShell}
 \title{Diffusion Tube Data Plots}
 \usage{
-tubePlot(data, x = NULL, y = NULL, ...)
+tubePlot(data, x = NULL, y = NULL, plot.type = NULL, ...)
 
 tubeTimePlot(data, x = NULL, y = NULL, ...)
 
@@ -19,6 +19,8 @@ build a plot using ggplot2.}
 
 \item{x, y}{The names of the data-series to plot on the
 X and Y axes, respectively, and assumed to be elements of \code{data}.}
+
+\item{plot.type}{The type of plot(s) to produce, defaults \code{'point'}.}
 
 \item{...}{Additional arguments. See details below.}
 }
