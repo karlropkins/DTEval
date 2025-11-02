@@ -8,6 +8,8 @@
 
 * Package pre-release 
 
+    * __v 0.0.16__ [2025-11-02] updated tubePlot smooth, fix tubeInXYPolygon 
+    rename
     * __v 0.0.15__ [2025-10-22] added clusterTubeData, tagTubeRequired;
     importing cluster, removing splancs. 
     * __v 0.0.14__ [2025-10-10] added fitTubeModel, deseasonTubeData, 

@@ -97,6 +97,11 @@
 #  handling grouping/subsets within polygon
 #      for multiple polygon files and for buffering
 
+
+## dd <- tagTube(dont.share::dt.bradford.2); dd <- dd[dd$.longitude<0,]
+## dd <- tubeInXYPolygon(dd, dont.share::caz.bradford)
+
+
 #' @rdname misc.tube.lat.lon
 #' @export
 
@@ -226,8 +231,13 @@ tubeInXYPolygon <- function(data, polygon, ...){
   # not done all...
   # if we start using merge.data.table for this we need to check dim in versus dim out
 
+  #remove any earlier version of data$[name/rename]
+  data <- data[names(data)[names(data)!=.name]]
+
+  #merge
   out <- merge(data, df1, by=c(lon, lat))
 
+  #out
   return(out)
 
 }
