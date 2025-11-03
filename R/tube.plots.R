@@ -23,7 +23,7 @@
 #' build a plot using ggplot2.
 #' @param x,y The names of the data-series to plot on the
 #'  X and Y axes, respectively, and assumed to be elements of \code{data}.
-#' @param plot.type The type of plot(s) to produce, defaults \code{'point'}.
+#' @param plot.type The type of plot(s) to produce, default \code{'point'}.
 #' @param ... Additional arguments. See details below.
 
 #' @details In addition to \code{data}, the main data source for plots,
@@ -33,8 +33,7 @@
 #' different from plot defaults.
 #'
 #'  * \code{group} The name of the data-series to use to group
-#'  plotted data with. By default, \code{ggplotTubeShell} assumes
-#'  supplied groups are factors if less than 20 unique cases.
+#'  plotted data with.
 #'
 #'  * \code{facet} The name of the data-series to use to cut
 #'  the data by when generating multiple plot panels. Also provides
@@ -233,11 +232,20 @@
 
 # also
 #    tubePlot(tagTube(dont.share::dt.bradford.2), x=".longitude", y=".latitude", palette=c("white", "green")) + ggplot2::geom_density_2d_filled(breaks=10^(0:10)) +ggplot2::xlim(-2.5,-1) + ggplot2::ylim(53.7, 54)
-#       # needs three colours because it is default fill.pallete because no fill in call...
+#       # needs three colours because it is default fill.paletet because no fill in call...
 #           # and every if there were, the geom would ignore it because it uses a z term...
 
 # saw this on over.plotting
 # https://bookdown.dongzhuoer.com/hadley/ggplot2-book/overplotting
+
+# from https://stackoverflow.com/questions/8197559/emulate-ggplot2-default-color-palette
+# gg_color_hue <- function(n) {
+#   hues = seq(15, 375, length = n + 1)
+#   hcl(h = hues, l = 65, c = 100)[1:n]
+#  }
+# n <- 5; hcl(h = seq(15, 375, length = n + 1), l = 65, c = 100)[1:n]
+
+
 
 # also
 #    tubePlot(tagTubeDate(dd), x=".date", y=".latitude", surface.fill=".value")
@@ -260,10 +268,10 @@ tubePlot <-
     ####################
 
     #args
+    .xargs <- dte_ggshellTidyArgs(list(...))
     .xargs <- modifyList(list(grid.borders = 0.05,
                               auto.text = TRUE),
-                         list(...))
-    .xargs <- dte_ggshellTidyArgs(.xargs)
+                         .xargs)
 
     #data
     if("ggplot" %in% class(data)){
@@ -300,6 +308,9 @@ tubePlot <-
         x <- ".index"
       }
     }
+    ##########################################
+    # strictly not ggplotTubeShell anymore....
+    ##########################################
     d2[, x] <- getTubeX(d2, x, if.err = "stop<<ggplotTubeShell>>x")
     d2[, y] <- getTubeX(d2, y, if.err = "stop<<ggplotTubeShell>>x")
     if(!is.null(.xargs$group)){
@@ -347,17 +358,59 @@ tubePlot <-
 
       #point
       #################################
-      # overplot options/stat ???
-      # mean and count to add back in ???
+      # added  overplot option
+      #     calculates mean or count of overplot data
+      #
       if("point" %in% i){
-        ##########################
-        # testing this tidy
         .xargs2 <- dte_ggshellTidyArgs(.xargs, "point")
+        .xargs2.test <- dte_ggshellTestArgs(.xargs2, d2)
+        .d2 <- d2
+        # overplot in-plot handling
+        if("overplot" %in% names(.xargs2)){
+          #like a tidier way of doing this
+          .by <- c(x, y, .xargs2$facet, .xargs2$group)
+          .x <- c()
+          if(length(.xargs2)>0){
+            for(i in 1:length(.xargs2)){
+              #print(.xargs2[[i]]) - value
+              #print(names(.xargs2)[i]) - name
+              if(.xargs2.test[[i]]=="data"){
+                if(!is.numeric(getTubeX(.d2, .xargs2[[i]]))){
+                  .by <- c(.by, .xargs2[[i]])
+                } else {
+                  .x <- c(.x, .xargs2[[i]])
+                }
+              }
+            }
+          }
+          .by <- unique(.by)
+          .x <- unique(.x[!.x %in% .by])
+          if(length(.x)<1){
+            #add dummy
+            .d2$..dummy <- 1
+            .x="..dummy"
+          }
+          if(.xargs2$overplot=="mean"){
+            .stat <- function(x) { list(mean=mean(x, na.rm=TRUE)) }
+            .d2 <- suppressWarnings(calcTubeStat(.d2, .x, stat=.stat, by =.by))
+            .xargs2[.xargs2 %in% .x] <- paste(.xargs2[.xargs2 %in% .x], ".mean", sep="")
+            # ignoring dummy means if nothing to mean
+          }
+          if(.xargs2$overplot=="count"){
+            .stat <- function(x) { list(count=length(x[!is.na(x)])) }
+            .d2 <- suppressWarnings(calcTubeStat(.d2, .x, stat=.stat, by =.by))
+            .xargs2[.xargs2 %in% .x] <- paste(.xargs2[.xargs2 %in% .x], ".count", sep="")
+            if("..dummy.count" %in% names(.d2) & !"size" %in% names(.xargs2)){
+              .xargs2$size = "..dummy.count"
+            }
+          }
+          # currently ignoring overplot if not understood...
+        }
         if(.xargs2$..test=="OK"){
           .xargs2 <- modifyList(list(x=x, y=y), .xargs2)
           ##########################
           drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPoint)]
-          plt <- dte_ggshellAddGeom(.xargs2, d2, plt,
+          plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
                                     ggplot2::geom_point,
                                     defaults = list(na.rm=TRUE),
                                     drops = drops)
@@ -426,11 +479,13 @@ tubePlot <-
       #bad.smooth
       if("smooth" %in% i){
         .xargs2 <- dte_ggshellTidyArgs(.xargs, "smooth")
+        .xargs2.test <- dte_ggshellTestArgs(.xargs2, d2)
         # needs groups
         # if fill or col declared...
         #     tracking in order fill, then colour
         if(!"group" %in% names(.xargs2)){
           .test <- c(.xargs2$fill, .xargs2$colour)
+          .test <- unlist(.xargs[names(.xargs.test[.xargs.test=="data"])])
           if(length(.test)>0){
             .xargs2$group <- .test[1]
           }
@@ -490,16 +545,22 @@ tubePlot <-
           .d2$..ymin. <- .d2[[y]] - .d2[["..s.err"]]
           .xargs2 <- modifyList(list(x=x, y=y, ymax="..ymax.", ymin="..ymin."), .xargs2)
           #.xargs2$fill <- .xargs2[[.test[1]]]
-          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomRibbon)]
+          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomSmooth)]
           plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
-                                    ggplot2::geom_ribbon,
-                                    defaults = list(na.rm=TRUE, alpha=0.5),
-                                    drops = c(drops, "col", "color", "colour"))
-          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomLine)]
-          plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
-                                    ggplot2::geom_line,
-                                    defaults = list(na.rm=TRUE),
-                                    drops = c(drops, "fill"))
+                                    ggplot2::geom_smooth,
+                                    defaults = list(na.rm=TRUE, se=TRUE, fill=grey(0.5), stat="identity"),
+                                    drops = drops[!c(drops) %in% c("ymax", "ymin", "se")])
+#   now using deom_smooth
+#          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomRibbon)]
+#          plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
+#                                    ggplot2::geom_ribbon,
+#                                    defaults = list(na.rm=TRUE, alpha=0.3),
+#                                    drops = c(drops, "col", "color", "colour"))
+#          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomLine)]
+#          plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
+#                                    ggplot2::geom_line,
+#                                    defaults = list(na.rm=TRUE),
+#                                    drops = c(drops, "fill"))
         }
       }
 
@@ -667,20 +728,21 @@ tubePlot <-
              grep("[.]col|[.]color|[.]colour", .tt, value=TRUE))
     .pp <- c()
     if(length(.tt)>0) {
-      .pp <- getTubeX(data, .xargs[[.tt[1]]])
+      .pp <- getTubeX(d2, .xargs[[.tt[1]]])
     }
     if(!"palette" %in% names(.xargs) & length(.pp)>0){
       .xargs$palette <- if(is.numeric(.pp)){
         c("#132B43", "#56B1F7")
       } else {
         if(length(unique(.pp)) > length(.xargs$fill.palette)){
-          colorRampPalette(1:5)(length(unique(.pp)))
+          colorRampPalette(c("#F8766D", "#A3A500", "#00BF7D",
+                             "#00B0F6", "#E76BF3"))(length(unique(.pp)))
         } else{
-          1:5
+          c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF3")
         }
       }
-
     }
+
     if("palette" %in% names(.xargs)){
       # colours might not be being mapped
       .value <- if("alpha" %in% names(.xargs)){
@@ -701,7 +763,7 @@ tubePlot <-
           plt <- plt + ggplot2::scale_color_gradientn(colours=.value)
         } else {
           if(length(unique(.pp)) > length(.value)){
-            .values <- colorRampPalette(.value)(length(unique(.pp)))
+            .value <- colorRampPalette(.value)(length(unique(.pp)))
           }
           plt <- plt + ggplot2::scale_color_manual(values=.value)
         }
@@ -722,8 +784,9 @@ tubePlot <-
     .tt <- c(.tt[.tt=="fill"], grep("[.]fill", .tt, value=TRUE))
     .pp <- c()
     if(length(.tt)>0) {
-      .pp <- getTubeX(data, .xargs[[.tt[1]]])
+      .pp <- getTubeX(d2, .xargs[[.tt[1]]])
     }
+
     if("palette" %in% names(.xargs) & ! "fill.palette" %in% names(.xargs)){
       .xargs$fill.palette <- .xargs$palette
     }
@@ -732,13 +795,14 @@ tubePlot <-
         c("#132B43", "#56B1F7")
       } else {
         if(length(unique(.pp)) > length(.xargs$fill.palette)){
-          colorRampPalette(1:5)(length(unique(.pp)))
+          colorRampPalette(c("#F8766D", "#A3A500", "#00BF7D",
+                             "#00B0F6", "#E76BF3"))(length(unique(.pp)))
         } else{
-          1:5
+          c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF3")
         }
       }
-
     }
+
     if("fill.palette" %in% names(.xargs)){
       .value <- if("alpha" %in% names(.xargs)){
         # NB: alpha just updates, not a multiple,
@@ -747,23 +811,25 @@ tubePlot <-
       } else {
         .xargs$fill.palette
       }
+
       # like colours might not be being mapped
       # could also be a [whatever].fill
       if(length(.pp)==0){
         #############################################
         # testing removing - same in fill.palette
-        ##plt$mapping$fill <- "default"
+        plt$mapping$fill <- "default"
         plt <- plt + ggplot2::scale_fill_manual(values=.value,
                                                 guide="none")
+
       } else {
         #.pp <- data[[rlang::as_label(plt$mapping$colour)]]
         #.pp <- plt$mapping$colour
-        .pp <- getTubeX(data, .xargs[[.tt[1]]])
+        .pp <- getTubeX(d2, .xargs[[.tt[1]]])
         if(is.numeric(.pp)){
           plt <- plt + ggplot2::scale_fill_gradientn(colours=.value)
         } else {
-          if(length(unique(.pp)) > length(.xargs$fill.palette)){
-            .value <- colorRampPalette(.xargs$.value)(length(unique(.pp)))
+          if(length(unique(.pp)) > length(.value)){
+            .value <- colorRampPalette(.value)(length(unique(.pp)))
           }
           plt <- plt + ggplot2::scale_fill_manual(values=.value)
         }
@@ -1708,9 +1774,9 @@ tubeTimePlot <-
     .xargs <- list(...)
     #data
     if("ggplot" %in% class(data)){
-      data$data <- tagTubeDate(data$data)
+      data$data <- data$data
     } else {
-      data <- tagTubeDate(data)
+      data <- data
     }
     #if("new.data" %in% names(.xargs)) {
     #  data<-.xargs$new.data
