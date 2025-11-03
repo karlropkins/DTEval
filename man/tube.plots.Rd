@@ -56,8 +56,7 @@ In addition to \code{data}, the main data source for plots,
 \item \code{xlab}, \code{ylab} The X and Y axes labels to use if
 different from plot defaults.
 \item \code{group} The name of the data-series to use to group
-plotted data with. By default, \code{ggplotTubeShell} assumes
-supplied groups are factors if less than 20 unique cases.
+plotted data with.
 \item \code{facet} The name of the data-series to use to cut
 the data by when generating multiple plot panels. Also provides
 an addition \code{facet.type} shortcut to different \code{ggplot2}

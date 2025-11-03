@@ -19,7 +19,9 @@ same function.}
 X and Y axes, respectively, and assumed to be sampling point longitude and
 latitude.}
 
-\item{...}{Additional arguments. See \code{Details}.}
+\item{...}{Additional arguments. \code{tubeMap} uses \code{data}, \code{x},
+\code{y} and optional argument \code{facet} to build map layers then passes
+arguments on to \code{tubePlot} to generate plot layers.}
 }
 \value{
 \code{tubeMap} generates static maps using \code{ggplot2}
@@ -29,19 +31,6 @@ and \code{OpenStreetMap}. \code{leafletTubeMap} generates interactive
 \description{
 \code{DTEval} currently provides static \code{ggplot2} and
 dynamic (html) \code{leaflet} diffusion tube maps.
-}
-\details{
-In addition to \code{data}, \code{x} and \code{y}, \code{tubeMap}
-handles the following arguments:
-\itemize{
-\item \code{point} to add tube locations as points.
-\item \code{polygon} to add a polygon to the map.
-\item \code{surface} to fit/add a surface to the the map.
-\item Common plotting arguments, e.g \code{col} for colour, etc. These are
-typically applied to all plot elements (points, polygons, ect) that
-can apply them but plot features can also be specified, e.g. \code{point.col='red'}
-to just colour points red.
-}
 }
 \note{
 These functions are in development, so may change.

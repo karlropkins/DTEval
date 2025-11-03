@@ -12,18 +12,10 @@
 #' @param x,y The names of the data-series to plot on the
 #' X and Y axes, respectively, and assumed to be sampling point longitude and
 #' latitude.
-#' @param ... Additional arguments. See \code{Details}.
+#' @param ... Additional arguments. \code{tubeMap} uses \code{data}, \code{x},
+#' \code{y} and optional argument \code{facet} to build map layers then passes
+#' arguments on to \code{tubePlot} to generate plot layers.
 
-#' @details In addition to \code{data}, \code{x} and \code{y}, \code{tubeMap}
-#' handles the following arguments:
-#'
-#' * \code{point} to add tube locations as points.
-#' * \code{polygon} to add a polygon to the map.
-#' * \code{surface} to fit/add a surface to the the map.
-#' * Common plotting arguments, e.g \code{col} for colour, etc. These are
-#' typically applied to all plot elements (points, polygons, ect) that
-#' can apply them but plot features can also be specified, e.g. \code{point.col='red'}
-#' to just colour points red.
 
 # #' * \code{xlab}, \code{ylab} The X and Y axes labels to use if
 # #' different from plot defaults.
@@ -84,6 +76,154 @@
 #' @export
 
 tubeMap <-
+  function(data, x=NULL, y=NULL, ...){
+
+    #setup
+    ####################
+    .xargs <- list(...)
+    if("ggplot" %in% class(data)){
+      previous <- data
+      d2 <- data$data
+    } else {
+      d2 <- data
+      previous <- NULL
+    }
+    if("new.data" %in% names(.xargs)) {
+      d2<-.xargs$new.data
+    }
+
+    #what to do about col/colour...?
+    #   currently using this cludge in both tubePlot and ggplotTubeShell
+    #      and assuming colour hereafter...
+    names(.xargs)[names(.xargs) %in% c("col", "color")] <- "colour"
+    .xargs <- .xargs[!duplicated(names(.xargs), fromLast=TRUE)]
+    if(is.null(x)){
+      x <- ".longitude"
+    }
+    if(is.null(y)){
+      y <- ".latitude"
+    }
+
+    d2 <- tagTubeRequired(d2, required=c(x, y, .xargs$facet))
+
+    .x <- getTubeX(d2, x, if.err="stop<<tubeMap>>x")
+    .y <- getTubeX(d2, y, if.err="stop<<tubeMap>>y")
+
+    if(!"grid.borders" %in% names(.xargs)){
+      .xargs$grid.borders <- 0.05
+    }
+
+    ##build map layer
+    ###################
+    if(is.null(previous)){
+      #map ranges
+      rng.lat <- range(.y, na.rm=TRUE)
+      rng.lon <- range(.x, na.rm=TRUE)
+      #adding border
+      exp <- function(rng, n=0.1){
+        temp <- (rng[2]-rng[1])*n
+        c(rng[1]-temp, rng[2]+temp)
+      }
+      rng.lon <- exp(rng.lon, .xargs$grid.borders)
+      rng.lat <- exp(rng.lat, .xargs$grid.borders)
+      dc <- OpenStreetMap::openmap(c(rng.lat[2], rng.lon[1]),
+                                   c(rng.lat[1],rng.lon[2]),
+                                   zoom = NULL,
+                                   type =  "esri",
+                                   mergeTiles = TRUE)
+
+      dc <- suppressMessages(suppressWarnings(
+        OpenStreetMap::openproj(dc,
+                                projection = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
+      ))
+      p1 <- dc$bbox$p1
+      p2 <- dc$bbox$p2
+      .bb <- data.frame(x = c(p1[1], p2[1]),
+                        y = c(p1[2], p2[2]))
+      names(.bb) <- c(x,y)
+      if("facet" %in% names(.xargs)){
+        .bb <- data.frame(.bb, facet=rep(unique(d2[[.xargs$facet]]), each=2))
+        names(.bb)[3] <- .xargs$facet
+      }
+      #####################################
+      # would like to simplify this bit...
+      ######################################
+
+      .all <- modifyList(list(data=d2, x=x, y=y), .xargs)
+      plt <- suppressMessages(suppressWarnings(
+        do.call(ggplotTubeShell, .all)
+      ))
+      .ggshell <- c("facet.type", "xlab", "ylab",
+                    "auto.text", "palette", "fill.palette", "map.args",
+                    "key.position", "key.direction", "rotate.x.axes")
+      .xargs <- .xargs[!names(.xargs) %in% .ggshell]
+      .xargs <- modifyList(list(x=x, y=y),
+                           .xargs)
+
+      for(tile in dc$tiles){
+        p1 <- tile$bbox$p1
+        p2 <- tile$bbox$p2
+        rast <- matrix(tile$colorData, nrow = tile$xres, byrow = TRUE)
+        plt <- plt + ggplot2::annotation_raster(rast, -Inf, Inf, -Inf, Inf)
+      }
+
+      plt <- plt + ggplot2::expand_limits(x = c(p1[1], p2[1]),
+                                          y = c(p2[2], p1[2])) +
+        ggplot2::scale_x_continuous(expand = c(0, 0)) +
+        ggplot2::scale_y_continuous(expand = c(0, 0))
+
+      ##########################
+      # need to re-instate these
+      #    (if we can stop them
+      #     erroring out...)
+      ##########################
+
+      #plt <- plt + ggplot2::geom_text(data=data.frame(),
+      #                      ggplot2::aes(x=rng.lon[2], y=rng.lat[1]),
+      #                      label="Map layer: (c) OpenStreetMap/ESRI contributors    ",
+      #                      size=1.8, hjust=1, vjust=-0.5)
+
+      #plt <- plt + ggplot2::coord_sf() + ggplot2::labs(x="") +
+      #  ggplot2::labs(y="") +
+      #  ggplot2::scale_x_discrete(labels = NULL, breaks = NULL) +
+      #  ggplot2::scale_y_discrete(labels = NULL, breaks = NULL)
+
+
+      map <- plt
+
+      #      map + ggplot2::coord_equal()
+      #################################
+      # general map text, formatting and sizing
+      #      suppressMessages(suppressWarnings(
+      #        map <- plt + ggplot2::geom_text(data=data.frame(),
+      #                                        ggplot2::aes(x=rng.lon[2], y=rng.lat[1]),
+      #                                        label="Map layer: (c) OpenStreetMap/ESRI contributors    ",
+      #                                        size=1.8, hjust=1, vjust=-0.5) #+
+      #          ggplot2::coord_quickmap() +
+      #          ggplot2::theme_void()
+      #      ))
+    } else {
+      map <- previous
+    }
+
+    out <- suppressMessages(suppressWarnings(
+      tubePlot(map, x, y, ...) + ggplot2::coord_sf()
+    ))
+
+
+    out <- out + ggplot2::theme(axis.title.x=ggplot2::element_blank(),
+                                axis.text.x=ggplot2::element_blank(),
+                                axis.ticks.x=ggplot2::element_blank(),
+                                axis.title.y=ggplot2::element_blank(),
+                                axis.text.y=ggplot2::element_blank(),
+                                axis.ticks.y=ggplot2::element_blank())
+    out
+
+  }
+
+
+
+tubeMap.2 <-
   function(data, x=NULL, y=NULL, ...){
 
     #setup
