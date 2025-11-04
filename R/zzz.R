@@ -6,7 +6,7 @@
 #' na.omit median cor
 #' @importFrom utils data modifyList
 #' @importFrom methods is
-#' @importFrom grDevices colorRampPalette as.raster grey
+#' @importFrom grDevices colorRampPalette as.raster grey hcl
 
 ##########################
 # don't want full import
