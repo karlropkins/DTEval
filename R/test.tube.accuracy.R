@@ -406,10 +406,14 @@ testTubeAccuracy <-
       #    see testTubeAccuracy for line handling
       #       BUT might not work the same...
       ######################################
+      if("group" %in% names(.xargs)){
+        if(!any(c("colour", "col", "color") %in% names(.xargs))){
+          .xargs$col <- .xargs$group
+        }
+      }
       plt <- do.call(ggplotTubeShell,
                      modifyList(.xargs,
-                     list(data=local, x=".ref", y=".tube",
-                          xlab=ref, ylab=tube))) +
+                     list(data=local, x=ref, y=tube))) +
                 ggplot2::geom_point() +
         # if we add col to plot, it does lm as well as colors...
         # so disconnects seen verses calculated...
