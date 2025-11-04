@@ -734,12 +734,14 @@ tubePlot <-
       .xargs$palette <- if(is.numeric(.pp)){
         c("#132B43", "#56B1F7")
       } else {
-        if(length(unique(.pp)) > length(.xargs$fill.palette)){
-          colorRampPalette(c("#F8766D", "#A3A500", "#00BF7D",
-                             "#00B0F6", "#E76BF3"))(length(unique(.pp)))
-        } else{
-          c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF3")
-        }
+        hcl(h = seq(15, 375, length = length(unique(.pp)) + 1),
+            l = 65, c = 100)[1:length(unique(.pp))]
+#        if(length(unique(.pp)) > length(.xargs$fill.palette)){
+#          colorRampPalette(c("#F8766D", "#A3A500", "#00BF7D",
+#                             "#00B0F6", "#E76BF3"))(length(unique(.pp)))
+#        } else{
+#          c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF3")
+#        }
       }
     }
 
@@ -794,12 +796,14 @@ tubePlot <-
       .xargs$fill.palette <- if(is.numeric(.pp)){
         c("#132B43", "#56B1F7")
       } else {
-        if(length(unique(.pp)) > length(.xargs$fill.palette)){
-          colorRampPalette(c("#F8766D", "#A3A500", "#00BF7D",
-                             "#00B0F6", "#E76BF3"))(length(unique(.pp)))
-        } else{
-          c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF3")
-        }
+        hcl(h = seq(15, 375, length = length(unique(.pp)) + 1),
+            l = 65, c = 100)[1:length(unique(.pp))]
+        #if(length(unique(.pp)) > length(.xargs$fill.palette)){
+        #  colorRampPalette(c("#F8766D", "#A3A500", "#00BF7D",
+        #                     "#00B0F6", "#E76BF3"))(length(unique(.pp)))
+        #} else{
+        #  c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF3")
+        #}
       }
     }
 
@@ -1813,7 +1817,9 @@ ggplotTubeShell <-
     ################################
 
     #.xargs
-    .xargs <- list(...)
+    # make like tubePlot
+    .xargs <- modifyList(list(auto.text=TRUE), list(...))
+    data <- tagTubeRequired(data, required=c(x, y, unlist(.xargs)))
 
     #what to do about this...?
     #using in tubePlot and ggplotTubeShell
@@ -2009,11 +2015,14 @@ ggplotTubeShell <-
       .xargs$palette <- if(is.numeric(.pp)){
         c("#132B43", "#56B1F7")
       } else {
-        if(length(unique(.pp)) > length(.xargs$fill.palette)){
-          colorRampPalette(1:5)(length(unique(.pp)))
-        } else{
-          1:5
-        }
+#        if(length(unique(.pp)) > length(.xargs$palette)){
+          hcl(h = seq(15, 375, length = length(unique(.pp)) + 1),
+              l = 65, c = 100)[1:length(unique(.pp))]
+#          colorRampPalette(c("#F8766D", "#A3A500", "#00BF7D",
+#                             "#00B0F6", "#E76BF3"))(length(unique(.pp)))
+#        } else{
+#          c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF3")
+#        }
       }
 
     }
@@ -2037,7 +2046,7 @@ ggplotTubeShell <-
           plt <- plt + ggplot2::scale_color_gradientn(colours=.value)
         } else {
           if(length(unique(.pp)) > length(.value)){
-            .values <- colorRampPalette(.value)(length(unique(.pp)))
+            .value <- colorRampPalette(.value)(length(unique(.pp)))
           }
           plt <- plt + ggplot2::scale_color_manual(values=.value)
         }
@@ -2067,11 +2076,14 @@ ggplotTubeShell <-
       .xargs$fill.palette <- if(is.numeric(.pp)){
          c("#132B43", "#56B1F7")
       } else {
-        if(length(unique(.pp)) > length(.xargs$fill.palette)){
-          colorRampPalette(1:5)(length(unique(.pp)))
-        } else{
-          1:5
-        }
+#        if(length(unique(.pp)) > length(.xargs$fill.palette)){
+          hcl(h = seq(15, 375, length = length(unique(.pp)) + 1),
+              l = 65, c = 100)[1:length(unique(.pp))]
+#          colorRampPalette(c("#F8766D", "#A3A500", "#00BF7D",
+#                             "#00B0F6", "#E76BF3"))(length(unique(.pp)))
+#        } else{
+#          c("#F8766D", "#A3A500", "#00BF7D", "#00B0F6", "#E76BF3")
+#        }
       }
 
     }

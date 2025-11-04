@@ -64,6 +64,10 @@
 ## etc...
 ## with(iris, eval(parse(text=a)))
 
+## need to be careful with this function
+## it is looking everywhere,
+##     so using ..getTubeX. as text term
+
 #' @rdname misc.dt.handlers
 #' @export
 
@@ -74,13 +78,13 @@ getTubeX <- function(data, x=NULL, ..., test.class=NULL,
   fun.nm <- "[getTubeX]"
   x.nm <- "x"
   if(grepl("^stop", if.err) & grepl("<<", if.err) & grepl(">>", if.err)){
-    test <- gsub("^stop|^stop<<|>>.*", "", if.err)
-    if(test != ""){
-      fun.nm <- paste("[", test, "]", sep="")
+    ..getTubeX. <- gsub("^stop|^stop<<|>>.*", "", if.err)
+    if(..getTubeX. != ""){
+      fun.nm <- paste("[", ..getTubeX., "]", sep="")
     }
-    test <- gsub(".*>>", "", if.err)
-    if(test != ""){
-      x.nm <- test
+    ..getTubeX. <- gsub(".*>>", "", if.err)
+    if(..getTubeX. != ""){
+      x.nm <- ..getTubeX.
     }
   }
 
@@ -118,8 +122,8 @@ getTubeX <- function(data, x=NULL, ..., test.class=NULL,
     return(NULL)
   } else {
     if(!is.null(test.class)){
-      test <- try(is(out, test.class))
-      if((class(test)[1]=="try-error") || !test){
+      ..getTubeX. <- try(is(out, test.class))
+      if((class(..getTubeX.)[1]=="try-error") || !..getTubeX.){
         if(if.err=="return.null"){
           return(NULL)
         } else {

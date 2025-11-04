@@ -148,10 +148,11 @@ testTubeAccuracy <-
     ###############################
 
     #chasing the dots
-    .xargs <- list(...)
+    .xargs <- modifyList(list(auto.text=TRUE), list(...))
 
     #tagTube check/add tags
-    data <- tagTube(data, ...)
+    data <- tagTubeRequired(tagTube(data, ...),
+                            required=c(tube, unlist(.xargs)), ...)
 
     #tube handling
     # error if not numeric via getTUbeX
@@ -405,8 +406,10 @@ testTubeAccuracy <-
       #    see testTubeAccuracy for line handling
       #       BUT might not work the same...
       ######################################
-      plt <- ggplotTubeShell(local, x=".ref", y=".tube",
-                             xlab=ref, ylab=tube, ...) +
+      plt <- do.call(ggplotTubeShell,
+                     modifyList(.xargs,
+                     list(data=local, x=".ref", y=".tube",
+                          xlab=ref, ylab=tube))) +
                 ggplot2::geom_point() +
         # if we add col to plot, it does lm as well as colors...
         # so disconnects seen verses calculated...

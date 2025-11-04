@@ -74,7 +74,8 @@
 deseasonTubeData <- function(data, tube=".value", by=NULL, ...){
 
   # setup
-  data <- tagTube(data)
+  data <- tagTubeRequired(data, required = c(tube, by,), ...)
+
   data <- tagTubeDate(data)
   .by <- c(".date", by)
   .d <- calcTubeStat(data, tube, by=.by)

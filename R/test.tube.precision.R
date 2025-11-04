@@ -155,10 +155,12 @@ testTubePrecision <-
     ########################
 
     #chasing the dots
-    .xargs <- list(...)
+    .xargs <- modifyList(list(auto.text=TRUE,
+                              xlab="replicate mean",
+                              ylab=tube), list(...))
 
     #tagTube, check/tag
-    data <- tagTube(data, ...)
+    data <- tagTubeRequired(tagTube(data, ...), required=c(tube, unlist(.xargs)), ...)
 
     #tube handling
     # error if not numeric via getTubeX
@@ -208,7 +210,6 @@ testTubePrecision <-
     # could remove some of above with checkTubeData ??
     ##################
 
-
     ##################
     #only does method one at a time at moment...
     # maybe warn or stop if multiples...
@@ -227,50 +228,56 @@ testTubePrecision <-
     #    (assuming data tagged properly)
     ls <- lapply(unique(data$.cut), function(z){
       dat.ans <- data[data$.cut==z,]
-      test <- c(".start_date",
+      ..test. <- c(".start_date",
                 ".end_date", ".sample_id", ".cut", group,
                 facet)
       #moving to data.table
       #test <- dplyr::group_by(dat.ans, dplyr::pick(test))
+      #calling ..test. while using data.table because it
+      #seems to be tracking data$test from by...
+      #    think need more thinking about
+      #    have similar with getTubeX...
       dat.ans <- data.table::as.data.table(dat.ans)
       if(method=="1"){
-        test <- dat.ans[, .(.n = length(.tube[is.finite(.tube)]),
+        ..test. <- dat.ans[, .(.n = length(.tube[is.finite(.tube)]),
                             .mean = mean(.tube, na.rm=TRUE),
                             .low = quantile(.tube, 0.05, na.rm=TRUE),
                             .high = quantile(.tube, 0.95, na.rm=TRUE)
-        ), by=test]
-        test <- as.data.frame(test)
+        ), by=..test.]
+        test <- as.data.frame(..test.)
       }
       if(method=="2"){
-        test <- dat.ans[, .(.n = length(.tube[is.finite(.tube)]),
+        ..test. <- dat.ans[, .(.n = length(.tube[is.finite(.tube)]),
                             .mean = mean(.tube, na.rm=TRUE),
                             .sd = sd(.tube, na.rm=TRUE)
-        ), by=test]
-        test <- as.data.frame(test)
+        ), by=..test.]
+        test <- as.data.frame(..test.)
         .ts <- suppressWarnings(qt(0.05/2, df=test$.n-1, lower.tail = FALSE))
         test$.low <- ifelse(test$.n>2, test$.mean - (.ts * (test$.sd/sqrt(test$.n))), NA)
         test$.high <- ifelse(test$.n>2, test$.mean + (.ts * (test$.sd/sqrt(test$.n))), NA)
       }
       if(method=="3"){
-        test <- dat.ans[, .(.n = length(.tube[is.finite(.tube)]),
+        ..test. <- dat.ans[, .(.n = length(.tube[is.finite(.tube)]),
                             .mean = mean(.tube, na.rm=TRUE),
                             .sd = sd(.tube, na.rm=TRUE)
-        ), by=test]
-        test <- as.data.frame(test)
+        ), by=..test.]
+        test <- as.data.frame(..test.)
         test$.low <- ifelse(test$.n>2, test$.mean - (1.96*test$.sd/sqrt(test$.n)), NA)
         test$.high <- ifelse(test$.n>2, test$.mean + (1.96*test$.sd/sqrt(test$.n)), NA)
       }
       if(method=="4"){
-        test <- dat.ans[, .(.n = length(.tube[is.finite(.tube)]),
+        ..test. <- dat.ans[, .(.n = length(.tube[is.finite(.tube)]),
                             .mean = mean(.tube, na.rm=TRUE),
                             .sd = sd(.tube, na.rm=TRUE)
-        ), by=test]
-        test <- as.data.frame(test)
+        ), by=..test.]
+        test <- as.data.frame(..test.)
         test$.low <- ifelse(test$.n>2, test$.mean - (qnorm(0.975)*test$.sd), NA)
         test$.high <- ifelse(test$.n>2, test$.mean + (qnorm(0.975)*test$.sd), NA)
       }
+
       test <- as.data.frame(test)
       dat.ans <- as.data.frame(dat.ans)
+
       test <- merge(dat.ans, test)    #a join or data.table.merge might be faster ???
       test <- subset(test, .n==n)     #subset for data with replicates
       test <- test[!is.na(test$.tube),]
@@ -349,10 +356,9 @@ testTubePrecision <-
       if(!"line.col" %in% names(.xargs)){
         .xargs$line.col <- "red"
       }
-      plt <- ggplotTubeShell(test, x=".mean", y=".tube",
-                             xlab="replicate mean",
-                             ylab=tube,
-                             ...) +
+      plt <- do.call(ggplotTubeShell,
+                     modifyList(.xargs, list(data=test,
+                                             x=".mean", y=".tube"))) +
         ggplot2::geom_point() +
         ggplot2::geom_line(ggplot2::aes(y=.y), col=.xargs$line.col) +
         ggplot2::geom_line(ggplot2::aes(y=.ylow), col=.xargs$line.col,
