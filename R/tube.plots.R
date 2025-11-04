@@ -541,8 +541,8 @@ tubePlot <-
           # tidy this....
           #########################
           y <- paste(y, ".pred", sep="")
-          .d2$..ymax. <- .d2[[y]] + .d2[["..s.err"]]
-          .d2$..ymin. <- .d2[[y]] - .d2[["..s.err"]]
+          .d2$..ymax. <- .d2[[y]] + (.d2[["..s.err"]] * 1.96)
+          .d2$..ymin. <- .d2[[y]] - (.d2[["..s.err"]] * 1.96)
           .xargs2 <- modifyList(list(x=x, y=y, ymax="..ymax.", ymin="..ymin."), .xargs2)
           #.xargs2$fill <- .xargs2[[.test[1]]]
           drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomSmooth)]
