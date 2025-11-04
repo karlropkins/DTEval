@@ -97,7 +97,7 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
   .xargs <- list(...)
   # tag data
   # d2 should have all tags if data is recognisable dt data
-  d2 <- tagTube(data)
+  d2 <- tagTubeRequired(data, required=c(tube, inputs, by), ...)
 
   # data checks
   d2 <- checkTubeData(d2, tube, if.err="stop<<fitTubeModel>>tube")
