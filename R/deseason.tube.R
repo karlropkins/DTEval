@@ -45,7 +45,7 @@
 # need to document
 
 # current test
-#    dd <- tagTube(dont.share::dt.bradford.2); dd <- dd[dd$.longitude<0,]
+#    dd <- dont.share::dt.bradford.2; dd <- dd[dd$.longitude<0,]
 #    dd <- tubeInXYPolygon(dd, dont.share::caz.bradford)
 #    ans <- deseasonTubeData(dd, "bias_adjusted_measurement", by=c(".in_polygon"))
 #    tubePlot.old(ans, x=".date", "..deseason", col=".in_polygon", plot.type="smooth")
@@ -74,10 +74,9 @@
 deseasonTubeData <- function(data, tube=".value", by=NULL, ...){
 
   # setup
-  data <- tagTubeRequired(data, required = c(tube, by), ...)
-
-  data <- tagTubeDate(data)
   .by <- c(".date", by)
+  data <- tagTubeRequired(data, required = c(tube, .by), ...)
+
   .d <- calcTubeStat(data, tube, by=.by)
   .d$jd <- as.numeric(format(.d$.date, "%j"))
   .d$n <- as.numeric(.d$.date)

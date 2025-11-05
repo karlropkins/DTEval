@@ -72,6 +72,16 @@
 # need to
 #######################
 
+# Check through and update following after reset tubePlot updates
+# THEN same for tubeMap
+
+# using geom_raster instead of geom_tile to stop aliasing with
+#    transparent surfaces BUT very small too.fars may break this ...
+# COULD TRY leaving NAs in corners or replace all too.far data with
+#    NAs rather than removing them... BUT might mean we cannot
+#    reduce the plot range..???
+
+
 ###############################
 # added
 # tidy what follows when done
@@ -613,10 +623,10 @@ tubePlot <-
             # if fill in there
             if("fill" %in% names(.xargs2)){
               .xargs2$fill <- .xargs2[[.test[1]]]
-              drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomTile)]
+              drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomRaster)]
               drops <- c(drops, "col", "color", "colour")
               plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
-                                        ggplot2::geom_tile,
+                                        ggplot2::geom_raster,
                                         defaults = list(na.rm=TRUE),
                                         drops = drops)
             }
