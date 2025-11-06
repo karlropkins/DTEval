@@ -247,7 +247,14 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
         #use my MUCH slower generalised version...
         dte_too.far(.nd[inputs], .dd[inputs], .xargs$too.far)
       }
-      .nd <- .nd[!df.ex,]
+      ################################
+      # testing
+      ################################
+      # was/is
+      #.nd <- .nd[!df.ex,]
+      # but needs NA colour to be transparent in scale_colour/fill...
+      .nd[df.ex, paste(tube, ".pred", sep="")] <- NA
+      ################################
     }
     ## too.far only works for 2 inputs ...
     ## could drop predictions of nd

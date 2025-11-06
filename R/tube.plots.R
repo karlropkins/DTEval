@@ -234,6 +234,10 @@
 # BUT you need to know k and it is different for each group....
 
 
+# look at following re map handling...
+# https://jcoliver.github.io/learn-r/017-open-street-map.html
+
+
 # nice visualizations....
 #    https://www.nature.com/articles/s41467-018-03297-7
 
@@ -598,7 +602,11 @@ tubePlot <-
 
       #surface
       if("surface" %in% i){
-        #just arg should trigger this contour ??
+        #NB: hijacking na.value if using surface
+        if(!"na.value" %in% names(.xargs)){
+          .xargs$na.value <- NA
+        }
+        #just contour arg should trigger contour ??
         .xargs2 <- dte_ggshellTidyArgs(.xargs, "surface")
         .xargs2.test <- dte_ggshellTestArgs(.xargs2, d2)
         .test <- names(.xargs2.test[.xargs2.test=="data"])
@@ -731,12 +739,20 @@ tubePlot <-
     #   testing a colouring option
     #      alpha control limited at moment
     #      NB:need to make any changes for palette/colour and fill.palette/fill
+    #   currently setting NA.value to NA in scale_fill_gradientn for surface tubePlot
+    #      could set this NA.value for surface only..?
     ############################
     #test for map-able fills
     .tt <- names(.xargs.test[.xargs.test=="data"])
     .tt <- c(.tt[.tt %in% c("col", "color", "colour")],
              grep("[.]col|[.]color|[.]colour", .tt, value=TRUE))
     .pp <- c()
+    #na colour handling (hijacking this for surface fit/raster)
+    .na.value <- if("na.value" %in% names(.xargs)){
+      .xargs$na.value
+    } else {
+      "grey50"
+    }
     if(length(.tt)>0) {
       .pp <- getTubeX(d2, .xargs[[.tt[1]]])
     }
@@ -767,17 +783,20 @@ tubePlot <-
         # testing removing - same in fill.palette
         ##plt$mapping$colour <- "default"
         plt <- plt + ggplot2::scale_color_manual(values=.value,
+                                                 na.value=.na.value,
                                                  guide="none")
       } else {
         #.pp <- data[[rlang::as_label(plt$mapping$colour)]]
         #.pp <- plt$mapping$colour
         if(is.numeric(.pp)){
-          plt <- plt + ggplot2::scale_color_gradientn(colours=.value)
+          plt <- plt + ggplot2::scale_color_gradientn(colours=.value,
+                                                      na.value=.na.value)
         } else {
           if(length(unique(.pp)) > length(.value)){
             .value <- colorRampPalette(.value)(length(unique(.pp)))
           }
-          plt <- plt + ggplot2::scale_color_manual(values=.value)
+          plt <- plt + ggplot2::scale_color_manual(values=.value,
+                                                   na.value=.na.value)
         }
       }
     }
@@ -789,6 +808,7 @@ tubePlot <-
     #   testing a colouring option
     #      alpha control limited at moment
     #      NB:need to make any changes for palette/colour and fill.palette/fill
+    #   currently setting NA.value to NA in scale_fill_gradientn for surface tubePlot
     ############################
 
     #test for map-able fills
@@ -833,6 +853,7 @@ tubePlot <-
         # testing removing - same in fill.palette
         plt$mapping$fill <- "default"
         plt <- plt + ggplot2::scale_fill_manual(values=.value,
+                                                na.value=.na.value,
                                                 guide="none")
 
       } else {
@@ -840,12 +861,14 @@ tubePlot <-
         #.pp <- plt$mapping$colour
         .pp <- getTubeX(d2, .xargs[[.tt[1]]])
         if(is.numeric(.pp)){
-          plt <- plt + ggplot2::scale_fill_gradientn(colours=.value)
+          plt <- plt + ggplot2::scale_fill_gradientn(colours=.value,
+                                                     na.value=.na.value)
         } else {
           if(length(unique(.pp)) > length(.value)){
             .value <- colorRampPalette(.value)(length(unique(.pp)))
           }
-          plt <- plt + ggplot2::scale_fill_manual(values=.value)
+          plt <- plt + ggplot2::scale_fill_manual(values=.value,
+                                                  na.value=.na.value)
         }
       }
     }
