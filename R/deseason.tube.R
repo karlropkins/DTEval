@@ -64,7 +64,7 @@
 #    dd <- dont.share::dt.bradford.2; dd <- dd[dd$.longitude<0,]
 #    dd <- tubeInXYPolygon(dd, dont.share::caz.bradford)
 #    ans <- deseasonTubeData(dd, "bias_adjusted_measurement", by=c(".in_polygon"))
-#    tubePlot.old(ans, x=".date", "..deseason", col=".in_polygon", plot.type="smooth")
+#    tubePlot(ans, x=".date", "..trend", col=".in_polygon", plot.type="smooth")
 
 # TO DECIDE
 
@@ -202,10 +202,13 @@ deseasonTubeData <- function(data, tube=".value", by=NULL,
     ans <- lapply(sort(unique(.d$..id)), function(i){
       ############################
       # maybe distance check other way around?
-      # should outputs be associated with their current locations ONLY ??
-      #    OR should JUST the outputs for the modelled case be kept ??
-      # could also weight by distance in loess ???
-      # maybe think about setting span or surface ="direct" for loess
+      # should all outputs be associated with their current locations ONLY ??
+      #    Currently JUST keeping the outputs for the modelled case...
+      #       (at end of lapply)
+      #    could also weight by distance in loess ???
+      #       but needs thinking about because nearest sites are 0 distance away
+      #    maybe think about reinstating span reset or surface ="direct" for loess
+      #       (span dropped because to missing data issue...)
       ..test. <- AQEval::findNearLatLon(lat=.d[.d$..id==i,]$.latitude[1],
                            lon=.d[.d$..id==i,]$.longitude[1],
                            ref=data, nmax=nrow(data),
@@ -264,7 +267,7 @@ deseasonTubeData <- function(data, tube=".value", by=NULL,
 
         d2 <- d2[order(d2$.date), ]
         ##############################
-        # see notes at start of method
+        # see notes at start of lapply...
         #   how do we handle output
         #       currently just the main site/sample
         #       no matter the group size used...

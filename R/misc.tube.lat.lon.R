@@ -98,7 +98,7 @@
 #      for multiple polygon files and for buffering
 
 
-## dd <- tagTube(dont.share::dt.bradford.2); dd <- dd[dd$.longitude<0,]
+## dd <- tagTube(dont.share::dt.bradford.2); dd <- dd[dd$longitude<0,]
 ## dd <- tubeInXYPolygon(dd, dont.share::caz.bradford)
 
 
@@ -113,8 +113,6 @@ tubeInXYPolygon <- function(data, polygon, ...){
   # do we need/want to force tagging..??
   #    data <- tagTube(data)
 
-  # set up df1 - x/y point source
-  df1 <- as.data.frame(data)
   # data lat/lon sources
   lat <- if("lat" %in% names(.xargs)){
     .xargs$lat
@@ -126,6 +124,14 @@ tubeInXYPolygon <- function(data, polygon, ...){
   } else {
     ".longitude"
   }
+  data <- tagTubeRequired(data, required=c(lat, lon), ...)
+  ##########################
+  # I think I would rather everyone tagged
+  #   this feels like it might come back to bit use if we get
+  #      lots non-data.frames used as data ...
+  ###########################
+  # set up df1 - x/y point source
+  df1 <- as.data.frame(data)
   # x and y
   df1 <- checkTubeData(df1, c(lon, lat), if.err="stop<<tubeInXYPolygon>>data lat/lon")
   df1 <- df1[c(lon, lat)]
@@ -233,7 +239,6 @@ tubeInXYPolygon <- function(data, polygon, ...){
 
   #remove any earlier version of data$[name/rename]
   data <- data[names(data)[names(data)!=.name]]
-
   #merge
   out <- merge(data, df1, by=c(lon, lat))
 
