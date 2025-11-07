@@ -5,19 +5,24 @@
 \alias{deseasonTubeData}
 \title{Deseasonalise Diffusion Tube Data}
 \usage{
-deseasonTubeData(data, tube = ".value", by = NULL, ...)
+deseasonTubeData(data, tube = ".value", by = NULL, method = 1, ...)
 }
 \arguments{
 \item{data}{Data source, typically a data.frame or similar, containing
 data-series of diffusion tube records.}
 
 \item{tube}{The name of the data-series (in \code{data}) to fit a model
-to (see \code{model}), typically the DT NO2 concentrations (in ug/m3).}
+to (see \code{method} and \code{Details}), typically the DT NO2
+concentrations (in ug/m3).}
 
 \item{by}{The name(s) of hierarchical grouping terms. These are used to
 sub-sample the data when deseasonalising data.}
 
-\item{...}{additional arguments, currently ignored.}
+\item{method}{The deseasonalisation method to apply: 1 (default)
+LOESS; 2 local LOESS, like \code{1} but LOESS is applied to
+groups of one or more near sites, see also \code{Details}.}
+
+\item{...}{additional arguments, currently passed to \code{loess}.}
 }
 \value{
 All functions return the supplied \code{data.frame}
@@ -35,7 +40,19 @@ It builds a LOESS time-series model in the form:
 
 \code{[tube] ~ loess([day-of-year] + [date])}
 
-And, extracts the seasonal component as response term for the day-of-year.
+And, extracts the seasonal component as the response term for the day-of-year.
+
+\code{method 1} applies the LOESS model directly at the requested \code{by} level.
+
+\code{method 2} applies the LOESS model by-location in addition to the requested
+\code{by} level. Used directly it is equivalent to:
+
+\code{deseasonTubeData(..., method=1, by=".location")}
+
+... or similar, but can to expanded to build a near-location models
+using \code{max.distance} and/or \code{max.n} to set the maximum distance
+between and/or number of sampling sites in the subset near data used to
+build these models.
 }
 \note{
 \code{deseasonTubeData} and related functions assume that \code{data}

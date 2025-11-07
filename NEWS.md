@@ -8,9 +8,9 @@
 
 * Package pre-release 
 
-    * __v 0.0.16__ [2025-11-04] updated tubePlot smooth, fixed tubeInXYPolygon 
-    rename, updated mapTube, updated ggplotTubeShell, deseasonTubeData required 
-    tags only
+    * __v 0.0.16__ [2025-11-07] updated tubePlot smooth, fixed tubeInXYPolygon 
+    rename, updated mapTube, updated ggplotTubeShell, updated deseasonTubeData 
+    (method 2 added)
     * __v 0.0.15__ [2025-10-22] added clusterTubeData, tagTubeRequired;
     importing cluster, removing splancs. 
     * __v 0.0.14__ [2025-10-10] added fitTubeModel, deseasonTubeData, 

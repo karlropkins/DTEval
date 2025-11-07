@@ -16,8 +16,10 @@
 #' concentrations (in ug/m3).
 #' @param by The name(s) of hierarchical grouping terms. These are used to
 #' sub-sample the data when deseasonalising data.
-#' @param method The deseasonalisation method to apply: 1 (default) LOESS.
-#' @param ... additional arguments, currently passed to loess.
+#' @param method The deseasonalisation method to apply: 1 (default)
+#' LOESS; 2 local LOESS, like \code{1} but LOESS is applied to
+#' groups of one or more near sites, see also \code{Details}.
+#' @param ... additional arguments, currently passed to \code{loess}.
 
 #' @details
 #' \code{deseasonTubeData} attempts to deseasonalise the supplied time-series.
@@ -26,7 +28,19 @@
 #'
 #' \code{[tube] ~ loess([day-of-year] + [date])}
 #'
-#' And, extracts the seasonal component as response term for the day-of-year.
+#' And, extracts the seasonal component as the response term for the day-of-year.
+#'
+#' \code{method 1} applies the LOESS model directly at the requested \code{by} level.
+#'
+#' \code{method 2} applies the LOESS model by-location in addition to the requested
+#' \code{by} level. Used directly it is equivalent to:
+#'
+#' \code{deseasonTubeData(..., method=1, by=".location")}
+#'
+#' ... or similar, but can to expanded to build a near-location models
+#' using \code{max.distance} and/or \code{max.n} to set the maximum distance
+#' between and/or number of sampling sites in the subset near data used to
+#' build these models.
 #'
 #' @note \code{deseasonTubeData} and related functions assume that \code{data}
 #' is a data set \code{DTEval} will recognise as Diffusion Tube data, so either
@@ -76,11 +90,15 @@
 deseasonTubeData <- function(data, tube=".value", by=NULL,
                              method=1, ...){
 
-  # methods
+  # main setup
+  .xargs <- list(...)
+
+  # check methods
   .method.check=1:2
   if(!method %in% .method.check){
     stop("[deseasonTubeData] unknown method; maybe try ",
-         paste(.method.check, collapse=","), "?")
+         paste(.method.check, collapse=","), "?",
+         call.=FALSE)
   }
 
   if(method==1){
@@ -159,6 +177,15 @@ deseasonTubeData <- function(data, tube=".value", by=NULL,
     .by <- c(".date", ".longitude", ".latitude", by)
     data <- tagTubeRequired(data, required = c(tube, .by), ...)
 
+    # max.n / max.distance handling
+    ####################################
+    # could set max.distance to zero if
+    #    neither max.distance or max.n are set ???
+    ####################################
+    if(!"max.n" %in% names(.xargs) & !"max.distance" %in% names(.xargs)){
+       .xargs$max.distance <- 0
+    }
+
     # simplify...
     # option to turn this calcTubeStat ???
     #    (I think it would kill the loess)
@@ -175,10 +202,8 @@ deseasonTubeData <- function(data, tube=".value", by=NULL,
     ans <- lapply(sort(unique(.d$..id)), function(i){
       ############################
       # maybe distance check other way around?
-      # access distance.m in call (currently using as near.than)...
-      # have near.than BUT also want may nearest n locations
-      # should these be associated with their current locations ??
-      #    OR should just the outputs for the modelled case be kept ??
+      # should outputs be associated with their current locations ONLY ??
+      #    OR should JUST the outputs for the modelled case be kept ??
       # could also weight by distance in loess ???
       # maybe think about setting span or surface ="direct" for loess
       ..test. <- AQEval::findNearLatLon(lat=.d[.d$..id==i,]$.latitude[1],
@@ -186,13 +211,28 @@ deseasonTubeData <- function(data, tube=".value", by=NULL,
                            ref=data, nmax=nrow(data),
                            rename.ref.lat = ".latitude",
                            rename.ref.lon = ".longitude")
-      # get the near sites (current hard coded...)
-      ..test. <- ..test.[..test.$distance.m < 10,]
+      # get the near sites (max.distance)
+      # see note at start of method...?
+      if("max.distance" %in% names(.xargs)){
+        ..test. <- ..test.[..test.$distance.m <= .xargs$max.distance,]
+      }
       ..test. <- unique(paste(..test.$.latitude, ..test.$.longitude))
-      #check how many 'case' location + by... sampled
-      #print(length(..test.))
+      # get the near sites (max.nu)
+      if("max.n" %in% names(.xargs)){
+        if(length(..test.) > .xargs$max.n){
+           ..test. <- ..test.[1:.xargs$max.n]
+        }
+      }
+      # check max.distance/n response
+      ## print(length(..test.))
       d2 <- .d[.d$..id %in% ..test., ]
       row.names(d2) <- 1:nrow(d2)
+      ##################
+      # do we need to protect this from invalid passes ???
+      # also do we need to
+      #     reinstate span ??
+      #     add surface = "direct" default ??
+      #     (can be messy data...)
       suppressWarnings(suppressWarnings(
         mod <- try(loess(.y ~ jd + n, data=d2,...),
                    silent = TRUE)
@@ -222,7 +262,13 @@ deseasonTubeData <- function(data, tube=".value", by=NULL,
         d2$..season <- d2$..fit - d2$..trend
         d2$..deseason <- d2$.y- d2$..season
 
-        d2 <- d2[order(d2$.date),]
+        d2 <- d2[order(d2$.date), ]
+        ##############################
+        # see notes at start of method
+        #   how do we handle output
+        #       currently just the main site/sample
+        #       no matter the group size used...
+        d2 <- d2[d2$..id==i,]
         d2
       }
     })
