@@ -107,7 +107,24 @@
 
 tubeInXYPolygon <- function(data, polygon, ...){
 
-  .xargs <- modifyList(list(output="ans"), list(...))
+  # set up
+  ##########################
+  # should we move lat,lon,x,y,crs defaults into next line ???
+  # BUT if doing, we need to make sure all are got from .xargs...
+  #     either upfront or throughout function...
+  .xargs <- modifyList(list(output="ans", rename=".in_polygon"),
+                       list(...))
+  if(any(!.xargs$output %in% c("ans", "id"))){
+    #asking for other outputs
+    if(length(.xargs$output)!=length(.xargs$rename)){
+      .xargs$rename <- c(.xargs$rename,
+                         .xargs$output[!.xargs$output %in% c("ans", "id")])
+    }
+  }
+  if(length(.xargs$output)!=length(.xargs$rename)){
+    stop("[tubeInXYPolygon] output/rename mismatch, lengths differ...",
+         call. = FALSE)
+  }
   # could also add lat, lon, x, y, crs defaults here...
 
   # do we need/want to force tagging..??
@@ -190,11 +207,12 @@ tubeInXYPolygon <- function(data, polygon, ...){
   }
 
   #output common name
-  .name <- if("rename" %in% names(.xargs)){
-    .xargs$rename
-  } else {
-    ".in_polygon"
-  }
+  #just rename now but can be different lengths!!
+  #.name <- if("rename" %in% names(.xargs)){
+  #  .xargs$rename
+  #} else {
+  #  ".in_polygon"
+  #}
   .tt <- sf::st_within(df1, df2)
   df1 <- as.data.frame(sf::st_coordinates(sf::st_transform(df1, "WGS84")))
   names(df1)[1:2] <- c(lon, lat)
@@ -203,16 +221,25 @@ tubeInXYPolygon <- function(data, polygon, ...){
   #################################
   .tt <- do.call(c, lapply(.tt, function(x){ifelse(any(x>0), x, NA)}))
   if("ans" %in% .xargs$output){
+    .name <- .xargs$rename[.xargs$output=="ans"]
     df1[[.name]] <- !is.na(.tt)
   }
   if("id" %in% .xargs$output){
+    .name <- .xargs$rename[.xargs$output=="id"]
     df1[[paste(.name, ".id", sep="")]] <- .tt
   }
+  ################################
+  # other outputs
+  ################################
+  # adds these if they can be found in df2
+  # NOTE: not fully tested with longer
+  #       output and/or rename options....
   .ref <- names(df2)
   .ref <- .ref[!.ref %in% c("name","geom")]
   for(i in .ref){
     if(i %in% .xargs$output){
-      df1[[i]] <- df2[[i]][.tt]
+      .name <- .xargs$rename[.xargs$output==i]
+      df1[[.name]] <- df2[[i]][.tt]
     }
   }
 
@@ -237,10 +264,16 @@ tubeInXYPolygon <- function(data, polygon, ...){
   # not done all...
   # if we start using merge.data.table for this we need to check dim in versus dim out
 
-  #remove any earlier version of data$[name/rename]
-  data <- data[names(data)[names(data)!=.name]]
-  #merge
-  out <- merge(data, df1, by=c(lon, lat))
+  #only merge if something to merge....
+  if(ncol(df1)>2){
+    #remove any earlier version of data$[name/rename]
+    data <- data[names(data)[!names(data) %in% .xargs$rename]]
+    out <- merge(data, df1, by=c(lon, lat))
+  } else {
+    warning("[tubeInXYPolygon] nothing added/updated... maybe check inputs?",
+            call. = FALSE)
+    out <- data
+  }
 
   #out
   return(out)

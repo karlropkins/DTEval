@@ -49,7 +49,7 @@ And, extracts the seasonal component as the response term for the day-of-year.
 
 \code{deseasonTubeData(..., method=1, by=".location")}
 
-... or similar, but can to expanded to build a near-location models
+... or similar, but can to expanded to build near-location models
 using \code{max.distance} and/or \code{max.n} to set the maximum distance
 between and/or number of sampling sites in the subset near data used to
 build these models.
