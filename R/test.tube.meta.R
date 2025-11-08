@@ -97,6 +97,10 @@
 testTubeMeta <- function(data, x=NULL, by=NULL, ...){
 
   #setup
+  ############################
+  # think about the tagging behaviour
+  # what do we need/want
+  #    and what should we be showing in plot... ?
   .xargs <- modifyList(list(plot.type = 1), list(...))
   .d <- tagTube(data)
   if(is.null(x)){

@@ -72,9 +72,33 @@
 # currently doing
 ###############################
 
+# sorting rename/output combination calls...
 
 #  thinking about
 ##############################
+
+# check this out when time...
+# https://stackoverflow.com/questions/59144491/r-unusual-error-plotting-multipolygons-with-ggplot-geom-sf-and-openstreetmap
+
+# muiltpolygon handling
+
+##library(sf)
+##myshape <- st_read(system.file("shape/nc.shp", package = "sf"))
+##bbox_list <- lapply(st_geometry(myshape), st_bbox)
+##polys_list <- lapply(bbox_list, st_as_sfc)
+##endpol = polys_list[[1]]
+##for (i in 2:length(polys_list)) {
+##  endpol <- c(endpol, polys_list[[i]])
+##}
+##st_crs(endpol) <- st_crs(myshape)
+##endpol
+## #Plots
+##plot(st_geometry(myshape))
+##plot(endpol, add=TRUE, border="red")
+## #or..
+## ggplot2::ggplot(sf::st_buffer(dont.share::caz.bradford, 200)) + ggplot2::geom_sf(, fill=c("red"))
+
+## tubeInXYPolygon does not do holes, etc...
 
 #  coordinate handling
 #     added st_transform to polygon handling because some of supplied
