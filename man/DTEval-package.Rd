@@ -6,7 +6,7 @@
 \alias{"_PACKAGE"}
 \title{DTEval: Diffusion Tube Evaluation Code}
 \description{
-R code used for the pro-processing, analysis and evaluation of diffusion tube (DT)
+R code used for the pre-processing, analysis and evaluation of diffusion tube (DT)
 data typically collected in air quality assessment exercises.
 }
 \details{

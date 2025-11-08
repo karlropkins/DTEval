@@ -72,6 +72,22 @@
 #     see also fig 4.21 code 108 eco eval text (by conc and location)
 #        also check research emails - there should be a couple refs there....
 
+# might want to allow user to add an argument to set .date e.g.
+#     so they can use an equivalent...
+
+# look at why this dies
+# dd <- dont.share::dt.bradford.2; dd <- dd[dd$longitude<0,]
+# aa <- deseasonTubeData(dd, by=c(".latitude", ".longitude")); names(aa)
+# bb <- clusterTubeData(aa, tube=".value.mean", by=c(".longitude", ".latitude"), cluster=2, method=2);names(bb)
+# dies with In cor(d2[, `:=`(c(.temp), NULL)], use = "pairwise.complete.obs") : the standard deviation is zero
+
+# look at why this dies
+# dd <- dont.share::dt.bradford.2; dd <- dd[dd$longitude<0,]
+# aa <- deseasonTubeData(dd, by=c(".location")); names(aa)
+# bb <- clusterTubeData(aa, tube="..deseason", by=c(".location"), cluster=2, method=2);names(bb)
+# dies with Error in cluster::clara(d2, clusters, correct.d = TRUE) : Observations 212,213 have *only* NAs --> omit them for clustering!
+
+
 # example????
 ##############################
 
@@ -82,15 +98,19 @@
 # this uses cluster package...
 
 clusterTubeData <- function(data, tube=".value", by="site",
+
                             clusters=2, method=2, ...){
 
   #setup
-  d2 <- tagTube(data)
-  d2 <- tagTubeDate(d2)
+  ##################
+  # rename
+  .xargs <- modifyList(list(rename=".cluster"), list(...))
+  # data tagging
+  d2 <- tagTubeRequired(data, required=c(tube, by, ".date"), ...)
   d2 <- checkTubeData(d2, tube, if.err="stop<<clusterTubeData>>tube")
   d2 <- checkTubeData(d2, by, if.err="stop<<clusterTubeData>>by")
 
-  #reshape
+  #reshape data
   .temp <- ".date"
   if(length(by)>1){
     .temp <- paste(c(.temp, by[2:length(by)]), collapse ="+")
@@ -110,9 +130,12 @@ clusterTubeData <- function(data, tube=".value", by="site",
     d2 <- as.data.frame(d2)
     #return(d2)
     clst <- cluster::clara(t(d2), clusters, correct.d=TRUE)
-    .temp <- data.frame(x=names(clst$clustering),
+    .temp <- data.frame(.x=names(clst$clustering),
                         .cluster=factor(clst$clustering))
     names(.temp)[1] <- by[1]
+    #rename
+    names(.temp)[2] <- .xargs$rename[1]
+    data <- data[names(data)[!names(data) %in% .xargs$rename[1]]]
     out <- data.table::merge.data.table(data, .temp, by=by[1])
   }
   if(method==2){
@@ -122,6 +145,9 @@ clusterTubeData <- function(data, tube=".value", by="site",
     clst <- cluster::clara(d2, clusters, correct.d=TRUE)
     .temp <- data.frame(x=names(clst$clustering), .cluster=factor(clst$clustering))
     names(.temp)[1] <- by[1]
+    #rename
+    names(.temp)[2] <- .xargs$rename[1]
+    data <- data[names(data)[!names(data) %in% .xargs$rename[1]]]
     out <- data.table::merge.data.table(data, .temp, by=by[1])
   }
   if(method==3){
@@ -135,6 +161,9 @@ clusterTubeData <- function(data, tube=".value", by="site",
     .temp <- data.frame(x=names(clst$clustering),
                         .cluster=factor(clst$clustering))
     names(.temp)[1] <- by[1]
+    #rename
+    names(.temp)[2] <- .xargs$rename[1]
+    data <- data[names(data)[!names(data) %in% .xargs$rename[1]]]
     out <- data.table::merge.data.table(data, .temp, by=by[1])
 
   }
