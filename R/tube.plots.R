@@ -23,11 +23,14 @@
 #' build a plot using ggplot2.
 #' @param x,y The names of the data-series to plot on the
 #'  X and Y axes, respectively, and assumed to be elements of \code{data}.
-#' @param plot.type The type of plot(s) to produce, default \code{'point'}.
+#' @param plot.type The type of plot(s) to produce, e.g.:
+#'  \code{'point'} (default) for a scatter plot, \code{'box'} for
+#'  a box and whiskers plot, etc...
 #' @param ... Additional arguments. See details below.
 
-#' @details In addition to \code{data}, the main data source for plots,
-#' \code{ggplotTubeShell} handles the following common plot arguments:
+#' @details In addition to \code{data}, the main data source for
+#' the plots, \code{tubePlot} also handles the following common
+#' plot arguments:
 #'
 #' * \code{xlab}, \code{ylab} The X and Y axes labels to use if
 #' different from plot defaults.
@@ -43,8 +46,15 @@
 #'  specific by row-then-column or column-then-row grid handling,
 #'  respectively).
 #'
-#'  Functions like \code{tubePlot} add layers to this framework to
-#'  generate common plots.
+#'  *  The plots also apply some intuitive reasoning, e.g. the
+#'  argument \code{point.col='red'} is equivalent to
+#'  \code{plot.type='point'} and \code{col='red'} but only applies
+#'  that colour to points if other plot types are requested in
+#'  the same call.
+#'
+#'  Functions like \code{tubeTimePlot} and \code{tubeMap} are
+#'  wrappers that provide short-cuts to build commonly used
+#'  plots.
 #'
 
 ## see this about best practice using ggplot2 in a package...
@@ -873,7 +883,7 @@ tubePlot <-
           .xargs2$xmax <- paste(x, ".x.hi", sep="")
           drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomRibbon)]
           drops <- c(drops, "colour")
-          plt <- dte_ggshellAddGeom(.xargs2, d2, out,
+          plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
                                     ggplot2::geom_ribbon,
                                     defaults = list(na.rm=TRUE,
                                                     fill="grey", alpha=0.5),

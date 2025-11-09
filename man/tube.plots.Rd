@@ -20,7 +20,9 @@ build a plot using ggplot2.}
 \item{x, y}{The names of the data-series to plot on the
 X and Y axes, respectively, and assumed to be elements of \code{data}.}
 
-\item{plot.type}{The type of plot(s) to produce, default \code{'point'}.}
+\item{plot.type}{The type of plot(s) to produce, e.g.:
+\code{'point'} (default) for a scatter plot, \code{'box'} for
+a box and whiskers plot, etc...}
 
 \item{...}{Additional arguments. See details below.}
 }
@@ -50,8 +52,9 @@ the generic plot control for functions like \code{\link{testTubePrecision}}
 and \code{\link{testTubePrecision}}.
 }
 \details{
-In addition to \code{data}, the main data source for plots,
-\code{ggplotTubeShell} handles the following common plot arguments:
+In addition to \code{data}, the main data source for
+the plots, \code{tubePlot} also handles the following common
+plot arguments:
 \itemize{
 \item \code{xlab}, \code{ylab} The X and Y axes labels to use if
 different from plot defaults.
@@ -64,10 +67,16 @@ facet options: \code{'wrap'} for \code{facet_wrap} (default),
 \code{'grid'} for \code{facet_grid} (or 'grid.row' or grid.col' to
 specific by row-then-column or column-then-row grid handling,
 respectively).
+\item The plots also apply some intuitive reasoning, e.g. the
+argument \code{point.col='red'} is equivalent to
+\code{plot.type='point'} and \code{col='red'} but only applies
+that colour to points if other plot types are requested in
+the same call.
 }
 
-Functions like \code{tubePlot} add layers to this framework to
-generate common plots.
+Functions like \code{tubeTimePlot} and \code{tubeMap} are
+wrappers that provide short-cuts to build commonly used
+plots.
 }
 \note{
 Maybe I'm already missing \code{qplot}...
