@@ -682,19 +682,21 @@ tubePlot <-
           .xargs2 <- dte_ggshellTidyArgs(.xargs, "line")
           .xargs2.test <- dte_ggshellTestArgs(.xargs2, d2)
           .d2 <- d2[order(d2[[x]]),]
-          # like options for  geom_line, geom_path,
+          # has a gap option
+          # like options for  geom_line/geom_path switch...
           # also like y as well as x lines...
-          # also NAs to be indicated by gaps
-          #    or dotted lines....
-          #         maybe option because it'll be bad if used
-          #             on scatter plot data...
-          #             (maybe no issue; maybe all looks bad on scatter plots)
-          #    not quite the same but see:
+          # like more control of the line
+          #     maybe gap.linetype dotted, dashed, solid, none ???
+          # not quite the same but see:
           #    https://stackoverflow.com/questions/56763116/plotting-missing-values-in-ggplot2-with-a-separate-line-type
           if(.xargs2$..test=="OK"){
             .xargs2 <- modifyList(list(x=x, y=y), .xargs2)
-            ..na.pad. <- if("show.gaps" %in% names(.xargs2) & "group" %in% names(.xargs2)){
-              .xargs$show.gaps
+            #####################
+            # tidy this when time
+            #  simplify the two ifs/drop ..na.pad. .... ???
+            #####################
+            ..na.pad. <- if("gap" %in% names(.xargs2) & "group" %in% names(.xargs2)){
+              .xargs$gap
             } else {
               FALSE
             }
