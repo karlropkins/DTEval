@@ -658,8 +658,8 @@ tubePlot <-
               # fix for contour.[whatever]
               # maybe contour should be black if no fill and no col..?
               .xargs2$z <- .xargs2[[.test[1]]]
-              drops <-  names(.xargs2)[!names(.xargs2) %in% c(dte_GeomArgs(ggplot2::GeomContour),
-                                                              "z")]
+              drops <-  names(.xargs2)[!names(.xargs2) %in%
+                                         c(dte_GeomArgs(ggplot2::GeomContour), "z")]
               drops <- c(drops, "fill", "alpha")
               plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
                                         ggplot2::geom_contour,
@@ -681,8 +681,9 @@ tubePlot <-
       if("line" %in% i){
           .xargs2 <- dte_ggshellTidyArgs(.xargs, "line")
           .xargs2.test <- dte_ggshellTestArgs(.xargs2, d2)
-          .d2 <- d2
+          .d2 <- d2[order(d2[[x]]),]
           # like options for  geom_line, geom_path,
+          # also like y as well as x lines...
           # also NAs to be indicated by gaps
           #    or dotted lines....
           #         maybe option because it'll be bad if used
@@ -692,12 +693,54 @@ tubePlot <-
           #    https://stackoverflow.com/questions/56763116/plotting-missing-values-in-ggplot2-with-a-separate-line-type
           if(.xargs2$..test=="OK"){
             .xargs2 <- modifyList(list(x=x, y=y), .xargs2)
+            ..na.pad. <- if("show.gaps" %in% names(.xargs2) & "group" %in% names(.xargs2)){
+              .xargs$show.gaps
+            } else {
+              FALSE
+            }
             ##########################
-            drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPath)]
-            plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
-                                      ggplot2::geom_path,
-                                      defaults = list(),
-                                      drops = drops)
+            if(..na.pad.){
+              .old.lt <- .xargs2$linetype
+              .xargs2$linetype <- "dotted"
+              drops <- names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPath)]
+              plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
+                                        ggplot2::geom_path,
+                                        defaults = list(na.rm=TRUE),
+                                        drops = drops)
+              .xargs2$linetype <- .old.lt
+              ..test. <- names(.xargs2.test[.xargs2.test=="data"])
+              if(length(..test.)>0){
+                ..test. <- unique(unlist(.xargs2[..test.]))
+              }
+              ..test. <- unique(c(x, y, ..test.))
+              .d3 <- .d2[..test.]
+              ######################################
+              #think about sort()
+              #also rethink this section
+              #   it could be a lot cleaner/quicker
+              #   also I think wrong combination of terms will kill it...
+              #####################################
+              ..tmp. <- lapply(names(.d3)[names(.d3)!=y], function(x){sort(unique(.d3[[x]]))})
+              names(..tmp.) <- names(.d3)[names(.d3)!=y]
+              ..tmp. <- do.call(expand.grid, ..tmp.)
+              .d3 <- merge(.d3, ..tmp., all=TRUE)
+              ..tmp. <- data.table::as.data.table(.d3)
+              ..tmp. <- calcTubeStat(..tmp., y, by=..test.[!..test. %in% c(x,y)])
+              ..tmp. <- ..tmp.[!is.na(..tmp.[[paste(y, ".mean", sep="")]]),]
+              .d3 <- merge(..tmp., .d3, all.x=TRUE)
+              .d3 <- .d3[order(.d3[[x]]),]
+              drops <- names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPath)]
+              plt <- dte_ggshellAddGeom(.xargs2, .d3, plt,
+                                        ggplot2::geom_path,
+                                        defaults = list(na.rm=TRUE),
+                                        drops = drops)
+            } else {
+              drops <- names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPath)]
+              plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
+                                        ggplot2::geom_path,
+                                        defaults = list(na.rm=TRUE),
+                                        drops = drops)
+            }
           }
       }
 
@@ -731,6 +774,7 @@ tubePlot <-
       if("box" %in% i){
         .xargs2 <- dte_ggshellTidyArgs(.xargs, "box")
         .d2 <- d2
+        .xargs2.test <- dte_ggshellTestArgs(.xargs2, .d2)
         #if(!"group" %in% names(.xargs2)){
           # needs more work, might not be x...
           # also need a more complex group if
@@ -746,17 +790,23 @@ tubePlot <-
             # note
             ############################
             # this'll die if both are numeric...
-            .test <- unique(unlist(.xargs2[names(.xargs.test[.xargs.test=="data"])]))
-           if(is.numeric(getTubeX(.d2, x))){
-                  .d2$group <- paste(getTubeX(.d2, y), .d2[[.test]])
-           } else {
-                  .d2$group <- paste(getTubeX(.d2, x), .d2[[.test]])
-           }
-          .xargs2$group <- x
-        }
 
-        .xargs2.test <- dte_ggshellTestArgs(.xargs2, d2)
-        .d2 <- d2
+          ..test. <- names(.xargs2.test[.xargs2.test=="data"])
+          if(length(..test.)>0){
+            ..test. <- unique(unlist(.xargs2[..test.]))
+            ..test. <- ..test.[!..test. %in% c(x,y)]
+          }
+          if(is.numeric(getTubeX(.d2, x))){
+            .d2$..group <- apply(.d2[c(y, ..test.)], 1, function(x)
+              paste(unlist(paste(x)), collapse = "&"))
+            .xargs2$group <- "..group"
+          } else {
+            .d2$..group <- apply(.d2[c(x, ..test.)], 1, function(x)
+               paste(unlist(paste(x)), collapse = "&"))
+            .xargs2$group <- "..group"
+          }
+        }
+        .xargs2.test <- dte_ggshellTestArgs(.xargs2, .d2)
         if(.xargs2$..test=="OK"){
           .xargs2 <- modifyList(list(x=x, y=y), .xargs2)
           ##########################
@@ -773,8 +823,7 @@ tubePlot <-
         .xargs2 <- dte_ggshellTidyArgs(.xargs, "band")
         .xargs2.test <- dte_ggshellTestArgs(.xargs2, d2)
         .d2 <- d2
-        # note: I need to mess with stat.ribbon...
-        local <- i
+        # note: I need to mess with this...
         #set to "x.stat.ribbon" or "y.stat.ribbon" if not set
         .b.dir <- if("cheat" %in% .xargs2){
           .xargs2$cheat
@@ -786,14 +835,14 @@ tubePlot <-
         .by <- c(x, y, .xargs2$facet, .xargs2$group)
         .x <- c()
         if(length(.xargs2)>0){
-          for(i in 1:length(.xargs2)){
-            #print(.xargs2[[i]]) - value
-            #print(names(.xargs2)[i]) - name
-            if(.xargs2.test[[i]]=="data"){
-              if(!is.numeric(getTubeX(.d2, .xargs2[[i]]))){
-                .by <- c(.by, .xargs2[[i]])
+          for(j in 1:length(.xargs2)){
+            #print(.xargs2[[j]]) - value
+            #print(names(.xargs2)[j]) - name
+            if(.xargs2.test[[j]]=="data"){
+              if(!is.numeric(getTubeX(.d2, .xargs2[[j]]))){
+                .by <- c(.by, .xargs2[[j]])
               } else {
-                .x <- c(.x, .xargs2[[i]])
+                .x <- c(.x, .xargs2[[j]])
               }
             }
           }

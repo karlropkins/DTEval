@@ -225,8 +225,12 @@ testTubePrecision <-
 
     # calcs
     ##################################
-    #    (assuming data tagged properly)
-    ls <- lapply(unique(data$.cut), function(z){
+    # (assuming data tagged properly)
+
+    #####################################
+    # note (might need watching...)
+    # below sort overrides any factors, etc...
+    ls <- lapply(sort(unique(data$.cut)), function(z){
       dat.ans <- data[data$.cut==z,]
       ..test. <- c(".start_date",
                 ".end_date", ".sample_id", ".cut", group,
