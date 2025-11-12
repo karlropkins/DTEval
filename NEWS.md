@@ -8,7 +8,7 @@
 
 * Package pre-release 
 
-    * __v 0.0.16__ [2025-11-07] updated tubePlot smooth, fixed tubeInXYPolygon 
+    * __v 0.0.16__ [2025-11-12] updated tubePlot smooth, fixed tubeInXYPolygon 
     rename, updated mapTube, updated ggplotTubeShell, updated deseasonTubeData 
     (method 2 added)
     * __v 0.0.15__ [2025-10-22] added clusterTubeData, tagTubeRequired;

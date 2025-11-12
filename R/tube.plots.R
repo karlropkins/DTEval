@@ -1193,6 +1193,7 @@ tubePlot <-
     #########################
     #force legend together if multiple are mapped
     #messy.... should only be if mapped to the same arg...
+    #    think about setting combination during geom calls
     ########################
     if(length(names(.xargs)[names(.xargs) %in% c("colour", "size", "fill")]) >1){
       if("colour" %in% names(.xargs)){
@@ -1204,19 +1205,20 @@ tubePlot <-
       if("fill" %in% names(.xargs)){
         plt <- plt + ggplot2::guides(fill=ggplot2::guide_legend())
       }
-
     }
 
     #annotation
+    ###########################
     if("xlab" %in% names(.xargs)){
+      # move from xlab and ylab to labs ???
       plt <- plt + ggplot2::xlab(dte_quickText(.xargs$xlab, .xargs$auto.text))
-
     }
     if("ylab" %in% names(.xargs)){
+      # move from xlab and ylab to labs ???
       plt <- plt + ggplot2::ylab(dte_quickText(.xargs$ylab, .xargs$auto.text))
     }
-
     if(.xargs$auto.text){
+      # will need to add other labels
       plt <- plt +  ggplot2::theme(axis.title.x = ggtext::element_markdown(),
                                    axis.title.y = ggtext::element_markdown())
     }
@@ -1238,6 +1240,21 @@ tubePlot <-
       # guessing this might want tidying???
       plt <- plt + ggplot2::theme(legend.position = .xargs$key.position,
                                   legend.direction = .xargs$key.direction)
+    }
+    if("key.name" %in% names(.xargs)){
+      ..tmp. <- ggplot2::get_labs(plt)
+      # next needs thinking about because it'll only works by removing
+      #    KNOWN non-aes labels and will be others...
+      #    from names(formals(ggplot2::labs))
+      ..tmp. <- ..tmp.[names(..tmp.) %in% names(.xargs)[!names(.xargs) %in%
+                         c("x.sec", "x", "y", "y.sec", "title", "alt",
+                           "subtitle", "caption", "tag", "dictionary",
+                           "alt", "alt_insight")]]
+      #change object content NOT object...
+      ..tmp.[] <- rep(.xargs$key.name, length=length(..tmp.))
+      if(length(..tmp.)>0){
+        plt <- plt + do.call(ggplot2::labs, ..tmp.)
+      }
     }
 
     return(plt)
