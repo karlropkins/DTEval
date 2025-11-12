@@ -100,9 +100,9 @@
 calcTubeStat <- function(data, tube = ".value", by = NULL, stat = NULL, ...){
 
   # tag data
-  # NB: checking if we need tagging for this
-  #d2 <- tagTube(data)
-  d2 <- data
+  #   testing required tagging only
+  #d2 <- data
+  d2 <- tagTubeRequired(data, required=c(tube, by), ...)
 
   # data checks
   d2 <- checkTubeData(d2, tube, if.err="stop<<calcTubeStat>>tube")

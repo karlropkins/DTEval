@@ -721,12 +721,17 @@ tubePlot <-
               #also rethink this section
               #   it could be a lot cleaner/quicker
               #   also I think wrong combination of terms will kill it...
+              #   also like to control linetype, linewidth, etc
+              #        for the missing data section (dotted, dashed, none, etc)
               #####################################
               ..tmp. <- lapply(names(.d3)[names(.d3)!=y], function(x){sort(unique(.d3[[x]]))})
               names(..tmp.) <- names(.d3)[names(.d3)!=y]
               ..tmp. <- do.call(expand.grid, ..tmp.)
               .d3 <- merge(.d3, ..tmp., all=TRUE)
               ..tmp. <- data.table::as.data.table(.d3)
+              #print(names(..tmp.))
+              #print(y)
+              #print(..test.[!..test. %in% c(x,y)])
               ..tmp. <- calcTubeStat(..tmp., y, by=..test.[!..test. %in% c(x,y)])
               ..tmp. <- ..tmp.[!is.na(..tmp.[[paste(y, ".mean", sep="")]]),]
               .d3 <- merge(..tmp., .d3, all.x=TRUE)
