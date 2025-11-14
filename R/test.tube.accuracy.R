@@ -49,7 +49,7 @@
 #' @param show The outputs to show when returning results, by default the
 #' plot and summary report.
 #' @param ... Additional arguments, currently passed to
-#' \code{\link{tagTube}} to check tube tags, and \code{\link{ggplotTubeShell}}
+#' \code{\link{tagTube}} to check tube tags, and \code{\link{tubePlot}}
 #' to handle generic plotting arguments.
 
 #' @return \code{testTubeAccuracy} returns a list of test results, typically
@@ -67,7 +67,7 @@
 #' is probably better to tag and check all data yourself before running more
 #' detailed analysis.
 #'
-#' \code{testTubeAccuracy} also uses \code{\link{ggplotTubeShell}} to handle
+#' \code{testTubeAccuracy} also uses \code{\link{tubePlot}} to handle
 #' common plotting arguments, e.g. X and Y axes label handling. Plot
 #' conditioning arguments like \code{group} and \code{facet} are also
 #' tracked by \code{testTubeAccuracy} itself and used to subset data
@@ -110,6 +110,9 @@
 
 # data.ref <- openair::importAURN(c("LEED", "LED6"), year=2019:2024, meta=TRUE)
 # testTubeAccuracy(dont.share::dt.leeds, data.ref, tube="measurement", ref="no2", facet="year_of_measurement")
+
+# data.ref <- openair::importAURN(c("LEED", "LED6"), year=2019:2025, meta=TRUE)
+# testTubeAccuracy(dont.share::dt.leeds.2, data.ref, tube=".value", ref="no2", facet=c(".year", "site.ref"), facet.type="grid.col")
 
 
 #' @rdname test.tube.accuracy
@@ -411,10 +414,10 @@ testTubeAccuracy <-
           .xargs$col <- .xargs$group
         }
       }
-      plt <- do.call(ggplotTubeShell,
+      plt <- do.call(tubePlot,
                      modifyList(.xargs,
                      list(data=local, x=ref, y=tube))) +
-                ggplot2::geom_point() +
+                #ggplot2::geom_point() +
         # if we add col to plot, it does lm as well as colors...
         # so disconnects seen verses calculated...
         # to disconnect color from smooth in plot maybe ???

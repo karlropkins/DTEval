@@ -50,7 +50,7 @@ the nearest tube/ref pairings are retained.}
 plot and summary report.}
 
 \item{...}{Additional arguments, currently passed to
-\code{\link{tagTube}} to check tube tags, and \code{\link{ggplotTubeShell}}
+\code{\link{tagTube}} to check tube tags, and \code{\link{tubePlot}}
 to handle generic plotting arguments.}
 }
 \value{
@@ -75,7 +75,7 @@ NOTE: \code{testTubeAccuracy} attempts to tag \code{data} using default
 is probably better to tag and check all data yourself before running more
 detailed analysis.
 
-\code{testTubeAccuracy} also uses \code{\link{ggplotTubeShell}} to handle
+\code{testTubeAccuracy} also uses \code{\link{tubePlot}} to handle
 common plotting arguments, e.g. X and Y axes label handling. Plot
 conditioning arguments like \code{group} and \code{facet} are also
 tracked by \code{testTubeAccuracy} itself and used to subset data

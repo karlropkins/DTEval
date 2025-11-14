@@ -68,13 +68,20 @@
 
 # currently does
 ###############################
+
 #     basic calculation
 #         stat can be set as a functions
 #
 
 
-#  thinking about
+# thinking about
 ##############################
+
+# like a krig or similar as an alternative surface for maps...
+#     maybe fields (version 1.3-1)
+#           Krig: Kriging surface estimate
+
+
 
 # example????
 ##############################
@@ -83,6 +90,9 @@
 # see
 #  https://stackoverflow.com/questions/11693599/alternative-to-expand-grid-for-data-frames
 #  https://stackoverflow.com/questions/30085487/expand-grid-function-for-data-frames-in-r
+
+#
+
 
 
 #' @rdname fit.tube
@@ -220,6 +230,13 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
       return(NULL)
     }
 
+    ######################################
+    # testing for models that can
+    #      return NULL
+    #####################################
+    if(is.null(.nd)){
+      return(NULL)
+    }
 
     #row.names(.dd) <- 1:nrow(.dd)
     #mod <- mgcv::gam(.form, data=.dd)

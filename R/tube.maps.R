@@ -69,8 +69,7 @@
 
 # current test
 #    dd <- tagTube(dont.share::dt.bradford.2); dd <- dd[dd$.longitude<0,]
-#    dd$.year <- format(dd$.start_date, "%Y")
-#    tubeMap(dd)
+#    tubeMap(dd, facet=".year)
 
 #' @rdname tube.maps
 #' @export
@@ -93,7 +92,7 @@ tubeMap <-
     }
 
     #what to do about col/colour...?
-    #   currently using this cludge in both tubePlot and ggplotTubeShell
+    #   currently using this cludge in tubePlot
     #      and assuming colour hereafter...
     names(.xargs)[names(.xargs) %in% c("col", "color")] <- "colour"
     .xargs <- .xargs[!duplicated(names(.xargs), fromLast=TRUE)]
@@ -150,8 +149,11 @@ tubeMap <-
       ######################################
 
       .all <- modifyList(list(data=d2, x=x, y=y), .xargs)
+      # do I need to send all at this stage ???
+      # would just data+x+y work to build the basic ggplot objects ???
+      # test when this project has some quiet time ...
       plt <- suppressMessages(suppressWarnings(
-        do.call(ggplotTubeShell, .all)
+        do.call(tubePlot, .all)
       ))
       .ggshell <- c("facet.type", "xlab", "ylab",
                     "auto.text", "palette", "fill.palette", "map.args",
@@ -223,265 +225,6 @@ tubeMap <-
 
 
 
-tubeMap.2 <-
-  function(data, x=NULL, y=NULL, ...){
-
-    #setup
-    ####################
-    .xargs <- list(...)
-    if("ggplot" %in% class(data)){
-      previous <- data
-      d2 <- data$data
-    } else {
-      d2 <- data
-      previous <- NULL
-    }
-    if("new.data" %in% names(.xargs)) {
-      d2<-.xargs$new.data
-    }
-
-    #what to do about col/colour...?
-    #   currently using this cludge in both tubePlot and ggplotTubeShell
-    #      and assuming colour hereafter...
-    names(.xargs)[names(.xargs) %in% c("col", "color")] <- "colour"
-    .xargs <- .xargs[!duplicated(names(.xargs), fromLast=TRUE)]
-    if(is.null(x)){
-      x <- ".longitude"
-    }
-    if(is.null(y)){
-      y <- ".latitude"
-    }
-    .x <- getTubeX(d2, x, if.err="stop<<tubeMap>>x")
-    .y <- getTubeX(d2, y, if.err="stop<<tubeMap>>y")
-
-    #check for facet
-    if("facet" %in% names(args)){
-      d2 <- checkTubeData(d2, x=.xargs$facet, n.x=2,
-                          if.err = "stop<<ggplotTubeShell>>facet")
-    }
-
-    if(!"grid.borders" %in% names(.xargs)){
-      .xargs$grid.borders <- 0.05
-    }
-
-    ##build map layer
-    ###################
-    if(is.null(previous)){
-      #map ranges
-      rng.lat <- range(.y, na.rm=TRUE)
-      rng.lon <- range(.x, na.rm=TRUE)
-      #adding border
-      exp <- function(rng, n=0.1){
-        temp <- (rng[2]-rng[1])*n
-        c(rng[1]-temp, rng[2]+temp)
-      }
-      rng.lon <- exp(rng.lon, .xargs$grid.borders)
-      rng.lat <- exp(rng.lat, .xargs$grid.borders)
-      dc <- OpenStreetMap::openmap(c(rng.lat[2], rng.lon[1]),
-                                   c(rng.lat[1],rng.lon[2]),
-                                   zoom = NULL,
-                                   type =  "esri",
-                                   mergeTiles = TRUE)
-
-      dc <- suppressMessages(suppressWarnings(
-        OpenStreetMap::openproj(dc,
-                                projection = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
-      ))
-      p1 <- dc$bbox$p1
-      p2 <- dc$bbox$p2
-      .bb <- data.frame(x = c(p1[1], p2[1]),
-                        y = c(p1[2], p2[2]))
-      names(.bb) <- c(x,y)
-      if("facet" %in% names(.xargs)){
-        .bb <- data.frame(.bb, facet=rep(unique(d2[[.xargs$facet]]), each=2))
-        names(.bb)[3] <- .xargs$facet
-      }
-      .all <- modifyList(list(data=d2, x=x, y=y), .xargs)
-      plt <- do.call(ggplotTubeShell, .all)
-      .ggshell <- c("facet.type", "xlab", "ylab",
-                    "auto.text", "palette", "fill.palette", "map.args",
-                    "key.position", "key.direction", "rotate.x.axes")
-      .xargs <- .xargs[!names(.xargs) %in% .ggshell]
-      .xargs <- modifyList(list(x=x, y=y),
-                           .xargs)
-
-      for(tile in dc$tiles){
-        p1 <- tile$bbox$p1
-        p2 <- tile$bbox$p2
-        rast <- matrix(tile$colorData, nrow = tile$xres, byrow = TRUE)
-        plt <- plt + ggplot2::annotation_raster(rast, -Inf, Inf, -Inf, Inf)
-      }
-
-      plt <- plt + ggplot2::expand_limits(x = c(p1[1], p2[1]),
-                                          y = c(p2[2], p1[2])) +
-        ggplot2::scale_x_continuous(expand = c(0, 0)) +
-        ggplot2::scale_y_continuous(expand = c(0, 0))
-
-      ##########################
-      # need to re-instate these
-      #    (if we can stop them
-      #     erroring out...)
-      ##########################
-
-      #plt <- plt + ggplot2::geom_text(data=data.frame(),
-      #                      ggplot2::aes(x=rng.lon[2], y=rng.lat[1]),
-      #                      label="Map layer: (c) OpenStreetMap/ESRI contributors    ",
-      #                      size=1.8, hjust=1, vjust=-0.5)
-
-      #plt <- plt + ggplot2::coord_sf() + ggplot2::labs(x="") +
-      #  ggplot2::labs(y="") +
-      #  ggplot2::scale_x_discrete(labels = NULL, breaks = NULL) +
-      #  ggplot2::scale_y_discrete(labels = NULL, breaks = NULL)
-
-
-
-      map <- plt
-
-      #      map + ggplot2::coord_equal()
-      #################################
-      # general map text, formatting and sizing
-      #      suppressMessages(suppressWarnings(
-      #        map <- plt + ggplot2::geom_text(data=data.frame(),
-      #                                        ggplot2::aes(x=rng.lon[2], y=rng.lat[1]),
-      #                                        label="Map layer: (c) OpenStreetMap/ESRI contributors    ",
-      #                                        size=1.8, hjust=1, vjust=-0.5) #+
-      #          ggplot2::coord_quickmap() +
-      #          ggplot2::theme_void()
-      #      ))
-    } else {
-      map <- previous
-    }
-
-
-
-    if(any(grepl("^polygon", names(.xargs)))){
-      ##########################
-      #testing this tidy
-      #    Holding code because it is very sensitive to ordering
-      #.xargs2 <- .xargs[grepl("^polygon[.]", names(.xargs))]
-      #names(.xargs2) <- gsub("polygon[.]", "", names(.xargs2))
-      #names(.xargs2)[names(.xargs2) %in% c("col", "color")] <- "colour"
-      #.xargs2 <- .xargs2[!duplicated(names(.xargs2), fromLast=TRUE)]
-      #.xargs2 <- modifyList(.xargs, .xargs2)
-      .xargs2 <- dte_ggshellTidyArgs(.xargs, "polygon")
-      if(.xargs2$..test=="OK"){
-        .xargs2 <- modifyList(.xargs2, list(x="X", y="Y"))
-        ##########################
-        # to think about...
-        #    this currently needs polygon to be a sf polygon...
-        #        BUT polygon could be a different object type ...
-        #        OR polygon could be true... then you would use the data as polygon source
-        #            can't colour a polygon by palette at moment
-        .xargs2$polygon <- as.data.frame(sf::st_coordinates(.xargs2$polygon))
-        drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPolygon)]
-        map <- dte_ggshellAddGeom(.xargs2, .xargs2$polygon, map,
-                                  ggplot2::geom_polygon,
-                                  defaults = list(na.rm=TRUE, colour="blue",
-                                                  fill="blue", alpha=0.25),
-                                  drops = drops)
-      }
-    }
-
-
-
-    # add surface
-    ############################
-    # this need tidying for contour and col handling
-    # issue this error because col terms is fitted...
-    # tubeMap(a, point=T, surface.fill=".value", too.far=0.1, grid.resolution=400, contour=T, point.col=".value", polygon=dont.share::caz.bradford, grid.borders=0.05, col=".value")
-    #
-    if(any(grepl("^surface", names(.xargs)))){
-      #just arg should trigger this contour ??
-      .xargs2 <- dte_ggshellTidyArgs(.xargs, "surface")
-      .xargs2.test <- dte_ggshellTestArgs(.xargs2, d2)
-      .test <- names(.xargs2.test[.xargs2.test=="data"])
-      .test <- .test[.test %in% c("fill", "z", "colour", "contour")]
-      if(length(.test)>0){
-        .fit.args <- modifyList(list(data=d2, tube=.xargs2[[.test[1]]],
-                                     inputs=c(x,y), by=c(.xargs$group, .xargs$facet),
-                                     simplify=TRUE, new.data="input.ranges"),
-                                #################################
-                                # could generalise next bit ???
-                                #################################
-                                .xargs2[names(.xargs2) %in% c("too.far", "model",
-                                                              "simplify",
-                                                              "force.positive",
-                                                              "grid.resolution",
-                                                              "grid.borders")])
-        .d2 <- do.call(fitTubeModel, .fit.args)
-        .xargs2[[.test[1]]] <- paste(.xargs2[[.test[1]]], ".pred", sep="")
-        if(.xargs2$..test=="OK"){
-          .xargs2 <- modifyList(list(x=x, y=y), .xargs2)
-          ##########################
-          # if fill in there
-          if("fill" %in% names(.xargs2)){
-            .xargs2$fill <- .xargs2[[.test[1]]]
-            drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomTile)]
-            drops <- c(drops, "col", "color", "colour")
-            map <- dte_ggshellAddGeom(.xargs2, .d2, map,
-                                      ggplot2::geom_tile,
-                                      defaults = list(na.rm=TRUE),
-                                      drops = drops)
-          }
-          if("contour" %in% names(.xargs2)){
-            ###################
-            # fix for contour.[whatever]
-            # maybe contour should be black if no fill and no col..?
-            .xargs2$z <- .xargs2[[.test[1]]]
-            drops <-  names(.xargs2)[!names(.xargs2) %in% c(dte_GeomArgs(ggplot2::GeomContour),
-                                                            "z")]
-            drops <- c(drops, "fill", "alpha")
-            map <- dte_ggshellAddGeom(.xargs2, .d2, map,
-                                      ggplot2::geom_contour,
-                                      defaults = list(na.rm=TRUE,
-                                                      colour="white"),
-                                      drops = drops)
-            map <- dte_ggshellAddGeom(.xargs2, .d2, map,
-                                      metR::geom_text_contour,
-                                      defaults = list(na.rm=TRUE,
-                                                      colour="white"),
-                                      drops = drops)
-          }
-
-        }
-
-      }
-
-    }
-
-    if(any(grepl("^point", names(.xargs)))){
-      ##########################
-      #tidy this
-      #    ALSO very sensitive to ordering
-      .xargs2 <- .xargs[grepl("^point[.]", names(.xargs))]
-      names(.xargs2) <- gsub("point[.]", "", names(.xargs2))
-      names(.xargs2)[names(.xargs2) %in% c("col", "color")] <- "colour"
-      .xargs2 <- .xargs2[!duplicated(names(.xargs2), fromLast=TRUE)]
-      .xargs2 <- modifyList(.xargs, .xargs2)
-      .xargs2 <- modifyList(list(x=x, y=y), .xargs2)
-      ##########################
-      drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPoint)]
-      map <- dte_ggshellAddGeom(.xargs2, d2, map,
-                                ggplot2::geom_point,
-                                defaults = list(na.rm=TRUE),
-                                drops = drops)
-
-    }
-
-    ##################
-    # to do
-    #################
-    # point mean, count, etc...
-    # add faceting
-    # add grouping ???
-    # add surface layer
-    # add/tidy structure - palette, legend, ect...
-
-    #
-    return(map)
-  }
-
-
 
 
 
@@ -548,8 +291,8 @@ leafletTubeMap <-
     if(is.null(previous)){
       m <- leaflet::leaflet() |>
         leaflet::addProviderTiles("CartoDB.Positron")
-        # yes, I am that lazy
-        m$dte_data <- d2
+      # yes, I am that lazy
+      m$dte_data <- d2
     } else {
       m <- previous
     }
@@ -574,6 +317,7 @@ leafletTubeMap <-
     #print(m)
     return(m)
   }
+
 
 
 

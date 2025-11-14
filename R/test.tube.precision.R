@@ -20,7 +20,7 @@
 #' @param show The outputs to show when returning results, by default the
 #' plot and summary report.
 #' @param ... Additional arguments, currently passed to
-#' \code{\link{tagTube}} to check tube tags, and \code{\link{ggplotTubeShell}}
+#' \code{\link{tagTube}} to check tube tags, and \code{\link{tubePlot}}
 #' to handle generic plotting arguments.
 
 #' @details \code{testTubePrecision} uses \code{\link{tagTube}}
@@ -45,7 +45,7 @@
 #' is probably better to tag and check all data yourself before running more
 #' detailed analysis.
 #'
-#' \code{testTubePrecision} also uses \code{\link{ggplotTubeShell}} handles
+#' \code{testTubePrecision} also uses \code{\link{tubePlot}} handles
 #' common plotting arguments, e.g. X and Y axes label handling. Plot
 #' conditioning arguments like \code{group} and \code{facet} are also
 #' tracked by \code{testTubePrecision} itself and used to subset data
@@ -100,19 +100,13 @@
 #        (not sure if we should be catching this???)
 
 # think about facet/group/.cut handling
-#    added but not fully  tested
-#    currently .cut uses just group and facet
-#        may want option for user to control these separately ??
-#        TESTING option to set colour, etc, in ggplotTubeShell
-#             as option to do this
+#    testTubePrecision/Accurcay
 
 # tidy plot control
-#    (in ggplotTubeShell)
 #    facet args currently:
 #         facet.type = "wrap", "grid", "grid.row", "grid.col"
 #         and any args passed forward via ...
 #    group
-#        maps to col and group in ggplotTubeShell
 #        force group/facet to factor ??
 #             is just "factor(what.ever)" enough ??
 #    control cols??
@@ -357,19 +351,22 @@ testTubePrecision <-
       # note
       ###############################
       # control for the 5%, 50%, 95% lines
-      #   not a right name yet but can't call it line.col
+      #   not a right name but line.col works for now
       #       going through tubePlot at moment ... !!
-      #   also do we need more control
-      if(!"errorbar.col" %in% names(.xargs)){
-        .xargs$errorbar.col <- "red"
+      #       other option pull out line info
+      #           pass rest to plot then do the line
+      #           stuff in next steps...
+      # not documenting until we sort this...
+      if(!"line.col" %in% names(.xargs)){
+        .xargs$line.col <- "red"
       }
       plt <- do.call(tubePlot,
                      modifyList(.xargs, list(data=test,
                                              x=".mean", y=".tube"))) +
-        ggplot2::geom_line(ggplot2::aes(y=.y), col=.xargs$errorbar.col) +
-        ggplot2::geom_line(ggplot2::aes(y=.ylow), col=.xargs$errorbar.col,
+        ggplot2::geom_line(ggplot2::aes(y=.y), col=.xargs$line.col) +
+        ggplot2::geom_line(ggplot2::aes(y=.ylow), col=.xargs$line.col,
                            linetype="dashed") +
-        ggplot2::geom_line(ggplot2::aes(y=.yhigh), col=.xargs$errorbar.col,
+        ggplot2::geom_line(ggplot2::aes(y=.yhigh), col=.xargs$line.col,
                            linetype="dashed")
     } else {
       plt <- NULL

@@ -4,14 +4,11 @@
 \alias{tube.plots}
 \alias{tubePlot}
 \alias{tubeTimePlot}
-\alias{ggplotTubeShell}
 \title{Diffusion Tube Data Plots}
 \usage{
 tubePlot(data, x = NULL, y = NULL, plot.type = NULL, ...)
 
 tubeTimePlot(data, x = NULL, y = NULL, ...)
-
-ggplotTubeShell(data, x = NULL, y = NULL, ...)
 }
 \arguments{
 \item{data}{Data source, typically a data.frame or similar, to be used to
@@ -33,9 +30,6 @@ diffusion tube data.
 \code{tubeTimePlot} is a \code{tubePlot} wrapper that adds the tagged
 sampling date as a second axes if one of \code{x} or \code{y} is
 supplied.
-
-\code{ggplotTubeShell} returns a ggplot object the user then
-needs to add \code{geom}s to, to build a standard plot.
 }
 \description{
 \code{DTEval} uses \code{ggplot2} to generate most plots.
@@ -46,7 +40,7 @@ recommend taking the time to learn a graphics package like
 \code{ggplot}, \code{lattice}, etc. But \code{DTEval} also includes
 several quick-use wrappers for some commonly used plot types and useful
 options like grouping and faceting, which can really help with data
-visualisation. It also includes \code{ggplotTubeShell}, which builds
+visualisation. It also includes \code{tubePlot}, which builds
 common plot shells for many of these, and handles some of of
 the generic plot control for functions like \code{\link{testTubePrecision}}
 and \code{\link{testTubePrecision}}.
