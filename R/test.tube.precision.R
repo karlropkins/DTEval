@@ -356,18 +356,20 @@ testTubePrecision <-
       ###############################
       # note
       ###############################
-      #  need more line control ??
-      if(!"line.col" %in% names(.xargs)){
-        .xargs$line.col <- "red"
+      # control for the 5%, 50%, 95% lines
+      #   not a right name yet but can't call it line.col
+      #       going through tubePlot at moment ... !!
+      #   also do we need more control
+      if(!"errorbar.col" %in% names(.xargs)){
+        .xargs$errorbar.col <- "red"
       }
-      plt <- do.call(ggplotTubeShell,
+      plt <- do.call(tubePlot,
                      modifyList(.xargs, list(data=test,
                                              x=".mean", y=".tube"))) +
-        ggplot2::geom_point() +
-        ggplot2::geom_line(ggplot2::aes(y=.y), col=.xargs$line.col) +
-        ggplot2::geom_line(ggplot2::aes(y=.ylow), col=.xargs$line.col,
+        ggplot2::geom_line(ggplot2::aes(y=.y), col=.xargs$errorbar.col) +
+        ggplot2::geom_line(ggplot2::aes(y=.ylow), col=.xargs$errorbar.col,
                            linetype="dashed") +
-        ggplot2::geom_line(ggplot2::aes(y=.yhigh), col=.xargs$line.col,
+        ggplot2::geom_line(ggplot2::aes(y=.yhigh), col=.xargs$errorbar.col,
                            linetype="dashed")
     } else {
       plt <- NULL
