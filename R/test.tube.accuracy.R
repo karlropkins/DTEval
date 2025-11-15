@@ -429,9 +429,10 @@ testTubeAccuracy <-
       #    .xargs2$fill <- .xargs2$group
       #  }
       #}
-      .xargs2 <- modifyList(.xargs3,
+      .xargs3 <- modifyList(.xargs3,
                             list(data=local, x=ref, y=tube))
-      plt <- do.call(tubePlot, .xargs2)
+      plt <- do.call(tubePlot, .xargs3)
+      .xargs2 <- dte_ggshellTidyArgs(.xargs, "smooth")
       if(!"group" %in% names(.xargs2)){
         if("colour" %in% names(.xargs2)){
           .xargs2$colour <- NULL
