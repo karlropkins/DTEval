@@ -115,6 +115,11 @@
 # testTubeAccuracy(dont.share::dt.leeds.2, data.ref, tube=".value", ref="no2", facet=c(".year", "site.ref"), facet.type="grid.col")
 
 
+# can now track formula through plot
+# so be useful to make the function itself do the same...
+#      aiming for testTubeAccuracy(..., formula = "y~0+x")
+
+
 #' @rdname test.tube.accuracy
 #' @export
 testTubeAccuracy <-
@@ -406,23 +411,46 @@ testTubeAccuracy <-
       ###########################
       # note
       ###########################
-      #    see testTubeAccuracy for line handling
-      #       BUT might not work the same...
+      #   testTubeAccuracy line handling was proviously different
+      #       #held marked off...
+      #       testing handling col management differently
+      #       currently line and fill track group if not set
+      #       if set they do want told....
+      #   now like testTubePrecision it just tracks what it told to...
+      #       need to decide a favourite...
       ######################################
-      if("group" %in% names(.xargs)){
-        if(!any(c("colour", "col", "color") %in% names(.xargs))){
-          .xargs$col <- .xargs$group
+      .xargs2 <- dte_ggshellTidyArgs(.xargs)
+      .xargs3 <- .xargs2[names(.xargs2)[!grepl("^smooth", names(.xargs2))]]
+      #if("group" %in% names(.xargs2)){
+      #  if(!any(c("colour", "col", "color") %in% names(.xargs2))){
+      #    .xargs2$colour <- .xargs2$group
+      #  }
+      #  if(!any(c("fill") %in% names(.xargs2))){
+      #    .xargs2$fill <- .xargs2$group
+      #  }
+      #}
+      .xargs2 <- modifyList(.xargs3,
+                            list(data=local, x=ref, y=tube))
+      plt <- do.call(tubePlot, .xargs2)
+      if(!"group" %in% names(.xargs2)){
+        if("colour" %in% names(.xargs2)){
+          .xargs2$colour <- NULL
+        }
+        if("fill" %in% names(.xargs2)){
+          .xargs2$fill <- NULL
         }
       }
-      plt <- do.call(tubePlot,
-                     modifyList(.xargs,
-                     list(data=local, x=ref, y=tube))) +
-                #ggplot2::geom_point() +
-        # if we add col to plot, it does lm as well as colors...
-        # so disconnects seen verses calculated...
-        # to disconnect color from smooth in plot maybe ???
+      drops <- names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomSmooth)]
+      drops <- drops[!drops %in% c("formula", "method")]
+      plt <- dte_ggshellAddGeom(.xargs2, local, plt,
+                                ggplot2::geom_smooth,
+                                defaults = list(method="lm",
+                                                formula = "y~x",
+                                                fill="grey"),
+                                drops = drops)
+
+        #ggplot2::geom_point() +
         # ggplot2::geom_smooth(method="lm", formula="y~x", ggplot2::aes(col=NULL))
-                ggplot2::geom_smooth(method="lm", formula="y~x")
     }
 
     #show

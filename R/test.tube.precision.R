@@ -132,6 +132,13 @@
 #      lookup so it is by .cut and n=[not enough] to no data output)
 
 
+#########################
+# example / test
+#########################
+
+# testTubePrecision(dont.share::dt.bradford.2)
+
+# feels too slow for examples
 
 #' @rdname test.tube.precision
 #' @export
@@ -357,17 +364,45 @@ testTubePrecision <-
       #           pass rest to plot then do the line
       #           stuff in next steps...
       # not documenting until we sort this...
-      if(!"line.col" %in% names(.xargs)){
-        .xargs$line.col <- "red"
-      }
+      #if(!"line.col" %in% names(.xargs)){
+      #  .xargs$line.col <- "red"
+      #}
+
+      .xargs2 <- .xargs[names(.xargs)[!grepl("^line", names(.xargs))]]
       plt <- do.call(tubePlot,
-                     modifyList(.xargs, list(data=test,
-                                             x=".mean", y=".tube"))) +
-        ggplot2::geom_line(ggplot2::aes(y=.y), col=.xargs$line.col) +
-        ggplot2::geom_line(ggplot2::aes(y=.ylow), col=.xargs$line.col,
-                           linetype="dashed") +
-        ggplot2::geom_line(ggplot2::aes(y=.yhigh), col=.xargs$line.col,
-                           linetype="dashed")
+                     modifyList(.xargs2, list(data=test,
+                                             x=".mean", y=".tube")))
+      .xargs2 <- dte_ggshellTidyArgs(.xargs)
+      .xargs2 <- .xargs[names(.xargs2) != "colour"]
+      .xargs2 <- dte_ggshellTidyArgs(.xargs2, "line")
+      .d2 <- test[order(test$.mean),]
+      suppressWarnings(
+        #######################
+        # need to look into this
+        #   seems to be seeing a fill that is not there....
+        #######################
+        if(.xargs2$..test=="OK"){
+          drops <- names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPath)]
+          .xargs2 <- modifyList(.xargs2, list(x=".mean", y=".y"))
+          plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
+                                    ggplot2::geom_path,
+                                    defaults = list(colour="red",
+                                                    linetype="solid"),
+                                    drops = drops)
+          .xargs2 <- modifyList(.xargs2, list(x=".mean", y=".ylow"))
+          plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
+                                    ggplot2::geom_path,
+                                    defaults = list(colour="red",
+                                                    linetype="dashed"),
+                                    drops = drops)
+          .xargs2 <- modifyList(.xargs2, list(x=".mean", y=".yhigh"))
+          plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,
+                                    ggplot2::geom_path,
+                                    defaults = list(colour="red",
+                                                    linetype="dashed"),
+                                    drops = drops)
+        }
+      )
     } else {
       plt <- NULL
     }

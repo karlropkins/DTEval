@@ -337,15 +337,15 @@ tubePlot <-
     ##########################################
     # strictly not ggplotTubeShell anymore....
     ##########################################
-    d2[, x] <- getTubeX(d2, x, if.err = "stop<<ggplotTubeShell>>x")
-    d2[, y] <- getTubeX(d2, y, if.err = "stop<<ggplotTubeShell>>x")
+    d2[, x] <- getTubeX(d2, x, if.err = "stop<<tubePlot>>x")
+    d2[, y] <- getTubeX(d2, y, if.err = "stop<<tubePlot>>x")
     if(!is.null(.xargs$group)){
       d2 <- checkTubeData(d2, x=.xargs$group, n.x=1,
-                            if.err = "stop<<ggplotTubeShell>>group")
+                            if.err = "stop<<tubePlot>>group")
     }
     if(!is.null(.xargs$facet)){
       d2 <- checkTubeData(d2, x=.xargs$facet, n.x=2,
-                            if.err = "stop<<ggplotTubeShell>>facet")
+                            if.err = "stop<<tubePlot>>facet")
     }
 
     ## (if not already a plot...) build first layer
@@ -368,7 +368,7 @@ tubePlot <-
 
     # plot.type
     # this is so sloppy but it gives me pleasure...
-    .check <- c("point", "path", "box", "band", "surface", "smooth", "polygon", "none", "ggsmooth")
+    .check <- c("point", "line", "box", "band", "surface", "smooth", "polygon", "none", "ggsmooth")
     .tt <- c(plot.type, names(.xargs))
     for(i in .check){
       .tt[grepl(paste("^", i, "[.]", sep=""), .tt)] <- i
@@ -443,34 +443,39 @@ tubePlot <-
         }
       }
 
-      #polygon
-      if("polygon" %in% i){
-        ##########################
-        #testing this tidy
-        #    Holding code because it is very sensitive to ordering
-        #.xargs2 <- .xargs[grepl("^polygon[.]", names(.xargs))]
-        #names(.xargs2) <- gsub("polygon[.]", "", names(.xargs2))
-        #names(.xargs2)[names(.xargs2) %in% c("col", "color")] <- "colour"
-        #.xargs2 <- .xargs2[!duplicated(names(.xargs2), fromLast=TRUE)]
-        #.xargs2 <- modifyList(.xargs, .xargs2)
-        .xargs2 <- dte_ggshellTidyArgs(.xargs, "polygon")
-        if(.xargs2$..test=="OK"){
-          .xargs2 <- modifyList(.xargs2, list(x="X", y="Y"))
-          ##########################
-          # to think about...
-          #    this currently needs polygon to be a sf polygon...
-          #        BUT polygon could be a different object type ...
-          #        OR polygon could be true... then you would use the data as polygon source
-          #            can't colour a polygon by palette at moment
-          .xargs2$polygon <- as.data.frame(sf::st_coordinates(.xargs2$polygon))
-          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPolygon)]
-          plt <- dte_ggshellAddGeom(.xargs2, .xargs2$polygon, plt,
-                                    ggplot2::geom_polygon,
-                                    defaults = list(na.rm=TRUE, colour="blue",
-                                                    fill="blue", alpha=0.25),
-                                    drops = drops)
-        }
-      }
+###############################################
+# polygon twice
+# check nothing different here before fully removing
+#############################################
+
+#      #polygon
+#      if("polygon" %in% i){
+#        ##########################
+#        #testing this tidy
+#        #    Holding code because it is very sensitive to ordering
+#        #.xargs2 <- .xargs[grepl("^polygon[.]", names(.xargs))]
+#        #names(.xargs2) <- gsub("polygon[.]", "", names(.xargs2))
+#        #names(.xargs2)[names(.xargs2) %in% c("col", "color")] <- "colour"
+#        #.xargs2 <- .xargs2[!duplicated(names(.xargs2), fromLast=TRUE)]
+#        #.xargs2 <- modifyList(.xargs, .xargs2)
+#        .xargs2 <- dte_ggshellTidyArgs(.xargs, "polygon")
+#        if(.xargs2$..test=="OK"){
+#          .xargs2 <- modifyList(.xargs2, list(x="X", y="Y"))
+#          ##########################
+#          # to think about...
+#          #    this currently needs polygon to be a sf polygon...
+#          #        BUT polygon could be a different object type ...
+#          #        OR polygon could be true... then you would use the data as polygon source
+#          #            can't colour a polygon by palette at moment
+#          .xargs2$polygon <- as.data.frame(sf::st_coordinates(.xargs2$polygon))
+#          drops <-  names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPolygon)]
+#          plt <- dte_ggshellAddGeom(.xargs2, .xargs2$polygon, plt,
+#                                    ggplot2::geom_polygon,
+#                                    defaults = list(na.rm=TRUE, colour="blue",
+#                                                    fill="blue", alpha=0.25),
+#                                    drops = drops)
+#        }
+#      }
 
       #polygon
       if("polygon" %in% i){
@@ -673,11 +678,12 @@ tubePlot <-
         }
       }
 
-      # path
+      # line
       #############################################
-      # switch from line to path so precision works
-      if("path" %in% i){
-          .xargs2 <- dte_ggshellTidyArgs(.xargs, "path")
+      # can't decide between line and path
+      # this get high jacked to make precision  works
+      if("line" %in% i){
+          .xargs2 <- dte_ggshellTidyArgs(.xargs, "line")
           .xargs2.test <- dte_ggshellTestArgs(.xargs2, d2)
           .d2 <- d2[order(d2[[x]]),]
           # has a gap option
