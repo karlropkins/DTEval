@@ -269,6 +269,7 @@ checkTubeMeta <- function(data, x=NULL, by=NULL, ...){
 
 extractTubeMeta <- function (data, x = NULL, by = NULL, ...)
 {
+  data <- tagTubeRequired(data, required=c(x, by), ...)
   if (is.null(by)) {
     if (".sample_id" %in% names(data)) {
       by <- ".sample_id"
