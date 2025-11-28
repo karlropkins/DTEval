@@ -69,7 +69,7 @@
 
 # current test
 #    dd <- tagTube(dont.share::dt.bradford.2); dd <- dd[dd$.longitude<0,]
-#    tubeMap(dd, facet=".year)
+#    tubeMap(dd, facet=".year")
 
 #' @rdname tube.maps
 #' @export
@@ -180,10 +180,17 @@ tubeMap <-
       #     erroring out...)
       ##########################
 
-      #plt <- plt + ggplot2::geom_text(data=data.frame(),
-      #                      ggplot2::aes(x=rng.lon[2], y=rng.lat[1]),
-      #                      label="Map layer: (c) OpenStreetMap/ESRI contributors    ",
-      #                      size=1.8, hjust=1, vjust=-0.5)
+      #dies of facetting...
+      #plt <- plt + ggplot2::geom_label(x=rng.lon[2], y=rng.lat[1],
+      #                                 label=" Map layer: (c) OpenStreetMap/ESRI contributors ",
+      #                                 #fill="white", border.colour="white",
+      #                                 #size=1.8,
+      #                                  hjust=1, vjust=0.20, size=1.8, size.unit = "pc")
+
+      #                      ggplot2::aes(x=x, y=y),
+      #                      label=" Map layer: (c) OpenStreetMap/ESRI contributors ",
+      #                      fill="white", border.colour="white",
+      #                      size=1.8, hjust=1, vjust=0.20)
 
       #plt <- plt + ggplot2::coord_sf() + ggplot2::labs(x="") +
       #  ggplot2::labs(y="") +
@@ -199,7 +206,7 @@ tubeMap <-
       #      suppressMessages(suppressWarnings(
       #        map <- plt + ggplot2::geom_text(data=data.frame(),
       #                                        ggplot2::aes(x=rng.lon[2], y=rng.lat[1]),
-      #                                        label="Map layer: (c) OpenStreetMap/ESRI contributors    ",
+      #                                        label=" Map layer: (c) OpenStreetMap/ESRI contributors ",
       #                                        size=1.8, hjust=1, vjust=-0.5) #+
       #          ggplot2::coord_quickmap() +
       #          ggplot2::theme_void()

@@ -272,6 +272,23 @@
 #    tubePlot(tagTubeDate(dd), x=".date", y=".latitude", surface.fill=".value")
 #       dies because .date has two names...
 
+
+##############
+# issue
+###################
+
+## this works
+# tubePlot(test, ".date", "..pred", plot.type = "line", group=".location", col="caz.class")
+## but this dies 
+# tubePlot(test, ".date", "..pred", plot.type = "smooth", group=".location", col="caz.class")
+# guessing smooth is somehow dropping caz.class from test, maybe through fit model ??? 
+# works if I facet caz.class !!!
+## tubePlot(test, ".date", "..pred", plot.type = "smooth", group=".location", col="caz.class", facet="caz.class")
+# so guessing it is tracking group and facet but not col, etc....
+
+################################
+
+
 # update based on current tubeMap
 #    previous tubePlot now unexported tubePlot.old
 #

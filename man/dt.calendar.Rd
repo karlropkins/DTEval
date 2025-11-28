@@ -5,7 +5,7 @@
 \alias{dt.calendar}
 \title{dt.calendar}
 \format{
-A (132x5) 'data.frame' object
+A (144x5) 'data.frame' object
 \describe{
 \item{year}{sampling year}
 \item{month}{sampling month}
@@ -23,13 +23,13 @@ https://laqm.defra.gov.uk/air-quality/air-quality-assessment/diffusion-tube-moni
 
 LAQM Helpdesk Team (2022),
 
-https://laqm.defra.gov.uk/air-quality/air-quality-assessment/diffusion-tube-monitoring-calendar/ (2023-2025).
+https://laqm.defra.gov.uk/air-quality/air-quality-assessment/diffusion-tube-monitoring-calendar/ (2023-2026).
 }
 \usage{
 dt.calendar
 }
 \description{
 The diffusion tube sampling schedule calendar
-2015 and 2025.
+2015 and 2026.
 }
 \keyword{datasets}

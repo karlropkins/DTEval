@@ -28,7 +28,7 @@
 #' one of the following methods to estimate the precision of cases
 #' with \code{n} replicates:
 #'
-#' * \code{method = 1} uses \code{quantile(x, 0.05, 0.95)}
+#' * \code{method = 1} uses \code{quantile(x, 0.025, 0.975)}
 #'
 #' * \code{method = 2} uses \code{mean(x) +/- qt(0.05/2, n(x)-1), lower.tail=FALSE)} &ast;
 #' \code{sd(x)/sqrt(n(x))}
@@ -38,6 +38,8 @@
 #' * \code{method = 4} used \code{mean(x) +/- qnorm(0.975)} &ast; \code{sd(x)}
 
 # document these properly when other methods go in...
+# see https://cran.r-project.org/web/packages/distributions3/vignettes/one-sample-t-confidence-interval.html
+#
 
 #'
 #' NOTE: \code{testTubePrecision} attempts to tag \code{data} using default
@@ -246,8 +248,8 @@ testTubePrecision <-
       if(method=="1"){
         ..test. <- dat.ans[, .(.n = length(.tube[is.finite(.tube)]),
                             .mean = mean(.tube, na.rm=TRUE),
-                            .low = quantile(.tube, 0.05, na.rm=TRUE),
-                            .high = quantile(.tube, 0.95, na.rm=TRUE)
+                            .low = quantile(.tube, 0.025, na.rm=TRUE),
+                            .high = quantile(.tube, 0.975, na.rm=TRUE)
         ), by=..test.]
         test <- as.data.frame(..test.)
       }
@@ -263,8 +265,8 @@ testTubePrecision <-
       }
       if(method=="3"){
         ..test. <- dat.ans[, .(.n = length(.tube[is.finite(.tube)]),
-                            .mean = mean(.tube, na.rm=TRUE),
-                            .sd = sd(.tube, na.rm=TRUE)
+                               .mean = mean(.tube, na.rm=TRUE),
+                               .sd = sd(.tube, na.rm=TRUE)
         ), by=..test.]
         test <- as.data.frame(..test.)
         test$.low <- ifelse(test$.n>2, test$.mean - (1.96*test$.sd/sqrt(test$.n)), NA)
@@ -278,6 +280,8 @@ testTubePrecision <-
         test <- as.data.frame(..test.)
         test$.low <- ifelse(test$.n>2, test$.mean - (qnorm(0.975)*test$.sd), NA)
         test$.high <- ifelse(test$.n>2, test$.mean + (qnorm(0.975)*test$.sd), NA)
+        #test$.low <- ifelse(test$.n>2, qnorm(0.025, test$.mean, test$.sd), NA)
+        #test$.high <- ifelse(test$.n>2, qnorm(0.975, test$.mean, test$.sd), NA)
       }
 
       test <- as.data.frame(test)

@@ -4,9 +4,9 @@
 #'
 #' @name dt.calendar
 #' @description The diffusion tube sampling schedule calendar
-#' 2015 and 2025.
+#' 2015 and 2026.
 #'
-#' @format A (132x5) 'data.frame' object
+#' @format A (144x5) 'data.frame' object
 #' \describe{
 #'   \item{year}{sampling year}
 #'   \item{month}{sampling month}
@@ -22,7 +22,7 @@
 #'
 #' LAQM Helpdesk Team (2022),
 #'
-#' https://laqm.defra.gov.uk/air-quality/air-quality-assessment/diffusion-tube-monitoring-calendar/ (2023-2025).
+#' https://laqm.defra.gov.uk/air-quality/air-quality-assessment/diffusion-tube-monitoring-calendar/ (2023-2026).
 
 #sources
 #(accessed 09-2021)
@@ -38,6 +38,8 @@
 #(accessed 11-2023; 2023/2024)
 #https://laqm.defra.gov.uk/air-quality/air-quality-assessment/diffusion-tube-monitoring-calendar/
 #(accessed 11-2024; 2025)
+#https://laqm.defra.gov.uk/air-quality/air-quality-assessment/diffusion-tube-monitoring-calendar/
+#(accessed 11-2025; 2026)
 #https://laqm.defra.gov.uk/air-quality/air-quality-assessment/diffusion-tube-monitoring-calendar/
 
 
