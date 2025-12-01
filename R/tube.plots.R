@@ -279,9 +279,9 @@
 
 ## this works
 # tubePlot(test, ".date", "..pred", plot.type = "line", group=".location", col="caz.class")
-## but this dies 
+## but this dies
 # tubePlot(test, ".date", "..pred", plot.type = "smooth", group=".location", col="caz.class")
-# guessing smooth is somehow dropping caz.class from test, maybe through fit model ??? 
+# guessing smooth is somehow dropping caz.class from test, maybe through fit model ???
 # works if I facet caz.class !!!
 ## tubePlot(test, ".date", "..pred", plot.type = "smooth", group=".location", col="caz.class", facet="caz.class")
 # so guessing it is tracking group and facet but not col, etc....
@@ -356,11 +356,13 @@ tubePlot <-
     ##########################################
     d2[, x] <- getTubeX(d2, x, if.err = "stop<<tubePlot>>x")
     d2[, y] <- getTubeX(d2, y, if.err = "stop<<tubePlot>>x")
-    if(!is.null(.xargs$group)){
+    # moving next two checks from !is.null(.xargs$...) to %in% names
+    # because facet.type without facet trips here
+    if("group" %in% names(.xargs)){
       d2 <- checkTubeData(d2, x=.xargs$group, n.x=1,
                             if.err = "stop<<tubePlot>>group")
     }
-    if(!is.null(.xargs$facet)){
+    if("facet" %in% names(.xargs)){
       d2 <- checkTubeData(d2, x=.xargs$facet, n.x=2,
                             if.err = "stop<<tubePlot>>facet")
     }
