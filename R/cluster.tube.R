@@ -207,7 +207,7 @@ clusterTubeData <- function(data, tube=".value", by="site",
                         .cluster=factor(clst$clustering))
   }
   # this is currently common but might not last / work...
-  return(.temp)
+  ##return(.temp)
   names(.temp)[1] <- by[1]
   #rename
   names(.temp)[2] <- .xargs$rename[1]
