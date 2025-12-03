@@ -148,7 +148,7 @@ clusterTubeData <- function(data, tube=".value", by="site",
     .temp <- c(.temp, by[2:length(by)])
   }
 
-  check <- 1:3
+  check <- 1:5
   if(!method %in% check){
     stop("[clusterTubeData] Unknown method, maybe try one of: ",
          paste(check, collapse=","),
@@ -192,8 +192,14 @@ clusterTubeData <- function(data, tube=".value", by="site",
     d2 <- d2[, c(.temp) := NULL]
     d2 <- as.data.frame(d2)
     .temp <- names(d2)
-    d2 <- as.data.frame(apply(d2,2,scale))
-    d2 <- as.data.frame(apply(d2,2,diff))
+    #####################################
+    # think about base r versus data.atble
+    # apply(df, 2, function(x) {(x - min(x, na.rm = T))/(max(x, na.rm = T) - min(x, na.rm = T))})
+    # setDT(df)[ , lapply(.SD, function(x) (x - min(x, na.rm = T))/(max(x, na.rm = T) - min(x, na.rm = T)))]
+
+    # scale ???
+    d2 <- as.data.frame(apply(d2, 2, function(x) {(x - min(x, na.rm = T)) /
+                                        (max(x, na.rm = T) - min(x, na.rm = T))}))
     names(d2) <- .temp
     # does this need/want NA handling like method 2 ??
     # but that might kill it ???
@@ -206,6 +212,28 @@ clusterTubeData <- function(data, tube=".value", by="site",
     .temp <- data.frame(x=names(clst$clustering),
                         .cluster=factor(clst$clustering))
   }
+  if (method == 4) {
+    d2 <- d2[, `:=`(c(.temp), NULL)]
+    d2 <- as.data.frame(d2)
+    .temp <- names(d2)
+    d2 <- as.data.frame(apply(d2, 2, function(x) {x - mean(x, na.rm=TRUE)}))
+    d2 <- as.data.frame(apply(d2, 2, function(x) {x / sd(x, na.rm=TRUE)}))
+    names(d2) <- .temp
+    clst <- cluster::clara(t(d2), clusters, correct.d = TRUE)
+    .temp <- data.frame(x = names(clst$clustering),
+                        .cluster = factor(clst$clustering))
+  }
+  if (method == 5) {
+    d2 <- d2[, `:=`(c(.temp), NULL)]
+    d2 <- as.data.frame(d2)
+    .temp <- names(d2)
+    d2 <- as.data.frame(apply(d2, 2, function(x) {x/mean(x, na.rm=TRUE)}))
+    names(d2) <- .temp
+    clst <- cluster::clara(t(d2), clusters, correct.d = TRUE)
+    .temp <- data.frame(x = names(clst$clustering),
+                        .cluster = factor(clst$clustering))
+  }
+
   # this is currently common but might not last / work...
   ##return(.temp)
   names(.temp)[1] <- by[1]
