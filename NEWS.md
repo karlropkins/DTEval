@@ -8,6 +8,7 @@
 
 * Package pre-release 
 
+    * __v 0.0.17__ [2025-12-03] updated clusterTubeData
     * __v 0.0.16__ [2025-11-28] updated tubePlot smooth, fixed tubeInXYPolygon 
     rename, updated mapTube, updated ggplotTubeShell, updated deseasonTubeData 
     (method 2 added), update testTubePrecision, 2026 in dt.calendar

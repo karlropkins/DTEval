@@ -21,8 +21,8 @@ data-series of diffusion tube records.}
 \item{tube}{The name of the data-series (in \code{data}) to fit a model
 to (see \code{model}), typically the DT NO2 concentrations (in ug/m3).}
 
-\item{by}{The name(s) of hierarchical grouping terms. These are used to
-sub-sample the data before clustering data.}
+\item{by}{The name of a hierarchical grouping term. This is used to
+group the data before clustering. (see Note.)}
 
 \item{clusters}{The number of clusters to extract, default 2.}
 
@@ -33,8 +33,7 @@ sub-sample the data before clustering data.}
 }
 \value{
 All functions return the supplied \code{data.frame}
-with attached predicted time-series components: \code{..season},
-\code{..deseason}, etc.
+with attached cluster assignment: \code{.cluster}.
 }
 \description{
 Functions for clustering multiple site
@@ -46,6 +45,10 @@ diffusion tube (DT).
 It assigns data to the requested number of clusters.
 }
 \note{
+\code{clusterTubeData} is currently only fully tested for use with
+single \code{by} terms. It will accept multiple values, but at this stage
+outputs for multiple inputs should not be
+
 \code{clusterTubeData} and related functions assume that \code{data}
 is a data set \code{DTEval} will recognise as Diffusion Tube data, so either
 previously tagged tube data or data that is tag-able using a

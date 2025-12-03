@@ -781,7 +781,7 @@ tagTubeYear <- function(data, method=1, force=FALSE, ...){
   .temp <- tagTubeDate(data, ...)
   check <- 1
   if(!method %in% check){
-    stop("[setTubeYear] Unknown method, maybe try one of: ", paste(check, collapse=","),
+    stop("[tagTubeYear] Unknown method, maybe try one of: ", paste(check, collapse=","),
          call.=FALSE)
   }
   if(method==1){
