@@ -8,7 +8,7 @@
 \usage{
 tubeMap(data, x = NULL, y = NULL, ...)
 
-leafletTubeMap(data, x = NULL, y = NULL, ...)
+leafletTubeMap(data, x = NULL, y = NULL, plot.type = NULL, ...)
 }
 \arguments{
 \item{data}{Data source to be used to build a plot. This is typically a
@@ -22,6 +22,10 @@ latitude.}
 \item{...}{Additional arguments. \code{tubeMap} uses \code{data}, \code{x},
 \code{y} and optional argument \code{facet} to build map layers then passes
 arguments on to \code{tubePlot} to generate plot layers.}
+
+\item{plot.type}{The type of plot(s) to produce, e.g.:
+\code{'point'} (default) for a scatter plot, \code{'surface'} to
+fit a surface, etc...}
 }
 \value{
 \code{tubeMap} generates static maps using \code{ggplot2}

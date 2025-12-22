@@ -12,6 +12,9 @@
 #' @param x,y The names of the data-series to plot on the
 #' X and Y axes, respectively, and assumed to be sampling point longitude and
 #' latitude.
+#' @param plot.type The type of plot(s) to produce, e.g.:
+#' \code{'point'} (default) for a scatter plot, \code{'surface'} to
+#' fit a surface, etc...
 #' @param ... Additional arguments. \code{tubeMap} uses \code{data}, \code{x},
 #' \code{y} and optional argument \code{facet} to build map layers then passes
 #' arguments on to \code{tubePlot} to generate plot layers.
@@ -253,17 +256,24 @@ tubeMap <-
 # jobs
 #############################
 
-# leaflet
-#   make a static copy of a leaflet output....
-
 # current test
 #    dd <- tagTube(dont.share::dt.bradford.2); dd <- dd[dd$.longitude<0,]
 #    leafletTubeMap(dd, point=T, polygon=dont.share::caz.bradford)
+#    leafletTubeMap(dd, surface=T, point=T)
 
-# jobs
-#    standardize args and options so it is more like tubeMap
-#    add surface fit
+# standardize args and options so it is more like tubeMap
 
+# add surface fit
+#           see
+#           https://stackoverflow.com/questions/67537458/creating-a-heatmap-on-r-using-leaflet-function-add-heatmap-or-addheatmap
+#           https://gis.stackexchange.com/questions/168886/r-how-to-build-heatmap-with-the-leaflet-package
+
+# leaflet
+#   make a static copy of a leaflet output....
+#      https://gis.stackexchange.com/questions/299192/saving-leaflet-map-as-image
+
+# quick fix for quarto reports....
+#  could not use leafletTubeMap in if in quarto
 
 
 #' @rdname tube.maps
@@ -272,11 +282,17 @@ tubeMap <-
 # draw maps of tubes using leaflet...
 
 leafletTubeMap <-
-  function(data, x=NULL, y=NULL, ...){
+  function(data, x=NULL, y=NULL, plot.type=NULL, ...){
 
     #plot only intended for tagged or tag-able data...
     d2 <- data
-    .xargs <- list(...)
+
+    #args
+    .xargs <- dte_ggshellTidyArgs(list(...))
+    .xargs <- modifyList(list(grid.borders = 0.05,
+                              auto.text = TRUE),
+                         .xargs)
+
     if("leaflet" %in% class(data)){
       previous <- d2
       d2 <- data$dte_data
@@ -304,25 +320,81 @@ leafletTubeMap <-
       m <- previous
     }
 
-    if("polygon" %in% names(.xargs)){
-      # quick fix for quarto reports....
-      #  could not use leafletTubeMap in if in quarto
-      if(!is.null(.xargs$polygon)){
-        m <- leaflet::addPolygons(m, data=.xargs$polygon)
+    ################################
+    # plot.type like tubePlot
+    #     BUT for selected plot types
+    ################################
+    #.check <- c("point", "line", "box", "band", "surface", "smooth", "polygon", "none", "ggsmooth")
+    .check <- c("point", "surface", "polygon", "none")
+    .tt <- c(plot.type, names(.xargs))
+    for(i in .check){
+      .tt[grepl(paste("^", i, "[.]", sep=""), .tt)] <- i
+    }
+    plot.type <- unique(.tt[.tt %in% .check])
+    if(length(plot.type)==0){
+      plot.type <- "point"
+    }
+
+    for(i in plot.type){
+
+      if(i == "polygon"){
+        ##########################
+        # needs to track args
+        ##########################
+        if(!is.null(.xargs$polygon)){
+          m <- leaflet::addPolygons(m, data=.xargs$polygon)
+        }
       }
+
+      if(i == "surface"){
+        ##########################
+        # currently needs raster added to imports
+        ##########################
+        # needs to track args
+        ##########################
+        .dd <- fitTubeModel(d2, tube=".value", inputs=c(".longitude", ".latitude"),
+                            new.data="input.ranges", simplify=TRUE, too.far=0.15)
+        #print(names(.dd))
+
+        .lat <- unique(.dd$.latitude)
+        .lon <- unique(.dd$.longitude)
+
+        r <- raster::raster(xmn = min(.lon, na.rm=TRUE),
+                    xmx = max(.lon, na.rm=TRUE),
+                    ymn = min(.lat, na.rm=TRUE),
+                    ymx = max(.lat, na.rm=TRUE),
+                    nrows = length(.lon),
+                    ncols = length(.lat))
+        .mat <- matrix(.dd$.value.pred, nrow(r), ncol(r),
+                       byrow = TRUE)
+        .mat  <- .mat[c(ncol(.mat):1),,drop=FALSE]
+
+        raster::values(r) <- .mat
+        raster::crs(r) <- raster::crs("+init=epsg:4326")
+        pal <- leaflet::colorNumeric("Spectral", rev(pretty(.dd$.value.pred)),
+                                     na.color = "#00000000", reverse=T)
+        pal2 <- leaflet::colorNumeric("Spectral", rev(pretty(.dd$.value.pred)),
+                                     reverse=F)
+        m <- leaflet::addRasterImage(m, r, colors = pal, opacity = 0.5) |>
+          leaflet::addLegend(pal = pal2, values = pretty(.dd$.value.pred),
+                             labFormat = leaflet::labelFormat(transform = function(x) sort(x, decreasing = TRUE)))
+
+      }
+
+
+      if(i == "point"){
+        ##########################
+        # needs to track args
+        ##########################
+        m <- leaflet::addCircleMarkers(m, lng=d2$.longitude, lat=d2$.latitude,
+                                       radius=2)
+      }
+
     }
+    ########################
 
-    ##################
-    # surface to add
-    ##################
-
-    if("point" %in% names(.xargs)){
-      m <- leaflet::addCircleMarkers(m, lng=d2$.longitude, lat=d2$.latitude,
-                                     radius=2)
-    }
-
-    #print(m)
-    return(m)
+      #print(m)
+      return(m)
   }
 
 
