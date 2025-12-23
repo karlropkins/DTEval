@@ -409,7 +409,6 @@ tubePlot <-
       #################################
       # added  overplot option
       #     calculates mean or count of overplot data
-      #
       if("point" %in% i){
         .xargs2 <- dte_ggshellTidyArgs(.xargs, "point")
         .xargs2.test <- dte_ggshellTestArgs(.xargs2, d2)

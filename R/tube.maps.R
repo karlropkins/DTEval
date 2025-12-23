@@ -356,8 +356,9 @@ leafletTubeMap <-
       if(i == "surface"){
         ##########################
         # currently needs raster added to imports
+        #    see in-section notes...
         ##########################
-        # needs to track args
+        # needs to track args like point
         ##########################
         .dd <- fitTubeModel(d2, tube=".value", inputs=c(".longitude", ".latitude"),
                             new.data="input.ranges", simplify=TRUE, too.far=0.15)
@@ -366,6 +367,9 @@ leafletTubeMap <-
         .lat <- unique(.dd$.latitude)
         .lon <- unique(.dd$.longitude)
 
+        ##########################
+        # raster package only used for next section of code at moment...
+        #    like to remove that if possible... ???
         r <- raster::raster(xmn = min(.lon, na.rm=TRUE),
                     xmx = max(.lon, na.rm=TRUE),
                     ymn = min(.lat, na.rm=TRUE),
@@ -378,6 +382,7 @@ leafletTubeMap <-
 
         raster::values(r) <- .mat
         raster::crs(r) <- raster::crs("+init=epsg:4326")
+        ################################
         pal <- leaflet::colorNumeric("Spectral", rev(pretty(.dd$.value.pred)),
                                      na.color = "#00000000", reverse=T)
         pal2 <- leaflet::colorNumeric("Spectral", rev(pretty(.dd$.value.pred)),
@@ -399,26 +404,45 @@ leafletTubeMap <-
         #      dte_ggshellTidyTestArgs to dte_localArgsTidies
         #             could handle both,more...
         #   if this behaves, it could supersede the ggshell code completely... ???
-        #   NEEDS to track mapped terms...
-        #       color and radius
+        #   NEEDS color and radius mapping
+        #   CAN'T do other shapes...
+        # see re circle handling, popup, label, etc ...
+        # https://rpubs.com/sofie/875527
+        # https://rpubs.com/mayotunde/212634
+        # also try leaflet::setView() to force starting position
         ##########################
         .xargs2 <- dte_localArgsTidies(.xargs, "point",
                                        tidy.name=list(c("col", "color"),
                                                       c("colour", "color"),
                                                       c("size", "radius")),
                                        tidy.ref=leaflet::addCircleMarkers)
+        #needs a overplot stat handler like in tubePlot...
+        #   guessing here ???
+        #     see overplot in tubePlot, point...
         .xargs2.test <- dte_localArgsTests(.xargs2, d2)
         if(.xargs2$..test=="OK"){
           .xargs2 <- .xargs2[names(.xargs2) != "..test"]
-          .xargs2 <- modifyList(list(m, lng=d2$.longitude, lat=d2$.latitude,
+          if("color" %in% names(.xargs2)){
+            if(.xargs2.test$color=="data") {
+              #########################
+              #ONLY works for numeric at moment
+              #needs palette control
+              .xargs2$color <- leaflet::colorNumeric("Spectral",
+                                  d2[[.xargs2$color]])(d2[[.xargs2$color]])
+              #########################
+              #needs a colour scale???
+            }
+          }
+          .xargs2 <- modifyList(list(map=m, lng=d2$.longitude, lat=d2$.latitude,
                                      radius=2),
                                 .xargs2)
           m <- do.call(leaflet::addCircleMarkers, .xargs2)
         }
       }
-      ########################
+    ########################
+    #end of for-loop
     }
-    #print(m)
+    #end
     return(m)
   }
 
