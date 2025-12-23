@@ -286,6 +286,10 @@
 ## tubePlot(test, ".date", "..pred", plot.type = "smooth", group=".location", col="caz.class", facet="caz.class")
 # so guessing it is tracking group and facet but not col, etc....
 
+# this works
+# tubePlot(dd, x=".longitude", y=".latitude", size=1, col=".value")
+#  but assumes the size needs mapping when it odes not...
+
 ################################
 
 

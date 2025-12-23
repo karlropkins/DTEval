@@ -143,8 +143,13 @@ dte_quickText <- function (text, auto.text = TRUE)
 # test data and .xargs for use with ggplot2...
 
 # was dte_testShellAndArgs
+# now replacing with dte_localArgsTests
 
 dte_ggshellTestArgs <- function(.xargs, data){
+  dte_localArgsTests(.xargs, data)
+}
+
+dte_localArgsTests <- function(.xargs, data){
   .xargs.tmp <- lapply(.xargs, function(x) !is.null(getTubeX(data, x)))
   .xargs.source <- ifelse(.xargs.tmp, "data", "unknown")
   .xargs.tmp <- lapply(.xargs, function(x) !is.null(getTubeX(NULL, x)))
@@ -221,6 +226,39 @@ dte_GeomArgs <- function(GP){
 
 dte_ggshellTidyArgs <- function(args, type=NULL){
 
+    # tidy/rationalise args for dte_ggshell
+    ###############################
+
+    # check for type specific args
+    #     handle [plot.type].[arg]s etc...
+    args$..test <- "OK"
+    if(!is.null(type)){
+      args2 <- args[grepl(paste("^", type, "[.]", sep=""), names(args))]
+      names(args2) <- gsub(paste(type, "[.]", sep=""), "", names(args2))
+      args <- modifyList(args, args2)
+      #########################
+      # messy points=FALSE will slips through
+      if(type %in% names(args)){
+        if(is.logical(args[[type]]) && !all(args[[type]])){
+          args$..test <- "not OK"
+        }
+      }
+    }
+
+    # col/color/colour handling... after assume colour...
+    names(args)[names(args) %in% c("col", "color")] <- "colour"
+    args <- args[!duplicated(names(args), fromLast=TRUE)]
+
+    #out
+    args
+  }
+
+# planning to replace above with this...
+
+dte_localArgsTidies <- function(args, type=NULL,
+                                tidy.name=NULL,
+                                tidy.ref=NULL){
+
   # tidy/rationalise args for dte_ggshell
   ###############################
 
@@ -241,8 +279,26 @@ dte_ggshellTidyArgs <- function(args, type=NULL){
   }
 
   # col/color/colour handling... after assume colour...
-  names(args)[names(args) %in% c("col", "color")] <- "colour"
+  # replace with a tidy list
+  # to be tidied....
+  if(is.null(tidy.name)){
+    tidy.name <- list(c("col", "colour"),
+                      c("color", "colour"))
+  }
+  if(!is.null(tidy.name)){
+    #assume list
+    for(i in tidy.name){
+      names(args)[names(args) %in% i[1]] <- i[2]
+    }
+  }
   args <- args[!duplicated(names(args), fromLast=TRUE)]
+
+  if(!is.null(tidy.ref)){
+    #assume function
+    #keep ..test
+    .check <- c(names(formals(tidy.ref)), "..test")
+    args <- args[names(args) %in% .check]
+  }
 
   #out
   args

@@ -392,40 +392,34 @@ leafletTubeMap <-
       if(i == "point"){
         ##########################
         # tracking args 2
-        #    IN_DEVELOPMENT
-        #    nb; the dte_... may want modifying to leaflet???
-        #    x/lng and y/lat assignment needs to track...
-        #    currently going to circle marker so no shape control
-        #        size = radius, default 10, using 2...
-        #        colour (etc) = color, default "#03F"/blue
-        #        think about opacity, popup, grouping,
-        #           also colour mapping d2$.value, etc...
-        #    think about tidying methods before doing for other plot.type(s)
-        #        dte_ggshellTidyTestArgs to dte_localArgsTests because it is
-        #               more general
-        #        dte_ggshellTidyTestArgs to dte_localArgsTidies
-        #        (.xargs,){
-        #            [local]. term handler because point.[whatever]
-        #            tidy.names list of conversions
-        #            option to limit args to forced cases???
-        #            }
-        #        then add map and do.call leaflet ???
-        #   if it behaves this could supersede the ggshell code completely... ???
+        #   IN_DEVELOPMENT
+        #   thinking about tidying methods before doing for other plot.type(s)
+        #      dte_ggshellTidyTestArgs to dte_localArgsTests because it can
+        #             be used more generally ???
+        #      dte_ggshellTidyTestArgs to dte_localArgsTidies
+        #             could handle both,more...
+        #   if this behaves, it could supersede the ggshell code completely... ???
+        #   NEEDS to track mapped terms...
+        #       color and radius
         ##########################
-        .xargs2 <- dte_ggshellTidyArgs(.xargs, "point")
-        .xargs2.test <- dte_ggshellTestArgs(.xargs2, d2)
-        if(!"colour" %in% names(.xargs2)){
-         .xargs$colour <- "#03F"
+        .xargs2 <- dte_localArgsTidies(.xargs, "point",
+                                       tidy.name=list(c("col", "color"),
+                                                      c("colour", "color"),
+                                                      c("size", "radius")),
+                                       tidy.ref=leaflet::addCircleMarkers)
+        .xargs2.test <- dte_localArgsTests(.xargs2, d2)
+        if(.xargs2$..test=="OK"){
+          .xargs2 <- .xargs2[names(.xargs2) != "..test"]
+          .xargs2 <- modifyList(list(m, lng=d2$.longitude, lat=d2$.latitude,
+                                     radius=2),
+                                .xargs2)
+          m <- do.call(leaflet::addCircleMarkers, .xargs2)
         }
-        m <- leaflet::addCircleMarkers(m, lng=d2$.longitude, lat=d2$.latitude,
-                                       radius=2, color=.xargs2$colour)
       }
-
+      ########################
     }
-    ########################
-
-      #print(m)
-      return(m)
+    #print(m)
+    return(m)
   }
 
 
