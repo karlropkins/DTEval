@@ -239,25 +239,23 @@ clusterTubeData <- function(data, tube=".value", by="site",
         return(as.data.frame(d2))
       }
     }
-    print(dim(d2))
     clst <- cluster::clara(t(d2), clusters, correct.d = TRUE)
     .temp <- data.frame(x = names(clst$clustering),
                         .cluster = factor(clst$clustering))
   }
   if (method == 6) {
+    .dd <- as.numeric(d2$.date)
     d2 <- d2[, `:=`(c(.temp), NULL)]
     d2 <- as.data.frame(d2)
     .temp <- names(d2)
-    d2 <- as.data.frame(apply(d2, 2, function(x) {x/mean(x, na.rm=TRUE)}))
+    d2 <- t(as.data.frame(apply(d2, 2, function(x) {cor(x, .dd, use="pairwise.complete.obs")})))
+    d2 <- 1-d2
     names(d2) <- .temp
-    .test <- apply(d2, 2, function(x) {!all(is.na(x))})
-    d2 <- d2[, .test]
     if("output" %in% names(.xargs)){
       if(.xargs$output == "data"){
         return(as.data.frame(d2))
       }
     }
-    print(dim(d2))
     clst <- cluster::clara(t(d2), clusters, correct.d = TRUE)
     .temp <- data.frame(x = names(clst$clustering),
                         .cluster = factor(clst$clustering))
