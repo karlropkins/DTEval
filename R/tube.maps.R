@@ -360,8 +360,21 @@ leafletTubeMap <-
         ##########################
         # needs to track args like point
         ##########################
-        .dd <- fitTubeModel(d2, tube=".value", inputs=c(".longitude", ".latitude"),
-                            new.data="input.ranges", simplify=TRUE, too.far=0.15)
+        .fit.args <- modifyList(list(data=d2, tube=".value", inputs=c(".longitude", ".latitude"),
+                                     new.data="input.ranges", simplify=TRUE),
+                                #################################
+                                # could generalise next bit ???
+                                #################################
+                                .xargs[names(.xargs) %in% c("too.far", "model",
+                                                            "simplify",
+                                                            "force.positive",
+                                                            "grid.resolution",
+                                                            "grid.borders")])
+
+        .dd <- do.call(fitTubeModel, .fit.args)
+#        .dd <- fitTubeModel(d2, tube=".value", inputs=c(".longitude", ".latitude"),
+#                            new.data="input.ranges", simplify=TRUE, too.far=0.15,
+#                            grid.borders=c(0.4), grid.resolution=300)
         #print(names(.dd))
 
         .lat <- unique(.dd$.latitude)
@@ -383,6 +396,7 @@ leafletTubeMap <-
         raster::values(r) <- .mat
         raster::crs(r) <- raster::crs("+init=epsg:4326")
         ################################
+        #using leaflet::colorBin for blocked sacle
         pal <- leaflet::colorNumeric("Spectral", rev(pretty(.dd$.value.pred)),
                                      na.color = "#00000000", reverse=T)
         pal2 <- leaflet::colorNumeric("Spectral", rev(pretty(.dd$.value.pred)),
@@ -390,6 +404,23 @@ leafletTubeMap <-
         m <- leaflet::addRasterImage(m, r, colors = pal, opacity = 0.5) |>
           leaflet::addLegend(pal = pal2, values = pretty(.dd$.value.pred),
                              labFormat = leaflet::labelFormat(transform = function(x) sort(x, decreasing = TRUE)))
+        ############## contours
+        .dd <- grDevices::contourLines(unique(.dd$.longitude), unique(.dd$.latitude), matrix(.dd$.value.pred, nrow=length(unique(.dd$.longitude))),
+                                       level=c(1:6)*5)
+        for(i in 1:length(.dd)){
+          m <- leaflet::addPolylines(m, lng=.dd[[i]]$x, lat=.dd[[i]]$y, group=.dd[[i]]$level,
+                                     label=.dd[[i]]$level)
+          m <- leaflet::addLabelOnlyMarkers(m, lng=.dd[[i]]$x[1], lat=.dd[[i]]$y[1],
+                                            group=.dd[[i]]$level[1],
+                                     label=.dd[[i]]$level[1],
+                                     labelOptions = leaflet::labelOptions(noHide = T, textOnly = T))
+          #          data.frame(x=, y=.dd[[x]]$y, level=.dd[[x]]$level, grp=x)
+        }
+#        .dd <- do.call(rbind, .dd)
+#        .dd <- .dd[.dd$level==20,]
+#        print(.dd)
+#        m <- leaflet::addPolylines(m, lng=.dd$x, lat=.dd$y, group=.dd$grp, noClip = T)
+
 
       }
 
