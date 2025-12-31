@@ -401,7 +401,7 @@ leafletTubeMap <-
                                      na.color = "#00000000", reverse=T)
         pal2 <- leaflet::colorNumeric("Spectral", rev(pretty(.dd$.value.pred)),
                                      reverse=F)
-        m <- leaflet::addRasterImage(m, r, colors = pal, opacity = 0.5) |>
+        m <- leaflet::addRasterImage(m, r, colors = pal, opacity = 0.3) |>
           leaflet::addLegend(pal = pal2, values = pretty(.dd$.value.pred),
                              labFormat = leaflet::labelFormat(transform = function(x) sort(x, decreasing = TRUE)))
         ############## contours
@@ -413,7 +413,10 @@ leafletTubeMap <-
           m <- leaflet::addLabelOnlyMarkers(m, lng=.dd[[i]]$x[1], lat=.dd[[i]]$y[1],
                                             group=.dd[[i]]$level[1],
                                      label=.dd[[i]]$level[1],
-                                     labelOptions = leaflet::labelOptions(noHide = T, textOnly = T))
+                                     labelOptions = leaflet::labelOptions(noHide = T, textOnly = F,
+                                                                          textsize = "15px",
+                                                                          style=list("color"="red"),
+                                                                          direction="left"))
           #          data.frame(x=, y=.dd[[x]]$y, level=.dd[[x]]$level, grp=x)
         }
 #        .dd <- do.call(rbind, .dd)
