@@ -245,6 +245,7 @@ clusterTubeData <- function(data, tube=".value", by="site",
   }
   if (method == 6) {
     .dd <- as.numeric(d2$.date)
+    .dd <- max(.dd, na.rm=TRUE) - .dd # make y/.date positive slope if decreasing...
     d2 <- d2[, `:=`(c(.temp), NULL)]
     d2 <- as.data.frame(d2)
     .temp <- names(d2)
