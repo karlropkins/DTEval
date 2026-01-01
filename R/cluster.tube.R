@@ -92,6 +92,11 @@
 # bb <- clusterTubeData(aa, tube="..deseason", by=c(".location"), cluster=2, method=2);names(bb)
 # dies with Error in cluster::clara(d2, clusters, correct.d = TRUE) : Observations 212,213 have *only* NAs --> omit them for clustering!
 
+# NEED TO THINK ABOUT THE NA handling for all cluster methods...
+###################
+# see method 2 and 4...
+
+
 
 # example????
 ##############################
@@ -158,6 +163,8 @@ clusterTubeData <- function(data, tube=".value", by="site",
     #amounts
     d2 <- d2[, c(.temp) := NULL]
     d2 <- as.data.frame(d2)
+    # NA handling
+    d2 <- d2[, apply(as.data.frame(d2),2, function(x){!all(is.na(x))})]
     # return d2
     if("output" %in% names(.xargs)){
       if(.xargs$output == "data"){
@@ -203,6 +210,8 @@ clusterTubeData <- function(data, tube=".value", by="site",
     names(d2) <- .temp
     # does this need/want NA handling like method 2 ??
     # but that might kill it ???
+    # NA handling
+    d2 <- d2[, apply(as.data.frame(d2),2, function(x){!all(is.na(x))})]
     if("output" %in% names(.xargs)){
       if(.xargs$output == "data"){
         return(as.data.frame(d2))
@@ -219,6 +228,8 @@ clusterTubeData <- function(data, tube=".value", by="site",
     d2 <- as.data.frame(apply(d2, 2, function(x) {x - mean(x, na.rm=TRUE)}))
     d2 <- as.data.frame(apply(d2, 2, function(x) {x / sd(x, na.rm=TRUE)}))
     names(d2) <- .temp
+    # NA handling
+    d2 <- d2[, apply(as.data.frame(d2),2, function(x){!all(is.na(x))})]
     if("output" %in% names(.xargs)){
       if(.xargs$output == "data"){
         return(as.data.frame(d2))
@@ -234,6 +245,8 @@ clusterTubeData <- function(data, tube=".value", by="site",
     .temp <- names(d2)
     d2 <- as.data.frame(apply(d2, 2, function(x) {x/mean(x, na.rm=TRUE)}))
     names(d2) <- .temp
+    # NA handling
+    d2 <- d2[, apply(as.data.frame(d2),2, function(x){!all(is.na(x))})]
     if("output" %in% names(.xargs)){
       if(.xargs$output == "data"){
         return(as.data.frame(d2))
@@ -252,12 +265,14 @@ clusterTubeData <- function(data, tube=".value", by="site",
     d2 <- t(as.data.frame(apply(d2, 2, function(x) {cor(x, .dd, use="pairwise.complete.obs")})))
     d2 <- 1-d2
     names(d2) <- .temp
+    # NA handling
+    d2 <- d2[,!is.na(t(d2))]
     if("output" %in% names(.xargs)){
       if(.xargs$output == "data"){
         return(as.data.frame(d2))
       }
     }
-    clst <- cluster::clara(t(d2), clusters, correct.d = TRUE)
+    clst <- cluster::clara(d2, clusters, correct.d = TRUE)
     .temp <- data.frame(x = names(clst$clustering),
                         .cluster = factor(clst$clustering))
   }
