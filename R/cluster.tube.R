@@ -92,9 +92,16 @@
 # bb <- clusterTubeData(aa, tube="..deseason", by=c(".location"), cluster=2, method=2);names(bb)
 # dies with Error in cluster::clara(d2, clusters, correct.d = TRUE) : Observations 212,213 have *only* NAs --> omit them for clustering!
 
-# NEED TO THINK ABOUT THE NA handling for all cluster methods...
+#######################################
+# NEED TO THINK ABOUT
+# THE NA handling for all cluster methods...
 ###################
 # see method 2 and 4...
+
+#####################################
+# NEED TO THINK OUT
+# when output = data
+#   should that run directly in cluster as in function
 
 
 
@@ -262,6 +269,9 @@ clusterTubeData <- function(data, tube=".value", by="site",
     d2 <- d2[, `:=`(c(.temp), NULL)]
     d2 <- as.data.frame(d2)
     .temp <- names(d2)
+    ##############################
+    # this is messy not not tripping on NAs...
+    # think again when time...
     d2 <- t(as.data.frame(apply(d2, 2, function(x) {cor(x, .dd, use="pairwise.complete.obs")})))
     d2 <- 1-d2
     names(d2) <- .temp

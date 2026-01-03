@@ -77,6 +77,9 @@
 # even if it is just to pass on to tubePlot ???
 #      would make all the plot handling more consistent...
 
+# think about this
+# https://rud.is/b/2015/07/24/a-path-towards-easier-map-projection-machinations-with-ggplot2/
+
 # current test
 #    dd <- tagTube(dont.share::dt.bradford.2); dd <- dd[dd$.longitude<0,]
 #    tubeMap(dd, facet=".year")
@@ -139,6 +142,7 @@ tubeMap <-
                                    c(rng.lat[1],rng.lon[2]),
                                    zoom = NULL,
                                    type =  "esri",
+                                   minNumTiles = 12,
                                    mergeTiles = TRUE)
 
       dc <- suppressMessages(suppressWarnings(
@@ -176,7 +180,8 @@ tubeMap <-
         p1 <- tile$bbox$p1
         p2 <- tile$bbox$p2
         rast <- matrix(tile$colorData, nrow = tile$xres, byrow = TRUE)
-        plt <- plt + ggplot2::annotation_raster(rast, -Inf, Inf, -Inf, Inf)
+        plt <- plt + ggplot2::annotation_raster(rast, -Inf, Inf, -Inf, Inf,
+                                                interpolate=TRUE)
       }
 
       plt <- plt + ggplot2::expand_limits(x = c(p1[1], p2[1]),
@@ -226,7 +231,8 @@ tubeMap <-
     }
 
     out <- suppressMessages(suppressWarnings(
-      tubePlot(map, x, y, ...) + ggplot2::coord_sf()
+      #tubePlot(map, x, y, ...) + ggplot2::coord_sf()
+      tubePlot(map, x, y, ...) + ggplot2::coord_quickmap()
     ))
 
 
