@@ -5,6 +5,7 @@
 \alias{addTubeMeta}
 \alias{checkTubeMeta}
 \alias{extractTubeMeta}
+\alias{extractAndAddTubeMeta}
 \alias{padTubeMeta}
 \alias{repairTubeMeta}
 \title{Working with Diffusion Tube Meta Data}
@@ -15,6 +16,8 @@ checkTubeMeta(data, x = NULL, by = NULL, ...)
 
 extractTubeMeta(data, x = NULL, by = NULL, ...)
 
+extractAndAddTubeMeta(data, x = NULL, by = NULL, ref = NULL, ...)
+
 padTubeMeta(data, x = NULL, by = NULL, ...)
 
 repairTubeMeta(data, x = NULL, by = NULL, options = NULL, ...)
@@ -23,9 +26,10 @@ repairTubeMeta(data, x = NULL, by = NULL, options = NULL, ...)
 \item{data}{Data source, typically a data.frame or similar, containing
 data-series of diffusion tube records.}
 
-\item{ref}{(For \code{addTubeMeta} only) The meta data source, typically
-a data.frame or similar, containing meta-information associated with the
-diffusion tube records in \code{data}. See Details below.}
+\item{ref}{(For \code{addTubeMeta} and \code{extractAndAddTubeMeta} only)
+The meta data source, typically a data.frame or similar containing
+meta-information associated with the diffusion tube records in \code{data}.
+See Details below.}
 
 \item{by}{The name of a data-series that can be used as a
 case identifier for meta information. For most diffusion tube meta data,
@@ -40,7 +44,7 @@ Details below.}
 \code{data} or expression to be evaluated, supplied as a character string.
 See Details below.}
 
-\item{options}{(for \code{repairTUbeMeta} only) a vector of valid options
+\item{options}{(for \code{repairTubeMeta} only) a vector of valid options
 for \code{x}. These are used to a guide when attempting to repair
 \code{x}/\code{by} combinations with multiple values associated. See Details
 below}
@@ -85,7 +89,7 @@ diffusion tube (DT) meta data.
 meta data or data extracted with from a reliable source using
 \code{extractTubeMeta}.
 
-\code{checkTubeMeta} attempts to identfied all unique values for an
+\code{checkTubeMeta} attempts to identified all unique values for an
 \code{x}/\code{by} combination. Meta-data is expected to unique at a
 specific level of aggregation, e.g. all \code{latitude} records should
 be identical for a given sample site. So, finding multiple values
@@ -105,6 +109,11 @@ this function extracts data-series that looks like meta information at
 the \code{by} grouping-level. There is no unambiguous test to identify a
 data-series as meta-data. So, this function needs to be handled with care,
 especially if you have any concerns about the quality of your data sets.
+
+\code{extractAndAddTubeMeta} is a wrapper for \code{extractTubeMeta} and
+\code{addTubeMeta} to extract valid meta-information from a source,
+\code{ref}, and add that meta-information to \code{data}. similarly, care
+should be taken using this function.
 
 \code{padTubeMeta} attempts to pad the \code{x} data-series by replacing
 any \code{NA}s with the first non-\code{NA} entry from the same data-series.

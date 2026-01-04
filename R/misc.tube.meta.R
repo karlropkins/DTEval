@@ -4,7 +4,7 @@
 
 #' @name misc.tube.meta
 #' @aliases misc.tube.meta addTubeMeta checkTubeMeta extractTubeMeta
-#' padTubeMeta repairTubeMeta
+#' extractAndAddTubeMeta padTubeMeta repairTubeMeta
 #' @description Miscellaneous code used to work with
 #' diffusion tube (DT) meta data.
 
@@ -13,9 +13,10 @@
 
 #' @param data Data source, typically a data.frame or similar, containing
 #' data-series of diffusion tube records.
-#' @param ref (For \code{addTubeMeta} only) The meta data source, typically
-#' a data.frame or similar, containing meta-information associated with the
-#' diffusion tube records in \code{data}. See Details below.
+#' @param ref (For \code{addTubeMeta} and \code{extractAndAddTubeMeta} only)
+#' The meta data source, typically a data.frame or similar containing
+#' meta-information associated with the diffusion tube records in \code{data}.
+#' See Details below.
 #' @param x (For most \code{...TubeMeta} functions) The name of a data-series in
 #' \code{data} or expression to be evaluated, supplied as a character string.
 #' See Details below.
@@ -26,7 +27,7 @@
 #' \code{tags} and data set details, but may still require user input. See
 #' Details below.
 #' @param ... additional arguments, currently ignored.
-#' @param options (for \code{repairTUbeMeta} only) a vector of valid options
+#' @param options (for \code{repairTubeMeta} only) a vector of valid options
 #' for \code{x}. These are used to a guide when attempting to repair
 #' \code{x}/\code{by} combinations with multiple values associated. See Details
 #' below
@@ -37,7 +38,7 @@
 #' meta data or data extracted with from a reliable source using
 #' \code{extractTubeMeta}.
 #'
-#' \code{checkTubeMeta} attempts to identfied all unique values for an
+#' \code{checkTubeMeta} attempts to identified all unique values for an
 #' \code{x}/\code{by} combination. Meta-data is expected to unique at a
 #' specific level of aggregation, e.g. all \code{latitude} records should
 #' be identical for a given sample site. So, finding multiple values
@@ -57,6 +58,11 @@
 #' the \code{by} grouping-level. There is no unambiguous test to identify a
 #' data-series as meta-data. So, this function needs to be handled with care,
 #' especially if you have any concerns about the quality of your data sets.
+#'
+#' \code{extractAndAddTubeMeta} is a wrapper for \code{extractTubeMeta} and
+#' \code{addTubeMeta} to extract valid meta-information from a source,
+#' \code{ref}, and add that meta-information to \code{data}. similarly, care
+#' should be taken using this function.
 #'
 #' \code{padTubeMeta} attempts to pad the \code{x} data-series by replacing
 #' any \code{NA}s with the first non-\code{NA} entry from the same data-series.
@@ -241,14 +247,6 @@ checkTubeMeta <- function(data, x=NULL, by=NULL, ...){
 
 
 
-
-
-
-
-
-
-
-
 #################################
 # extractTubeMeta
 #################################
@@ -288,6 +286,47 @@ extractTubeMeta <- function (data, x = NULL, by = NULL, ...)
     calcTubeStat(data, test, by, function(x){unique(x[!is.na(x)])[1]})
   }
 }
+
+
+#############################
+# extractAndAddTubeMeta
+#############################
+
+# in development
+
+# this is a wrapper to meta info from a ref and add it to data
+#   used to re-add the meta after a function strips it...
+
+# notes
+#############################
+
+# to think about
+#############################
+
+# this could go into functions like fitTubeModel
+#     as a final step repair before sending back???
+#      BUT it might need careful texting because missuse could kill the data
+
+
+#' @rdname misc.tube.meta
+#' @export
+
+extractAndAddTubeMeta <- function(data, x=NULL, by=NULL, ref=NULL, ...){
+
+  # I think this has to be step-wise BUT should test???
+  # do we option to strip .meta or data ???
+  #     i think current mechanism is
+  #         any duplicate columns are stripped from data before adding from ref
+  #            need to check ???
+  #     could do either here and/or in one/both of extract... and/or add...
+  #     maybe something like trust="data"/"ref"
+  for(i in 1:length(by)){
+    .meta <- extractTubeMeta(ref, by=by[i], x=x, ...)
+    data <- addTubeMeta(data, ref=.meta, by=by[i], ...)
+  }
+  return(data)
+}
+
 
 
 
@@ -363,7 +402,6 @@ padTubeMeta <- function(data, x=NULL, by=NULL,...){
 # compare
 # testTubePrecision(dt.bradford)
 # testTubePrecision(dat2)
-
 
 
 
