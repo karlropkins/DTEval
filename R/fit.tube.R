@@ -40,6 +40,8 @@
 #' used if recognised.
 
 # I know it is newdata in most model predicts...
+# this currently outputs [tube].pred and [tube].pred.se
+#      not sure [tube].pred.se is staying
 
 #' @details
 #' \code{fitTubeModel} attempts to fit a model to the supplied inputs.
@@ -195,6 +197,8 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
 
   ############################
   # force.positive
+  #   not documenting/showing at moment...
+  #   not sure we are keeping this...
   .fp <- 1
   if("force.positive" %in% names(.xargs)){
     if(.xargs$force.positive){
@@ -287,7 +291,9 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
   ans <- ans[names(ans) != "..index"]
   ################
   # force positive
-  #   can't force positive on non-numeric (e.g. date/time)
+  #   not documenting/showing at moment...
+  #       1. don't like it
+  #       2. can't force positive on non-numeric (e.g. date/time)
   if("force.positive" %in% names(.xargs)){
     if(tube %in% names(ans)){
       ans[[tube]] <- ans[[tube]]^(1/.fp)
@@ -296,8 +302,13 @@ fitTubeModel <- function(data, tube = ".value", inputs = NULL,
       ans$..pred <- ans$..pred^(1/.fp)
     }
   }
-
+  ########################
+  # ..pred and ..pred.se
+  # should these be checked for ??
+  # should we allow user reset
+  # should we allow rename
   names(ans)[names(ans)=="..pred"] <- paste(tube, ".pred", sep="")
+  names(ans)[names(ans)=="..pred.se"] <- paste(tube, ".pred.se", sep="")
   ###############
   #output
   return(ans)
@@ -341,14 +352,14 @@ fitTubeModel_gam <- function(data, tube, inputs, new.data = NULL, ...){
   }
   .tmp <- mgcv::predict.gam(mod, newdata=new.data)
   new.data$..pred <- NA
-  new.data$..pred[as.numeric(names(.tmp))] <- as.vector(.tmp)
+  new.data$..pred[as.numeric(names(.tmp$fit))] <- as.vector(.tmp$fit)
+  new.data$..pred.se <- NA
+  new.data$..pred.se[as.numeric(names(.tmp$se.fit))] <- as.vector(.tmp$se.fit)
   ########################
   # doing this in main function
-  #   so just once at end...
-  #      means model prediction needs to added as ..pred
-  #           then it is routinely converted to [tube].pred
-  #######################
+  # so just once
   #names(new.data)[names(new.data)=="..pred"] <- paste(tube, ".pred", sep="")
+  #########################
   new.data
 }
 
@@ -380,14 +391,13 @@ fitTubeModel_loess <- function(data, tube, inputs, new.data = NULL, ...){
          call. = FALSE)
   }
   #new.data <- as.data.frame(as.table(new.data))
-  .tmp <- predict(mod, newdata=new.data)
+  .tmp <- predict(mod, newdata=new.data, se=TRUE)
   new.data$..pred <- NA
-  new.data$..pred[as.numeric(names(.tmp))] <- as.vector(.tmp)
+  new.data$..pred[as.numeric(names(.tmp$fit))] <- as.vector(.tmp$fit)
+  new.data$..pred.se <- NA
+  new.data$..pred.se[as.numeric(names(.tmp$se.fit))] <- as.vector(.tmp$se.fit)
   ########################
-  # doing this in main function
-  #   so just once at end...
-  #      means model prediction needs to added as ..pred
-  #           then it is routinely converted to [tube].pred
+  # wondering if these should be ..fit not ..pred
   #######################
   #names(new.data)[names(new.data)=="..pred"] <- paste(tube, ".pred", sep="")
   new.data

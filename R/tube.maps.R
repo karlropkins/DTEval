@@ -80,6 +80,10 @@
 # think about this
 # https://rud.is/b/2015/07/24/a-path-towards-easier-map-projection-machinations-with-ggplot2/
 
+# looks like there are grid lines behind the maps
+# looks like scale_x_continuous(breaks=NULL) and scale_x_continuous(breaks=NULL) will
+#    fix this but it produces a waring...
+
 # current test
 #    dd <- tagTube(dont.share::dt.bradford.2); dd <- dd[dd$.longitude<0,]
 #    tubeMap(dd, facet=".year")

@@ -99,9 +99,16 @@
 # see method 2 and 4...
 
 #####################################
-# NEED TO THINK OUT
+# NEED TO THINK OUT...
 # when output = data
 #   should that run directly in cluster as in function
+
+#####################################
+# Test for number of clusters
+#     started this in Bradford Analysis
+#           extended notes on cluster analysis
+#     want to include a method in package but...
+#           want to avoid adding either a slow function or another import...
 
 
 
@@ -297,6 +304,8 @@ clusterTubeData <- function(data, tube=".value", by="site",
   out <- data.table::merge.data.table(data, .temp, by=by[1])
 
   # output
-  #  like option to export clst
+  ################################
+  # like option to export clst
+  # think output should be data.frame not data.table...
   out
 }

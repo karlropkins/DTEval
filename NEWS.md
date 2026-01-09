@@ -8,7 +8,8 @@
 
 * Package pre-release 
 
-    * __v 0.0.18__ [2026-01-04] add extractAndAddTubeMeta
+    * __v 0.0.18__ [2026-01-09] added extractAndAddTubeMeta, added se output to 
+    fitTubeModel
     * __v 0.0.17__ [2025-12-31] updated clusterTubeData, updated leafletTubePlot
     * __v 0.0.16__ [2025-11-28] updated tubePlot smooth, fixed tubeInXYPolygon 
     rename, updated mapTube, updated ggplotTubeShell, updated deseasonTubeData 
