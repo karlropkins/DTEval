@@ -58,6 +58,9 @@
 #     that understand tube tagging
 #         allows tube=c("measurement", "year_of_measurement")
 #         allows stat=function(x){c(mean = mean(x, na.rm=TRUE), med=median(x, na.rm=TRUE))}
+#         allows stat=list(mean = mean(measurement, na.rm=TRUE))
+#                  but only if measurement is in data
+#                  and stat=c(...more.than.one...)) does not work properly !!!
 
 # functions has issue if tube includes a names with a comma in it
 #   Error in `[.data.table`(d2, , as.list(unlist(lapply(.SD, stat))), .SDcols = tube,  :
@@ -68,8 +71,8 @@
 # currently does
 ###############################
 #     basic calculation
-#         stat can be set as a functions
-#
+#         stat can be set as a function
+#              also testing as list etc...
 
 
 #  thinking about
@@ -85,6 +88,9 @@
 #              (by extension year, month, etc)
 #         site (unique lat/lon combinations)
 #         sample (unique lat/lon/dates)...
+#
+
+
 
 # example????
 ##############################
@@ -101,23 +107,34 @@ calcTubeStat <- function(data, tube = ".value", by = NULL, stat = NULL, ...){
 
   # tag data
   #   testing required tagging only
-  #d2 <- data
   d2 <- tagTubeRequired(data, required=c(tube, by), ...)
 
   # data checks
   d2 <- checkTubeData(d2, tube, if.err="stop<<calcTubeStat>>tube")
   d2 <- checkTubeData(d2, by, if.err="stop<<calcTubeStat>>by")
 
-  # stat handling
-  if(is.null(stat)){
-    stat <- function(x) { list(mean=mean(x, na.rm=TRUE)) }
-  }
-
-  # calc...
+  #calc stat using data.table
   d2 <- data.table::as.data.table(d2)
-  #out <- d2[, .(stat = stat(.tube)), by=by]
-  #  from https://stackoverflow.com/questions/29620783/apply-multiple-functions-to-multiple-columns-in-data-table
-  out <- d2[, as.list(unlist(lapply(.SD, stat))), .SDcols = tube, by=by]
+  ..test <- try(stat, silent=TRUE)
+  if(inherits(..test, "try-error")){
+    #if does not already evaluate try evaluating it in place...
+    ##########################
+    # this will probably need more error handling...
+    # also using this route, tube is ignored...
+    #     should default for tube be NULL and
+    #        stat default be different for tube = NULL and tube = [something]
+    # also might have to think about pulling vals if you wanted to calculate
+    #     anything from using a tag?
+    # see:
+    # https://cran.r-project.org/web/packages/data.table/vignettes/datatable-programming.html
+    out <- d2[, eval(substitute(stat)), by=by]
+  } else {
+    if(is.null(try(stat, silent=TRUE))){
+      stat <- function(x) { list(mean=mean(x, na.rm=TRUE)) }
+    }
+    #  from https://stackoverflow.com/questions/29620783/apply-multiple-functions-to-multiple-columns-in-data-table
+    out <- d2[, as.list(unlist(lapply(.SD, stat))), .SDcols = tube, by=by]
+  }
 
   # output
   out <- as.data.frame(out)
