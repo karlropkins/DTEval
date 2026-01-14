@@ -332,12 +332,14 @@ fitTubeModel_gam <- function(data, tube, inputs, new.data = NULL, ...){
   ###############################
   # might want s(x1) + s(x2)...
   #     instead of te(x1, x2, ...) ???
+  # would be
+  #.form <- paste(tube, "~s(", paste(inputs, collapse = ")+s(", sep=""), ")", sep="")
+  ###############################
+  # do we want to pass on args using '...' ???
   ################################
   .form <- paste(tube, "~te(", paste(inputs, collapse =","), ")", sep="")
   .form <- as.formula(.form)
   row.names(data) <- 1:nrow(data)
-  ###############################
-  # do we want to pass on args using '...' ???
   ###############################
   mod <- mgcv::gam(.form, data=data)
   if(is.null(new.data)){
@@ -350,7 +352,7 @@ fitTubeModel_gam <- function(data, tube, inputs, new.data = NULL, ...){
     stop("[fitTubeModel] new.data option not understood",
          call. = FALSE)
   }
-  .tmp <- mgcv::predict.gam(mod, newdata=new.data)
+  .tmp <- mgcv::predict.gam(mod, newdata=new.data, se.fit=TRUE)
   new.data$..pred <- NA
   new.data$..pred[as.numeric(names(.tmp$fit))] <- as.vector(.tmp$fit)
   new.data$..pred.se <- NA
@@ -376,7 +378,7 @@ fitTubeModel_loess <- function(data, tube, inputs, new.data = NULL, ...){
   row.names(data) <- 1:nrow(data)
   ###############################
   # loess(y ~ x1 * x2 * etc, surface = "direct", ...)
-  #      (think this allows 4 y-terms ???)
+  #      (think this allows 4 x-terms ???)
   #      (might be a memory killer...)
   ###############################
   mod <- loess(.form, data=data, surface="direct")
