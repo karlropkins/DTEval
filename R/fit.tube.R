@@ -71,9 +71,8 @@
 # currently does
 ###############################
 
-#     basic calculation
-#         stat can be set as a functions
-#
+#     model fit wrapper
+#         model needs to be a function that adds ..pred and ..pred.se to data/new.data
 
 
 # thinking about
@@ -83,6 +82,10 @@
 #     maybe fields (version 1.3-1)
 #           Krig: Kriging surface estimate
 
+# other models, e.g. gam spline option like te(x1, x2)
+# but how to implement it ???
+#     maybe benchtest time for a dedicated gam/spline and
+#           a if(switch, tensor, spline) ???
 
 
 # example????
@@ -92,9 +95,6 @@
 # see
 #  https://stackoverflow.com/questions/11693599/alternative-to-expand-grid-for-data-frames
 #  https://stackoverflow.com/questions/30085487/expand-grid-function-for-data-frames-in-r
-
-#
-
 
 
 #' @rdname fit.tube

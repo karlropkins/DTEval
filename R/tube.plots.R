@@ -82,6 +82,9 @@
 # Check through and update following after reset tubePlot updates
 # THEN same for tubeMap
 
+# check that key.name (or whatever) works for tubePlot and TubeMap,
+#   think it was not always working in Bradford analysis...
+
 # using geom_raster instead of geom_tile to stop aliasing with
 #    transparent surfaces BUT very small too.fars may break this ...
 # COULD TRY leaving NAs in corners or replace all too.far data with
