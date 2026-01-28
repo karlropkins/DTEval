@@ -400,10 +400,15 @@ tagTubeStartEnd_method02 <- function(data, ...){
   }
   names(temp) <- c(.xargs$year, .xargs$month, ".start_date", ".end_date")
   if(all(c(.xargs$month, .xargs$year) %in% names(data))){
-    data <- dplyr::left_join(data, temp,
-                             by = c(.xargs$year, .xargs$month))
+    #data <- dplyr::left_join(data, temp,
+    #                         by = c(.xargs$year, .xargs$month))
+    data <- data.table::merge.data.table(
+      data.table::as.data.table(data),
+      data.table::as.data.table(temp),
+      all.x=TRUE, by =c(.xargs$year, .xargs$month)
+    )
   } else { stop() }
-  data
+  as.data.frame(data)
 }
 
 tagTubeStartEnd_method03 <- function(data, ...){

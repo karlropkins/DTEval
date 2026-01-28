@@ -8,6 +8,7 @@
 
 * Package pre-release 
 
+    * __v 0.0.19__ [2026-01-28] removed dplyr code/imports, removed test data
     * __v 0.0.18__ [2026-01-09] added extractAndAddTubeMeta, added se output to 
     fitTubeModel
     * __v 0.0.17__ [2025-12-31] updated clusterTubeData, updated leafletTubePlot
