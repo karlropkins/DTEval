@@ -25,7 +25,7 @@ __DTEval__ Projects pages: [to be build once package is PUBLIC]
 
 ## Installation
 
-Get developer's version of __DTEval__ from [GitHub](https://github.com)  ([archive](https://github.com/karlropkins/AQEval)) [currently PRIVATE]:
+Get developer's version of __DTEval__ from [GitHub](https://github.com)  ([archive](https://github.com/karlropkins/DTEval)) [currently PRIVATE]:
 
 ```{r, eval=FALSE}
 # (if you do not have remotes package, install it from CRAN) 
@@ -41,8 +41,7 @@ remotes::install_local(file.choose()) # and select
 ```
 
 ## Background
-This package contains code developed as part 
-of an on-going project.
+This package contains code developed as part of an on-going project.
 
 ## Contributing
 Contributions are very welcome.  
@@ -77,6 +76,8 @@ ref.york <- dplyr::bind_rows(
 #source City of York Council / York Open Data
 #https://data.yorkopendata.org/dataset/diffusion-tubes-data 
 #(downloaded 2024-12-02)
+
+dt.york <- dont.share::
 
 testTubeAccuracy(dt.york, ref.york, 
                  tube="measurement", ref="no2", 
