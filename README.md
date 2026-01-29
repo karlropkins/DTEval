@@ -14,7 +14,7 @@ quality assessment exercises.
 ## Installation
 
 Get developer’s version of **DTEval** from [GitHub](https://github.com)
-([archive](https://github.com/karlropkins/AQEval)) \[currently
+([archive](https://github.com/karlropkins/DTEval)) \[currently
 PRIVATE\]:
 
 ``` r
@@ -42,7 +42,14 @@ Contributions are very welcome.
 
 GPL-3
 
+## Introduction Slides
+
+[currently
+here](https://github.com/karlropkins/DTEval/blob/main/docs/slides/DTEval-Introduction.pdf)
+
 ## Example
+
+(using unpackaged data…)
 
 ``` r
 require(DTEval)
@@ -71,9 +78,12 @@ ref.york <- dplyr::bind_rows(
 #https://data.yorkopendata.org/dataset/diffusion-tubes-data 
 #(downloaded 2024-12-02)
 
+dt.york <- dont.share::dt.york
+
 testTubeAccuracy(dt.york, ref.york, 
                  tube="measurement", ref="no2", 
                  facet="site.ref", 
+                 col="CalendarYear==2017",
                  group="CalendarYear==2017")
 ```
 
