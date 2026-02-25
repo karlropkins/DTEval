@@ -41,7 +41,9 @@ remotes::install_local(file.choose()) # and select
 ```
 
 ## Background
-This package contains code developed as part of an on-going project.
+This package contains code developed as part of an on-going project, 
+and is currently open for beta-testing. 
+
 
 ## Contributing
 Contributions are very welcome.  
@@ -53,44 +55,3 @@ GPL-3
 
 [currently here](https://github.com/karlropkins/DTEval/blob/main/docs/slides/DTEval-Introduction.pdf)
 
-## Example 
-
-(using unpackaged data...)
-
-```{r}
-require(DTEval)
-```
-
-### Get local reference data for York: 
-
-```{r, warning=FALSE, message=FALSE}
-#AURN sites: YK10-11
-#AQE sites: YK7-9, YK13, YK15-16
-#(using openair and dplyr) 
-
-ref.york <- dplyr::bind_rows(
-  openair::importAURN(c("YK10", "YK11"), year=2005:2023, meta=TRUE),
-  openair::importAQE(c("YK7", "YK8", "YK9", "YK13", "YK15", "YK16"), 
-                     year=2005:2023, meta=TRUE)
-)
-```
-
-### Compare DT and reference data
-
-```{r}
-#DT data packaged as dt.york 
-#source City of York Council / York Open Data
-#https://data.yorkopendata.org/dataset/diffusion-tubes-data 
-#(downloaded 2024-12-02)
-
-dt.york <- dont.share::dt.york
-
-testTubeAccuracy(dt.york, ref.york, 
-                 tube="measurement", ref="no2", 
-                 facet="site.ref", 
-                 col="CalendarYear==2017",
-                 group="CalendarYear==2017")
-```
-
-
-(not keeping this example BUT maybe wrong units in 2017?)
