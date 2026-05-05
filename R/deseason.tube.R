@@ -132,38 +132,50 @@ deseasonTubeData <- function(data, tube=".value", by=NULL,
 
     ans <- lapply(.id, function(x){
       d2 <- .d[.d$..id==x,]
-      row.names(d2) <- 1:nrow(d2)
-      suppressWarnings(suppressWarnings(
-        mod <- try(loess(.y ~ jd + n, data=d2,...),
-                   silent = TRUE)
-      ))
-      if(inherits(mod, "try-error")){
-        NULL
+      ########################
+      # stop it building if d2 rows < 2
+      # (testing)
+      ########################
+      if(nrow(d2)>2){
+        row.names(d2) <- 1:nrow(d2)
+        suppressWarnings(suppressWarnings(
+          mod <- try(loess(.y ~ jd + n, data=d2,...),
+                     silent = TRUE)
+        ))
+        if(inherits(mod, "try-error")){
+          NULL
+        } else {
+          suppressWarnings(suppressWarnings(
+            temp <- predict(mod, se=TRUE)
+          ))
+          d2$..fit <- NA
+          d2$..fit[as.numeric(names(temp$fit))] <- temp$fit
+          d2$..fit.se <- NA
+          d2$..fit.se[as.numeric(names(temp$se.fit))] <- temp$se.fit
+          temp <- d2
+          temp$jd <- mean(temp$jd)
+          suppressWarnings(suppressWarnings(
+            temp <- predict(mod, temp, se=TRUE)
+          ))
+          d2$..trend <- NA
+          d2$..trend[as.numeric(names(temp$fit))] <- temp$fit
+          d2$..trend.se <- NA
+          d2$..trend.se[as.numeric(names(temp$se.fit))] <- temp$se.fit
+          d2$..trend <- d2$..trend - mean(d2$..trend)
+          d2$..trend <- d2$..trend + mean(d2$..fit)
+
+          d2$..season <- d2$..fit - d2$..trend
+          d2$..deseason <- d2$.y- d2$..season
+
+          d2 <- d2[order(d2$.date),]
+          d2
+        }
+      ########################
+      # close
+      # (stop it building if d2 rows < 2)
+      ########################
       } else {
-        suppressWarnings(suppressWarnings(
-          temp <- predict(mod, se=TRUE)
-        ))
-        d2$..fit <- NA
-        d2$..fit[as.numeric(names(temp$fit))] <- temp$fit
-        d2$..fit.se <- NA
-        d2$..fit.se[as.numeric(names(temp$se.fit))] <- temp$se.fit
-        temp <- d2
-        temp$jd <- mean(temp$jd)
-        suppressWarnings(suppressWarnings(
-          temp <- predict(mod, temp, se=TRUE)
-        ))
-        d2$..trend <- NA
-        d2$..trend[as.numeric(names(temp$fit))] <- temp$fit
-        d2$..trend.se <- NA
-        d2$..trend.se[as.numeric(names(temp$se.fit))] <- temp$se.fit
-        d2$..trend <- d2$..trend - mean(d2$..trend)
-        d2$..trend <- d2$..trend + mean(d2$..fit)
-
-        d2$..season <- d2$..fit - d2$..trend
-        d2$..deseason <- d2$.y- d2$..season
-
-        d2 <- d2[order(d2$.date),]
-        d2
+        NULL
       }
     })
     ans <- do.call(rbind, ans)
@@ -181,6 +193,7 @@ deseasonTubeData <- function(data, tube=".value", by=NULL,
     ####################################
     # could set max.distance to zero if
     #    neither max.distance or max.n are set ???
+    # does this need a row < 2 check like method 1?
     ####################################
     if(!"max.n" %in% names(.xargs) & !"max.distance" %in% names(.xargs)){
        .xargs$max.distance <- 0

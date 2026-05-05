@@ -8,6 +8,7 @@
 
 * Package pre-release 
 
+    * __v 0.0.21__ [2026-05-05] deseasonTubeData update (method 1 row>2)  
     * __v 0.0.20__ [2026-02-15] tidied readme for public release for beta 
     testing
     * __v 0.0.19__ [2026-01-28] removed dplyr code/imports, removed test data
