@@ -1,0 +1,25 @@
+############################################
+#' @title dts
+############################################
+#'
+#' @name dts
+#' @description diffusion tube data, 2020 to early 2026
+#'
+#' @format A (16737x13) 'data.frame' object
+#' \describe{
+#'   \item{site}{Site identifier code}
+#'   \item{site_name}{Site names/description}
+#'   \item{year_of_measurement}{Year tube of measurement (numeric, YYYY format)}
+#'   \item{month}{Month tube of measurement (3-letter abreviation)}
+#'   \item{month_numeric}{Month tube of measurement (numeric, 1-12)}
+#'   \item{latitude}{Latitude of diffusion tube site}
+#'   \item{longitude}{Longitude of diffusion tube site}
+#'   \item{aqsr_valid}{AQSR classifictiion}
+#'   \item{local_authority}{Local Authority collecting measurements}
+#'   \item{measurement}{the uncorrected diffusion tube meausrement}
+#'   \item{bias_adjustment}{the bias adjustment factor}
+#'   \item{bias_adjusted_measurement}{the bias_adjusted diffusion tube meausrement}
+#'   \item{annual.pc}{The annual percentage data coverage for site}
+#' }
+#' @source Bradford City Council
+"dts"
