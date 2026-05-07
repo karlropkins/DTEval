@@ -337,7 +337,11 @@ testTubeAccuracy <-
     #do by .cut
     ###########################
     # note currently doing this after dt and ref matched
-    ls <- lapply(unique(out$.cut), function(z){
+    ############
+    # using sort on this
+    # note (might need watching...)
+    # below sort overrides any factors, etc...
+    ls <- lapply(sort(unique(out$.cut)), function(z){
         test <- out[out$.cut==z,]
         local <- test[test$distance.m < max.distance,]
         if(nrow(local)>0){

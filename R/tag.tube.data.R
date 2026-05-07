@@ -791,7 +791,7 @@ tagTubeYear <- function(data, method=1, force=FALSE, ...){
   }
   if(method==1){
     temp <- format(.temp$.date, "%Y")
-    temp <- factor(temp, levels = sort(unique(temp)))
+    temp <- factor(temp, levels = sort(unique(temp)), ordered=TRUE)
   }
   data$.year <- temp
 

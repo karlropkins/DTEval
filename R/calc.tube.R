@@ -115,6 +115,7 @@ calcTubeStat <- function(data, tube = ".value", by = NULL, stat = NULL, ...){
 
   #calc stat using data.table
   d2 <- data.table::as.data.table(d2)
+  data.table::setorderv(d2, by)
   ..test <- try(stat, silent=TRUE)
   if(inherits(..test, "try-error")){
     #if does not already evaluate try evaluating it in place...
