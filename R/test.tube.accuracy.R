@@ -341,6 +341,8 @@ testTubeAccuracy <-
     # using sort on this
     # note (might need watching...)
     # below sort overrides any factors, etc...
+    #     (using this for testTubePrecision and testTubeAccuracy)
+    #     (would like to rewrite this to use calcTubeStat or better yet...)
     ls <- lapply(sort(unique(out$.cut)), function(z){
         test <- out[out$.cut==z,]
         local <- test[test$distance.m < max.distance,]
