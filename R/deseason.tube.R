@@ -242,6 +242,11 @@ deseasonTubeData <- function(data, tube=".value", by=NULL,
       # check max.distance/n response
       ## print(length(..test.))
       d2 <- .d[.d$..id %in% ..test., ]
+      ############################
+      # NEEDS test like in method 1
+      #  in case not enough data
+      #  maybe here because enough might be foreshortened by
+      #      max.distance or max.n ???
       row.names(d2) <- 1:nrow(d2)
       ##################
       # do we need to protect this from invalid passes ???
@@ -272,8 +277,8 @@ deseasonTubeData <- function(data, tube=".value", by=NULL,
         d2$..trend[as.numeric(names(temp$fit))] <- temp$fit
         d2$..trend.se <- NA
         d2$..trend.se[as.numeric(names(temp$se.fit))] <- temp$se.fit
-        d2$..trend <- d2$..trend - mean(d2$..trend)
-        d2$..trend <- d2$..trend + mean(d2$..fit)
+        d2$..trend <- d2$..trend - mean(d2$..trend)    # why no na.rm=TRUE??
+        d2$..trend <- d2$..trend + mean(d2$..fit)      # (again, maybe check elsewhere)
 
         d2$..season <- d2$..fit - d2$..trend
         d2$..deseason <- d2$.y- d2$..season

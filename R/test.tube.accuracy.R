@@ -158,15 +158,21 @@ testTubeAccuracy <-
     #chasing the dots
     .xargs <- modifyList(list(auto.text=TRUE), list(...))
 
+
     #tagTube check/add tags
     data <- tagTubeRequired(tagTube(data, ...),
                             required=c(tube, unlist(.xargs)), ...)
+
+    ##### tagTubeRequired has aproblem with stat = function...
 
     #tube handling
     # error if not numeric via getTUbeX
     data$.tube <- getTubeX(data, tube,
                            test.class = "numeric",
                            if.err="stop<<testTubeAccuracy>>tube")
+
+
+
 
 
     #ref handling
@@ -216,10 +222,11 @@ testTubeAccuracy <-
       .data$distance.m <- temp$distance.m[order(temp$cheat)]
       #aggregate ref .data and make it tube-like
       #########################################
+
       temp <- .data[!duplicated(paste(.data$.start_date, .data$.end_date)),]
       .ref <- AQEval::calcDateRangeStat(.ref, from=temp$.start_date,
                                         stat = .xargs[["stat"]],
-                                            to=temp$.end_date, method=method)
+                                        to=temp$.end_date, method=method)
 ##################
       #speed testing this is the method set in call at moment
 ##################
