@@ -186,7 +186,7 @@ deseasonTubeData <- function(data, tube=".value", by=NULL,
   if(method==2){
 
     # setup
-    .by <- c(".date", ".longitude", ".latitude", by)
+    .by <- unique(c(".date", ".longitude", ".latitude", ".location", by))
     data <- tagTubeRequired(data, required = c(tube, .by), ...)
 
     # max.n / max.distance handling
@@ -242,55 +242,61 @@ deseasonTubeData <- function(data, tube=".value", by=NULL,
       # check max.distance/n response
       ## print(length(..test.))
       d2 <- .d[.d$..id %in% ..test., ]
-      ############################
-      # NEEDS test like in method 1
-      #  in case not enough data
-      #  maybe here because enough might be foreshortened by
-      #      max.distance or max.n ???
-      row.names(d2) <- 1:nrow(d2)
-      ##################
-      # do we need to protect this from invalid passes ???
-      # also do we need to
-      #     reinstate span ??
-      #     add surface = "direct" default ??
-      #     (can be messy data...)
-      suppressWarnings(suppressWarnings(
-        mod <- try(loess(.y ~ jd + n, data=d2,...),
-                   silent = TRUE)
-      ))
-      if(inherits(mod, "try-error")){
-        NULL
+      ########################
+      # stop it building if d2 rows < 2
+      # (testing - like with method 1 BUT
+      #            later because max.distance
+      #            and max.n can remove rows...)
+      ########################
+      if(nrow(d2)>2){
+
+        row.names(d2) <- 1:nrow(d2)
+        ##################
+        # do we need to protect this from invalid passes ???
+        # also do we need to
+        #     reinstate span ??
+        #     add surface = "direct" default ??
+        #     (can be messy data...)
+        suppressWarnings(suppressWarnings(
+          mod <- try(loess(.y ~ jd + n, data=d2,...),
+                     silent = TRUE)
+        ))
+        if(inherits(mod, "try-error")){
+          NULL
+        } else {
+          suppressWarnings(suppressWarnings(
+            temp <- predict(mod, se=TRUE)
+          ))
+          d2$..fit <- NA
+          d2$..fit[as.numeric(names(temp$fit))] <- temp$fit
+          d2$..fit.se <- NA
+          d2$..fit.se[as.numeric(names(temp$se.fit))] <- temp$se.fit
+          temp <- d2
+          temp$jd <- mean(temp$jd)
+          suppressWarnings(suppressWarnings(
+            temp <- predict(mod, temp, se=TRUE)
+          ))
+          d2$..trend <- NA
+          d2$..trend[as.numeric(names(temp$fit))] <- temp$fit
+          d2$..trend.se <- NA
+          d2$..trend.se[as.numeric(names(temp$se.fit))] <- temp$se.fit
+          d2$..trend <- d2$..trend - mean(d2$..trend)    # why no na.rm=TRUE??
+          d2$..trend <- d2$..trend + mean(d2$..fit)      # (again, maybe check elsewhere)
+
+          d2$..season <- d2$..fit - d2$..trend
+          d2$..deseason <- d2$.y- d2$..season
+
+          d2 <- d2[order(d2$.date), ]
+          ##############################
+          # see notes at start of lapply...
+          #   how do we handle output
+          #       currently just the main site/sample
+          #       no matter the group size used...
+          d2 <- d2[d2$..id==i,]
+          d2
+        }
       } else {
-        suppressWarnings(suppressWarnings(
-          temp <- predict(mod, se=TRUE)
-        ))
-        d2$..fit <- NA
-        d2$..fit[as.numeric(names(temp$fit))] <- temp$fit
-        d2$..fit.se <- NA
-        d2$..fit.se[as.numeric(names(temp$se.fit))] <- temp$se.fit
-        temp <- d2
-        temp$jd <- mean(temp$jd)
-        suppressWarnings(suppressWarnings(
-          temp <- predict(mod, temp, se=TRUE)
-        ))
-        d2$..trend <- NA
-        d2$..trend[as.numeric(names(temp$fit))] <- temp$fit
-        d2$..trend.se <- NA
-        d2$..trend.se[as.numeric(names(temp$se.fit))] <- temp$se.fit
-        d2$..trend <- d2$..trend - mean(d2$..trend)    # why no na.rm=TRUE??
-        d2$..trend <- d2$..trend + mean(d2$..fit)      # (again, maybe check elsewhere)
-
-        d2$..season <- d2$..fit - d2$..trend
-        d2$..deseason <- d2$.y- d2$..season
-
-        d2 <- d2[order(d2$.date), ]
-        ##############################
-        # see notes at start of lapply...
-        #   how do we handle output
-        #       currently just the main site/sample
-        #       no matter the group size used...
-        d2 <- d2[d2$..id==i,]
-        d2
+        NULL
       }
     })
     ans <- do.call(rbind, ans)
