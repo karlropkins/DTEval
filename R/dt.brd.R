@@ -3,7 +3,7 @@
 ############################################
 #'
 #' @name dt.brd
-#' @description Bradford diffusion tube data set, 2020 to early 2026
+#' @description Bradford diffusion tube data set, 2020 to 2025
 #'
 #' @format A (16737x13) 'data.frame' object
 #' \describe{

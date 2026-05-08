@@ -556,8 +556,19 @@ tubePlot <-
                                        data$..x. <- as.numeric(data[[inputs[1]]]) # only handling first
                                        ..k <- unique(data$..x.)
                                        ..k <- length(..k[!is.na(..k)])
-                                       if(..k > 10){
-                                         ..k = - 1
+                                       if(..k > 20){
+                                          ..k = round(..k/2)
+                                       }
+                                       if("Date" %in% class(data[[inputs[1]]])){
+                                         ..test. <- diff.Date(c(min(data[[inputs[1]]], na.rm=TRUE),
+                                                                max(data[[inputs[1]]], na.rm=TRUE)))
+                                         if(..k > round(as.numeric(..test.)/365) * 2){
+                                           ..k <- round(as.numeric(..test.)/365) * 2
+                                         }
+                                         if(..k<3){
+                                           ..k=-1
+                                         }
+
                                        }
                                        if(is.null(new.data)){
                                          new.data <- data.frame(seq(min(data[[inputs[1]]], na.rm=TRUE),
