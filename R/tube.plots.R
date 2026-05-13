@@ -550,47 +550,49 @@ tubePlot <-
         .fit.args <- modifyList(list(data=d2, tube=y,
                                      inputs=x, by=c(.xargs2$group, .xargs2$facet),
                                      simplify=FALSE,
-                                     model = function(data, tube, inputs, new.data = NULL, ...){
+                                     model = function(data, tube, inputs, new.data = NULL,
+                                                      ...){
 
                                        data$..y. <- as.numeric(data[[tube]])
                                        data$..x. <- as.numeric(data[[inputs[1]]]) # only handling first
-                                       ..k <- unique(data$..x.)
-                                       ..k <- length(..k[!is.na(..k)])
-                                       if(..k > 20){
-                                          ..k = round(..k/2)
-                                       }
-                                       if("Date" %in% class(data[[inputs[1]]])){
-                                         ..test. <- diff.Date(c(min(data[[inputs[1]]], na.rm=TRUE),
-                                                                max(data[[inputs[1]]], na.rm=TRUE)))
-                                         if(..k > round(as.numeric(..test.)/365) * 2){
-                                           ..k <- round(as.numeric(..test.)/365) * 2
-                                         }
-                                         if(..k<3){
-                                           ..k=-1
-                                         }
+
+                                        ..k <- unique(data$..x.)
+                                        ..k <- length(..k[!is.na(..k)])
+                                        if(..k > 20){
+                                            ..k = round(..k/2)
+                                        }
+                                        if("Date" %in% class(data[[inputs[1]]])){
+                                           ..test. <- diff.Date(c(min(data[[inputs[1]]], na.rm=TRUE),
+                                                                  max(data[[inputs[1]]], na.rm=TRUE)))
+                                           if(..k > round((as.numeric(..test.)/365) * 2)+1){
+                                              ..k <- round((as.numeric(..test.)/365) * 2) +1
+                                           }
+                                           if(..k<4){
+                                              ..k=-1
+                                           }
 
                                        }
                                        if(is.null(new.data)){
-                                         new.data <- data.frame(seq(min(data[[inputs[1]]], na.rm=TRUE),
+                                          new.data <- data.frame(seq(min(data[[inputs[1]]], na.rm=TRUE),
                                                                     max(data[[inputs[1]]], na.rm=TRUE),
                                                                     length.out=100))
-                                         names(new.data) <- inputs[1]
-                                         new.data$..x. <- as.numeric(new.data[[inputs[1]]])
-                                       }
-                                       row.names(data) <- 1:nrow(data)
-                                       ######################
-                                       # think about
-                                       # formula = 'y ~ s(x, bs = "cs")'
-                                       ###################
-                                       mod <- mgcv::gam(..y. ~ s(..x., k=..k), data=data)
-                                       .tmp <- mgcv::predict.gam(mod, newdata=new.data, se.fit=TRUE)
-                                       new.data$..pred <- NA
-                                       new.data$..pred[as.numeric(names(.tmp$fit))] <- as.vector(.tmp$fit)
-                                       new.data$..s.err <- NA
-                                       new.data$..s.err[as.numeric(names(.tmp$se.fit))] <- as.vector(.tmp$se.fit)
-                                       new.data <- new.data[names(new.data) != "..x."]
-                                       new.data
-                                     }
+                                          names(new.data) <- inputs[1]
+                                          new.data$..x. <- as.numeric(new.data[[inputs[1]]])
+                                        }
+                                        row.names(data) <- 1:nrow(data)
+                                        ######################
+                                        # think about
+                                        # formula = 'y ~ s(x, bs = "cs")'
+                                        ###################
+                                        mod <- mgcv::gam(..y. ~ s(..x., k=..k), data=data)
+                                        .tmp <- mgcv::predict.gam(mod, newdata=new.data, se.fit=TRUE)
+                                        new.data$..pred <- NA
+                                        new.data$..pred[as.numeric(names(.tmp$fit))] <- as.vector(.tmp$fit)
+                                        new.data$..s.err <- NA
+                                        new.data$..s.err[as.numeric(names(.tmp$se.fit))] <- as.vector(.tmp$se.fit)
+                                        new.data <- new.data[names(new.data) != "..x."]
+                                        new.data
+                                      }
         ),
         #################################
         # could generalise next bit ???
