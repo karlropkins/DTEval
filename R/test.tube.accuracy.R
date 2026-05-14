@@ -78,6 +78,7 @@
 #' to facet or group data by a column in \code{data.ref}, you need to include
 #' the suffix when naming it.
 
+
 # see bodge 3/3...
 #    need this is data.ref names in output are sometimes name and sometimes
 #         name.ref depending on if name in both data and data.ref...

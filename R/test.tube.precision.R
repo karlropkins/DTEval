@@ -92,6 +92,14 @@
 # to do
 #############################
 
+# look into possible issue with testTubePrecision (and possibly ...accuracy)
+#      if data.frame includes column n, it kills functions
+#           no results, reports insufficient data...
+#           If column removed, runs fine
+#               currently guessing using n for replicate count...
+#                   if so, easy local fix and not an issue for accuracy
+#                   BUT needs looking into/sorting...
+
 
 
 # catching tube not numeric, but get error if year (a numeric)
