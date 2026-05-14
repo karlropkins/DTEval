@@ -43,6 +43,9 @@
 #' \code{data} summary statistics.
 #'
 
+#' @examples
+#' tubeSummary(dt.brd)
+#'
 
 #############################
 # tubeSummary

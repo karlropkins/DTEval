@@ -59,7 +59,12 @@
 #' \code{TRUE} (inside \code{polygon} bounderies) or \code{FALSE}
 #' (outside \code{polygon} bounderies).
 
-
+#' @examples
+#' dt <- tubeInXYPolygon(dt.brd, caz.brd, rename="in.caz")
+#' calcTubeStat(dt.brd, by="in.caz",
+#'       stat=list(mean=mean(.value, na.rm=TRUE),
+#'       count=length(.value[!is.na(.value)])))
+#'
 
 #############################
 # tubeInXYPolygon

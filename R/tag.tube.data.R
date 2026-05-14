@@ -161,7 +161,9 @@
 #          currently first in latlon and sampleid but NOT startend
 
 
-
+#' @examples
+#' tagTube(dt.brd)
+#'
 
 
 

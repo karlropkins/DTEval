@@ -117,7 +117,11 @@
 #    should probably drop padTubeMeta or replace with a
 #        repairTubeMeta wrapper (see notes)
 
-
+# extractTubeMeta
+#     looks like function might be killing .start_date, .end_date, etc
+#     could be from move from dplyr to data.table...
+#           example
+#           head(extractTubeMeta(dt.brd, by=".date"))
 
 
 
