@@ -18,12 +18,11 @@
 
 #' @param data Data source, typically a data.frame or similar, containing
 #' data-series of diffusion tube records.
-#' @param tube The name of the data-series (in \code{data}) to calculate,
+#' @param tube The name of the data-series (in \code{data}) to calculate
 #' the requested statistic (or statistics) for (see \code{stat}),
 #' typically the DT NO2 concentrations (in ug/m3).
 #' @param by The name(s) of any grouping terms. If none are supplied,
 #' total sample statistic(s) are calculated for \code{data}.
-#'
 #' @param stat The statistic to calculate, by default the mean in the form:
 #'
 #' \code{mean(x, na.rm=TRUE)}
@@ -32,6 +31,13 @@
 #' the form:
 #'
 #' \code{function(x){list(mean=mean(x, na.rm), sd=sd(x, na.rm=TRUE))}}
+#'
+#' Or:
+#'
+#' \code{list(mean=mean(a, na.rm), sd=sd(b, na.rm=TRUE))}
+#'
+#' ... if declaring sources directly, and for example here \code{a}
+#' and \code{b} are named columns in \code{data}.
 #' @param ... additional arguments, currently ignored.
 
 #' @details
@@ -45,7 +51,23 @@
 #' @return All functions return a \code{data.frame} of requested
 #' \code{data} statistics.
 
-
+#' @examples
+#' #basic example
+#' calcTubeStat(dt.brd)
+#'
+#' \dontrun{
+#' #multiple variables
+#' calcTubeStat(dt.brd,
+#'   tube=c("measurement",
+#'          "bias_adjusted_measurement"))
+#'
+#' #multiple statistics
+#' calcTubeStat(dt.brd,tube=".value",
+#'   by="year_of_measurement",
+#'   stat=function(x){
+#'        c(mean= mean(x, na.rm=TRUE),
+#'          med= median(x, na.rm=TRUE))})
+#' }
 
 #############################
 # calcTubeStat

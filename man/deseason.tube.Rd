@@ -60,3 +60,10 @@ is a data set \code{DTEval} will recognise as Diffusion Tube data, so either
 previously tagged tube data or data that is tag-able using a
 default call of \code{\link{tagTube}}
 }
+\examples{
+# ambient data exhibits seasonality
+tubePlot(dt.brd, ".date",".value", plot.type="smooth")
+# underlying trend
+mod<-deseasonTubeData(dt.brd,".value", by=".location")
+tubePlot(mod,".date", "..trend", plot.type="smooth")
+}

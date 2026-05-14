@@ -51,6 +51,13 @@
 #' with attached predicted time-series components: \code{..season},
 #' \code{..deseason}, etc.
 
+#' @examples
+#' # ambient data exhibits seasonality
+#' tubePlot(dt.brd, ".date",".value", plot.type="smooth")
+#' # underlying trend
+#' mod<-deseasonTubeData(dt.brd,".value", by=".location")
+#' tubePlot(mod,".date", "..trend", plot.type="smooth")
+
 # document stl guidance on this...
 # it is not just a regular pattern you put from the data
 

@@ -11,7 +11,7 @@ calcTubeStat(data, tube = ".value", by = NULL, stat = NULL, ...)
 \item{data}{Data source, typically a data.frame or similar, containing
 data-series of diffusion tube records.}
 
-\item{tube}{The name of the data-series (in \code{data}) to calculate,
+\item{tube}{The name of the data-series (in \code{data}) to calculate
 the requested statistic (or statistics) for (see \code{stat}),
 typically the DT NO2 concentrations (in ug/m3).}
 
@@ -25,7 +25,14 @@ total sample statistic(s) are calculated for \code{data}.}
 But it can be a list of one or more functions, ideally supplied in
 the form:
 
-\code{function(x){list(mean=mean(x, na.rm), sd=sd(x, na.rm=TRUE))}}}
+\code{function(x){list(mean=mean(x, na.rm), sd=sd(x, na.rm=TRUE))}}
+
+Or:
+
+\code{list(mean=mean(a, na.rm), sd=sd(b, na.rm=TRUE))}
+
+... if declaring sources directly, and for example here \code{a}
+and \code{b} are named columns in \code{data}.}
 
 \item{...}{additional arguments, currently ignored.}
 }
@@ -44,4 +51,22 @@ It and related functions assume that \code{data} is data
 \code{DTEval} will recognise as Diffusion Tube data, so either
 previously tagged tube data or data that is tag-able using a
 default call of \code{\link{tagTube}}
+}
+\examples{
+#basic example
+calcTubeStat(dt.brd)
+
+\dontrun{
+#multiple variables
+calcTubeStat(dt.brd,
+  tube=c("measurement",
+         "bias_adjusted_measurement"))
+
+#multiple statistics
+calcTubeStat(dt.brd,tube=".value",
+  by="year_of_measurement",
+  stat=function(x){
+       c(mean= mean(x, na.rm=TRUE),
+         med= median(x, na.rm=TRUE))})
+}
 }
