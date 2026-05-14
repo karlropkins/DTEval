@@ -24,4 +24,7 @@
 #'   \item{.end_date}{Sampling end date (Date, YYYY-MM-DD)}
 #' }
 #' @source Bradford City Council
+#' @examples
+#' head(dt.brd)
+#'
 "dt.brd"

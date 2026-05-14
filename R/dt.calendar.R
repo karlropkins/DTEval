@@ -23,6 +23,9 @@
 #' LAQM Helpdesk Team (2022),
 #'
 #' https://laqm.defra.gov.uk/air-quality/air-quality-assessment/diffusion-tube-monitoring-calendar/ (2023-2026).
+#' @examples
+#' head(dt.calendar)
+#'
 
 #sources
 #(accessed 09-2021)

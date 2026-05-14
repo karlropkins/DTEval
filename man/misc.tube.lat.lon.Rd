@@ -43,3 +43,10 @@ polygon source information, respectively, that \code{data} is data
 tagged (see \code{\link{tagTube}}), and that these and the x/y values in
 \code{polygon} are WGS84 format map coordinates.
 }
+\examples{
+dt <- tubeInXYPolygon(dt.brd, caz.brd, rename="in.caz")
+calcTubeStat(dt.brd, by="in.caz",
+      stat=list(mean=mean(.value, na.rm=TRUE),
+      count=length(.value[!is.na(.value)])))
+
+}

@@ -33,4 +33,8 @@ Bradford diffusion tube data set, 2020 to 2025 subset of
 tube measurements collected at sites classified as valid for
 roadside sampling using the AQSR sampling scheme.
 }
+\examples{
+head(dt.brd)
+
+}
 \keyword{datasets}

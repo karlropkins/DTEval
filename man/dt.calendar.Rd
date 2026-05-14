@@ -32,4 +32,8 @@ dt.calendar
 The diffusion tube sampling schedule calendar
 2015 and 2026.
 }
+\examples{
+head(dt.calendar)
+
+}
 \keyword{datasets}

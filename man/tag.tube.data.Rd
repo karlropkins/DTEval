@@ -164,3 +164,7 @@ to get these if not already tagged.
 \code{tagTubeRequired} is a variation on \code{tagTube} that attempts
 to add any listed in an optional argument, \code{required}.
 }
+\examples{
+tagTube(dt.brd)
+
+}

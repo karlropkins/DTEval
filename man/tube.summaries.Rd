@@ -46,3 +46,7 @@ recognise as Diffusion Tube data, so either previously tagged
 tube data or data that is tag-able using a default call of
 \code{\link{tagTube}}
 }
+\examples{
+tubeSummary(dt.brd)
+
+}
