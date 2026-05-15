@@ -53,16 +53,16 @@ previously tagged tube data or data that is tag-able using a
 default call of \code{\link{tagTube}}
 }
 \examples{
-#basic example
+# basic example
 calcTubeStat(dt.brd)
 
 \dontrun{
-#multiple variables
+# multiple variables
 calcTubeStat(dt.brd,
   tube=c("measurement",
          "bias_adjusted_measurement"))
 
-#multiple statistics
+# multiple statistics
 calcTubeStat(dt.brd,tube=".value",
   by="year_of_measurement",
   stat=function(x){

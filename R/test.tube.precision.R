@@ -61,6 +61,15 @@
 #' using \code{\link{tagTube}}, \code{plot}, results \code{lookup} table
 #' and; the (full) \code{report}.
 
+#' @examples
+#' # basic example
+#' testTubePrecision(dt.brd)
+#'
+#' \dontrun{
+#' # by-year
+#' testTubePrecision(dt.brd, facet=".year")
+#' }
+
 #splatted function
 
 ########################

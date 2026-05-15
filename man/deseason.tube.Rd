@@ -63,6 +63,7 @@ default call of \code{\link{tagTube}}
 \examples{
 # ambient data exhibits seasonality
 tubePlot(dt.brd, ".date",".value", plot.type="smooth")
+
 # underlying trend
 mod<-deseasonTubeData(dt.brd,".value", by=".location")
 tubePlot(mod,".date", "..trend", plot.type="smooth")

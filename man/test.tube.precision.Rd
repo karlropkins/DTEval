@@ -70,3 +70,12 @@ conditioning arguments like \code{group} and \code{facet} are also
 tracked by \code{testTubePrecision} itself and used to subset data
 when testing precision.
 }
+\examples{
+# basic example
+testTubePrecision(dt.brd)
+
+\dontrun{
+# by-year
+testTubePrecision(dt.brd, facet=".year")
+}
+}
