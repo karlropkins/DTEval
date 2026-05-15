@@ -61,7 +61,7 @@
 
 #' @examples
 #' dt <- tubeInXYPolygon(dt.brd, caz.brd, rename="in.caz")
-#' calcTubeStat(dt.brd, by="in.caz",
+#' calcTubeStat(dt, by="in.caz",
 #'       stat=list(mean=mean(.value, na.rm=TRUE),
 #'       count=length(.value[!is.na(.value)])))
 #'
