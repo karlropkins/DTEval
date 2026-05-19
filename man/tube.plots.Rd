@@ -75,3 +75,20 @@ plots.
 \note{
 Maybe I'm already missing \code{qplot}...
 }
+\examples{
+# basic example
+tubePlot(dt.brd, ".date", ".value")
+
+\dontrun{
+# by-site line plot
+tubePlot(dt.brd, ".date", ".value",
+         plot.type="line", group="site")
+
+# by-month smooth
+# with line colour and fill
+tubePlot(dt.brd, ".date", ".value",
+         plot.type="smooth", group=".month",
+         col=".month", fill=".month")
+}
+
+}

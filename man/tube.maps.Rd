@@ -39,3 +39,13 @@ dynamic (html) \code{leaflet} diffusion tube maps.
 \note{
 These functions are in development, so may change.
 }
+\examples{
+\dontrun{
+# map layers require internet access
+
+#basic examples
+tubeMap(dt.brd)
+leafletTubeMap(dt.brd)
+}
+
+}

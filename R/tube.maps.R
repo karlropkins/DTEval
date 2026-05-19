@@ -44,6 +44,16 @@
 #' (HTML) maps using \code{leaflet}.
 
 
+#' @examples
+#' \dontrun{
+#' # map layers require internet access
+#'
+#' #basic examples
+#' tubeMap(dt.brd)
+#' leafletTubeMap(dt.brd)
+#' }
+#'
+
 #############################
 # notes
 #############################
@@ -237,12 +247,12 @@ tubeMap <-
     out <- suppressMessages(suppressWarnings(
       #tubePlot(map, x, y, ...) + ggplot2::coord_sf()
 ###############################
-# test 
+# test
 # tubePlot(map, x, y, ...) + ggplot2::geom_sf()
 #   + coord_sf(crs = "WGS84"), st_crs(data), etc ...
-# adding coord_sf(crs="WGS84") didn't fix it but it got me on the right track and I figured it out. 
+# adding coord_sf(crs="WGS84") didn't fix it but it got me on the right track and I figured it out.
 # I changed the reference system for the EJRU object outside of the ggplot map code and then ran the code again.
-###############################  
+###############################
       tubePlot(map, x, y, ...) + ggplot2::coord_quickmap()
     ))
 
