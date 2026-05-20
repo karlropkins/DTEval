@@ -62,8 +62,10 @@
 # check about link to checkTubeMeta works...
 
 #' @examples
-#' #basic examples
+#' \dontrun{
+#' # (>5 secs during package build)
 #' testTubeMeta(dt.brd)
+#' }
 #'
 
 

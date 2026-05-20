@@ -86,3 +86,13 @@ a \code{'.ref'} suffix to data columns from \code{data.ref}, so it you want
 to facet or group data by a column in \code{data.ref}, you need to include
 the suffix when naming it.
 }
+\examples{
+\dontrun{
+# importAURN require internet access
+aurn <- openair::importAURN(site="bdma", year=2022:2025,
+                            meta=TRUE)
+testTubeAccuracy(dt.brd, data.ref=aurn,
+                 group=".year", col=".year")
+}
+
+}
