@@ -61,6 +61,11 @@
 
 # check about link to checkTubeMeta works...
 
+#' @examples
+#' #basic examples
+#' testTubeMeta(dt.brd)
+#'
+
 
 ######################################
 # to think about
@@ -101,7 +106,7 @@ testTubeMeta <- function(data, x=NULL, by=NULL, ...){
   # think about the tagging behaviour
   # what do we need/want
   #    and what should we be showing in plot... ?
-  .xargs <- modifyList(list(plot.type = 1), list(...))
+  .xargs <- modifyList(list(plot.type = 2), list(...))
   .d <- tagTube(data)
   if(is.null(x)){
     x <- names(.d)

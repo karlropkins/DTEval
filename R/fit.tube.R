@@ -54,7 +54,15 @@
 #' @return All functions return a \code{data.frame} of requested
 #' \code{data} statistics.
 
-
+#' @examples
+#' \dontrun{
+#' #basic examples
+#' mod <- fitTubeModel(dt.brd, inputs=c(".latitude", ".longitude"),
+#'                     by =".year", simplify = T)
+#' tubePlot(mod, ".value", ".value.pred", facet=".year")
+#' }
+#'
+#'
 
 #############################
 # fitTubeModel
@@ -77,6 +85,10 @@
 
 # thinking about
 ##############################
+
+# currently can't handle non-numeric inputs...
+#     so fit inputs = ".date" will die...
+
 
 # like a krig or similar as an alternative surface for maps...
 #     maybe fields (version 1.3-1)

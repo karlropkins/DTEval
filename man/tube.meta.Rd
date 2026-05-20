@@ -64,6 +64,11 @@ testing/extraction can be limited to specific cases using \code{x}.
 Please remeber that this function extracts data-series that at the
 \code{by} grouping-level looks like meta information.
 }
+\examples{
+#basic examples
+testTubeMeta(dt.brd)
+
+}
 \seealso{
 \code{\link[=checkTubeMeta]{checkTubeMeta()}} and related functions for working with and
 fixing Diffusion Tube meta-data.

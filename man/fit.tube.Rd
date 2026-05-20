@@ -73,3 +73,13 @@ It and related functions assume that \code{data} is data
 previously tagged tube data or data that is tag-able using a
 default call of \code{\link{tagTube}}
 }
+\examples{
+\dontrun{
+#basic examples
+mod <- fitTubeModel(dt.brd, inputs=c(".latitude", ".longitude"),
+                    by =".year", simplify = T)
+tubePlot(mod, ".value", ".value.pred", facet=".year")
+}
+
+
+}
