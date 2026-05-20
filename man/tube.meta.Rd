@@ -65,8 +65,10 @@ Please remeber that this function extracts data-series that at the
 \code{by} grouping-level looks like meta information.
 }
 \examples{
-#basic examples
+\dontrun{
+# (>5 secs during package build)
 testTubeMeta(dt.brd)
+}
 
 }
 \seealso{
