@@ -8,8 +8,8 @@
 
 * Package pre-release 
 
-    * __v 0.0.21__ [2026-05-06] deseasonTubeData update (method 1 row>2), added 
-    dts and caz.brd data sets 
+    * __v 0.0.21__ [2026-05-20] deseasonTubeData update (method 1 row>2), added 
+    dt.brd and caz.brd data sets; adding dt.brd examples 
     * __v 0.0.20__ [2026-02-15] tidied readme for public release for beta 
     testing
     * __v 0.0.19__ [2026-01-28] removed dplyr code/imports, removed test data
