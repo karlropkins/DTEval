@@ -3,17 +3,13 @@
 \name{DTEval-package}
 \alias{DTEval-package}
 \alias{DTEval}
-\alias{"_PACKAGE"}
 \title{DTEval: Diffusion Tube Evaluation Code}
 \description{
 R code used for the pre-processing, analysis and evaluation of diffusion tube (DT)
 data typically collected in air quality assessment exercises.
-}
-\details{
-This package was splat packed.
-}
-\section{Main Package Functions}{
 
-\code{\link{testTubeAccuracy}}, \code{\link{testTubePrecision}}
-}
+This package contains code developed was part of on-going with
+Defra, UK Local Authorities, Ipsos MORI and University of Leeds.
 
+"_PACKAGE"
+}

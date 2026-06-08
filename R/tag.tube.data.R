@@ -3,9 +3,7 @@
 ############################################
 
 #' @name tag.tube.data
-#' @aliases tag.tube.data tagTube tagTubeStartEnd tagTubeLatLon tagTubeSampleID
-#' TagTubeValue tagTubeDate tageTubeMonth tagTubeYear tagTubeLocation
-#' tagTubeRequired
+#' @aliases tag.tube.data tagTube tagTubeStartEnd tagTubeLatLon tagTubeSampleID TagTubeValue tagTubeDate tageTubeMonth tagTubeYear tagTubeLocation tagTubeRequired
 
 #' @description Pre-processing diffusion tube (DT) data for use with
 #' \code{DTEval}. Coded methods to standardise DT data collected using

@@ -2,8 +2,7 @@
 #misc setup and code
 ###########################
 
-#' @importFrom stats as.formula end lm loess predict qt quantile sd start qnorm
-#' na.omit median cor
+#' @importFrom stats as.formula end lm loess predict qt quantile sd start qnorm na.omit median cor
 #' @importFrom utils data modifyList
 #' @importFrom methods is as
 #' @importFrom grDevices colorRampPalette as.raster grey hcl

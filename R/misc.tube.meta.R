@@ -3,8 +3,7 @@
 ##################################################
 
 #' @name misc.tube.meta
-#' @aliases misc.tube.meta addTubeMeta checkTubeMeta extractTubeMeta
-#' extractAndAddTubeMeta padTubeMeta repairTubeMeta
+#' @aliases misc.tube.meta addTubeMeta checkTubeMeta extractTubeMeta extractAndAddTubeMeta padTubeMeta repairTubeMeta
 #' @description Miscellaneous code used to work with
 #' diffusion tube (DT) meta data.
 

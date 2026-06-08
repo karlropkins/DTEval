@@ -12,7 +12,7 @@ Encoding: UTF-8
 LazyData: true
 Depends: R (>= 4.1.0)
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Imports: methods, AQEval (>= 0.6.0), data.table (>= 1.9.8), ggplot2, ggtext, leaflet, metR, mgcv, cluster,
             OpenStreetMap, sf, raster
 Suggests: openair
+Config/roxygen2/version: 8.0.0
