@@ -1,6 +1,7 @@
 # DTEval version 0.1
 
 * Package updates 
+
     * __v 0.1.0__ [20**-**-**]  
 
 
@@ -8,6 +9,7 @@
 
 * Package pre-release 
 
+    * __v 0.0.22__ [2026-06-08] documents update for developer's version release
     * __v 0.0.21__ [2026-05-20] deseasonTubeData update (method 1 row>2), added 
     dt.brd and caz.brd data sets; adding dt.brd examples 
     * __v 0.0.20__ [2026-02-15] tidied readme for public release for beta 
