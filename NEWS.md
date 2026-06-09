@@ -1,9 +1,8 @@
-# DTEval version 0.1
+# DTEval version 0.1 
 
-* Package updates 
+* Package release for beta testing 
 
-    * __v 0.1.0__ [20**-**-**]  
-
+    * __v 0.1.0__ [2026-06-09] developer's version public for beta testing   
 
 # DTEval version 0.0
 

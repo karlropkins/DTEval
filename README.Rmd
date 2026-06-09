@@ -21,11 +21,11 @@ assessment exercises.
 
 ## Project Webpages
 
-__DTEval__ Projects pages: [to be build once package is PUBLIC]
+__DTEval__ Projects pages: [to be build]
 
 ## Installation
 
-Get developer's version of __DTEval__ from [GitHub](https://github.com)  ([archive](https://github.com/karlropkins/DTEval)) [currently PRIVATE]:
+Get developer's version of __DTEval__ from [GitHub](https://github.com)  ([archive](https://github.com/karlropkins/DTEval)):
 
 ```{r, eval=FALSE}
 # (if you do not have remotes package, install it from CRAN) 
