@@ -9,7 +9,8 @@ quality assessment exercises.
 
 ## Project Webpages
 
-**DTEval** Projects pages: \[to be build\]
+**DTEval** Projects pages: [draft
+release](https://karlropkins.github.io/DTEval/)
 
 ## Installation
 

@@ -21,7 +21,7 @@ assessment exercises.
 
 ## Project Webpages
 
-__DTEval__ Projects pages: [to be build]
+__DTEval__ Projects pages: [draft release](https://karlropkins.github.io/DTEval/)
 
 ## Installation
 
