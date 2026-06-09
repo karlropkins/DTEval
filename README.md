@@ -9,13 +9,12 @@ quality assessment exercises.
 
 ## Project Webpages
 
-**DTEval** Projects pages: \[to be build once package is PUBLIC\]
+**DTEval** Projects pages: \[to be build\]
 
 ## Installation
 
 Get developer’s version of **DTEval** from [GitHub](https://github.com)
-([archive](https://github.com/karlropkins/DTEval)) \[currently
-PRIVATE\]:
+([archive](https://github.com/karlropkins/DTEval)):
 
 ``` r
 # (if you do not have remotes package, install it from CRAN) 

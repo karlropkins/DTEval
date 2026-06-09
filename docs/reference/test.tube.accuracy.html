@@ -19,7 +19,7 @@ reference method (continuous analyser, CA) measurements."><!-- mathjax --><scrip
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">DTEval</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.10</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0</span>
       </span>
     </div>
 
@@ -54,7 +54,7 @@ reference method (continuous analyser, CA) measurements.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">testTubeAccuracy</span><span class="op">(</span></span>
 <span>  <span class="va">data</span>,</span>
 <span>  data.ref <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  tube <span class="op">=</span> <span class="st">"measurement"</span>,</span>
+<span>  tube <span class="op">=</span> <span class="st">".value"</span>,</span>
 <span>  ref <span class="op">=</span> <span class="st">"no2"</span>,</span>
 <span>  method <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  max.distance <span class="op">=</span> <span class="fl">10</span>,</span>
@@ -117,7 +117,7 @@ plot and summary report.</p></dd>
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments, currently passed to
-<code><a href="tag.tube.data.html">tagTube</a></code> to check tube tags, and <code><a href="plot.tube.html">ggplotTubeShell</a></code>
+<code><a href="tag.tube.data.html">tagTube</a></code> to check tube tags, and <code><a href="tube.plots.html">tubePlot</a></code>
 to handle generic plotting arguments.</p></dd>
 
 </dl></div>
@@ -132,13 +132,13 @@ to handle generic plotting arguments.</p></dd>
     <div id="details">
     <h2>Details</h2>
     <p>Both sampling dates and locations are identified/tagged using
-<code><a href="tag.tube.data.html">tagTube</a></code> methods. <code><a href="tag.tube.data.html">tagTubeDates</a></code> tags sampling
+<code><a href="tag.tube.data.html">tagTube</a></code> methods. <code><a href="tag.tube.data.html">tagTubeStartEnd</a></code> tags sampling
 dates and <code><a href="tag.tube.data.html">tagTubeLatLon</a></code> tags locations.</p>
 <p>NOTE: <code>testTubeAccuracy</code> attempts to tag <code>data</code> using default
 <code><a href="tag.tube.data.html">tagTube</a></code> setting if it has not already been tagged, but it
 is probably better to tag and check all data yourself before running more
 detailed analysis.</p>
-<p><code>testTubeAccuracy</code> also uses <code><a href="plot.tube.html">ggplotTubeShell</a></code> to handle
+<p><code>testTubeAccuracy</code> also uses <code><a href="tube.plots.html">tubePlot</a></code> to handle
 common plotting arguments, e.g. X and Y axes label handling. Plot
 conditioning arguments like <code>group</code> and <code>facet</code> are also
 tracked by <code>testTubeAccuracy</code> itself and used to subset data
@@ -149,6 +149,18 @@ to facet or group data by a column in <code>data.ref</code>, you need to include
 the suffix when naming it.</p>
     </div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="co"># importAURN require internet access</span></span></span>
+<span class="r-in"><span><span class="va">aurn</span> <span class="op">&lt;-</span> <span class="fu">openair</span><span class="fu">::</span><span class="fu"><a href="https://openair-project.github.io/openair/reference/importUKAQ-wrapper.html" class="external-link">importAURN</a></span><span class="op">(</span>site<span class="op">=</span><span class="st">"bdma"</span>, year<span class="op">=</span><span class="fl">2022</span><span class="op">:</span><span class="fl">2025</span>,</span></span>
+<span class="r-in"><span>                            meta<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">testTubeAccuracy</span><span class="op">(</span><span class="va">dt.brd</span>, data.ref<span class="op">=</span><span class="va">aurn</span>,</span></span>
+<span class="r-in"><span>                 group<span class="op">=</span><span class="st">".year"</span>, col<span class="op">=</span><span class="st">".year"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
@@ -161,7 +173,7 @@ the suffix when naming it.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
       </footer></div>
