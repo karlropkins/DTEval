@@ -34,7 +34,7 @@ roadside sampling using the AQSR sampling scheme.
 \note{
 Start and end dates of individual diffusion tube sampling periods
 (\code{.start_date} and \code{.end_date}) based of Defra Sampling
-Calendar, see \link{\code{dt.calendar}}.
+Calendar, see \code{\link[DTEval]{dt.calendar}}.
 }
 \examples{
 head(dt.brd)
