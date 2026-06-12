@@ -104,7 +104,7 @@
 #        see e.g.
 #            calcTubeStat(dont.share::dt.bradford.2, tube=c("measurement", "month"),
 #                         stat=function(x){c(mean = mean(x, na.rm=TRUE), med=median(x, na.rm=TRUE))})
-#     like to simply the stat input options
+#     like to simplify the stat input options
 #     by arg shortcuts ???, e.g.
 #         date (set date if not there and used this...)
 #              (by extension year, month, etc)
@@ -163,4 +163,5 @@ calcTubeStat <- function(data, tube = ".value", by = NULL, stat = NULL, ...){
   out <- as.data.frame(out)
   return(out)
 }
+
 

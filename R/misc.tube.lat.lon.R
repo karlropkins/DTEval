@@ -23,7 +23,7 @@
 
 #' @name misc.tube.lat.lon
 #' @aliases misc.tube.lat.lon tubeInXYPolygon
-#' @description Miscellaneous functions for use with Latitude and Longtitude
+#' @description Miscellaneous functions for use with Latitude and Longitude
 #' data. By default, these are setup for use with \code{DTEval}, so
 #' expects tagged data (see \code{\link{tagTube}}).
 

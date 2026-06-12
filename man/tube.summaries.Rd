@@ -41,7 +41,7 @@ They are also intended to be used in the form:
 
 \code{tubeSummary(data)}
 
-And all assumes that \code{data} is data \code{DTEval} will
+And all assume that \code{data} is data \code{DTEval} will
 recognise as Diffusion Tube data, so either previously tagged
 tube data or data that is tag-able using a default call of
 \code{\link{tagTube}}
