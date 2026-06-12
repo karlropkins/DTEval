@@ -13,7 +13,23 @@
 #' information about local data coverage (or capture efficiency)
 #' independent of co-locational sampling or site re-naming.
 
-# common annual stats calculators...
+#####################################
+# notes
+#####################################
+
+# these are common annual metrics/stats calculators...
+
+# currently tubeAnnualCover and tubeAnnualTest
+#    (bradford analysis 03 subsetting as functions)
+
+# status
+#    code is messy but running
+#    docs need work
+#    example not sorted yet
+
+# thinking about
+#    tidying code
+#    low coverage correction...
 
 #' @param data Data source, typically a data.frame or similar, containing
 #' data-series of diffusion tube records.
