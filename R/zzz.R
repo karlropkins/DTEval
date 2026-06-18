@@ -19,7 +19,8 @@ utils::globalVariables(c(".data", ".mean",".n", ".tube",".y", ".yhigh",
                          ".ylow", "latitude", "longitude", ".", ".value",
                          ".latitude", ".longitude", ".start_date",
                          ".end_date", "X", "Y", "checksum",
-                         "..type", "ref", "value"))
+                         "..type", "ref", "value", ".annual.n",
+                         ".annual.pc", ".year"))
 
                           # like to be able to drop a fe of the above...
 
