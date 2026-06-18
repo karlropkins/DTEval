@@ -121,8 +121,11 @@
 #     could be from move from dplyr to data.table...
 #           example
 #           head(extractTubeMeta(dt.brd, by=".date"))
-
-
+#     as.Date(as.numeric(.start_date)) etc, fixes this
+#     sapply(data, class) to check class
+#         compare input and output class for elements being extracted
+#         any different try to fix?
+#         may warn if fix fails or is unknown??
 
 
 #############################
@@ -286,8 +289,38 @@ extractTubeMeta <- function (data, x = NULL, by = NULL, ...)
   if(length(test)<1){
     return(NULL)
   } else {
-    calcTubeStat(data, test, by, function(x){unique(x[!is.na(x)])[1]})
+    out <- calcTubeStat(data, test, by, function(x){unique(x[!is.na(x)])[1]})
+    # reset classes
+    #######################
+    # this could be tidier
+    # is this a wrong use of data.table
+    # also it will not track ordered factors
+    #    like .month
+    #######################
+    .test <- names(out)[names(out) %in% names(data)]
+    .test <- sapply(out, class) == sapply(as.data.frame(data)[.test], class)
+    for(i in 1:length(.test)){
+      if(!.test[i]){
+        if(class(data[, names(.test[i])])[1]=="Date"){
+          out[, names(.test[i])] <- as.Date(as.numeric(out[, names(.test[i])]))
+        } else {
+          if(class(data[, names(.test[i])])[1]=="factor"){
+            ######################
+            # this might not work for all factors for an
+            out[, names(.test[i])] <- factor(out[, names(.test[i])])
+            attributes(out[, names(.test[i])]) <- attributes(data[, names(.test[i])])
+
+                                             #,
+                                             #levels=levels(data[, names(.test[i])]))
+          } else {
+            out[, names(.test[i])] <- as(out[, names(.test[i])], class(data[, names(.test[i])]))
+          }
+        }
+      }
+    }
+    return(out)
   }
+
 }
 
 

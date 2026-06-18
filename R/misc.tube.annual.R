@@ -28,7 +28,11 @@
 #    example not sorted yet
 
 # thinking about
-#    tidying code
+#    tidying code in existing functions
+#         (but test first; might redesign/rebuild anyway...)
+#    could have methods for tubeAnnualCover,
+#         1 all data in year sample collected...
+#         2 all data in all years or identified years...
 #    low coverage correction...
 
 #' @param data Data source, typically a data.frame or similar, containing

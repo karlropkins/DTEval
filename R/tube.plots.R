@@ -93,7 +93,7 @@
 # documentation notes
 ###############################
 
-# need to
+# like to
 #######################
 
 # Check through and update following after reset tubePlot updates
@@ -120,12 +120,6 @@
 
 # stat args for geoms maybe come from stat_[...] functions
 #    but be careful - there is a lot there...
-
-
-
-
-##
-
 
 #    reference and link to ggplot2... and/or plotting more generally in R
 
@@ -161,6 +155,13 @@
 
 # most urgent
 ############################
+
+# possible issue with plot.type="line" when using two facets
+#   (track down example... in Bradford 03 analysis code ???)
+#   maybe work on NA pad again as part of this...
+#       NB: saw this
+#          https://r-statistics.co/datatable-CJ-in-R.html
+#          might help and might be a faster option re expand.grid...
 
 # possible issue with point.count when it is same as one of the two axes...
 #    see
