@@ -201,7 +201,6 @@ tubeAnnualCover <- function(data, tube = ".value", by=".location",
   if(!".annual.pc" %in% .xargs$output){
     ans <- ans[, .annual.pc := NULL]
   }
-  #rename
   if(!is.null(.xargs$rename)){
     for(i in 1:length(.xargs$rename)){
       if(.xargs$output[i] %in% names(ans)){
@@ -216,7 +215,15 @@ tubeAnnualCover <- function(data, tube = ".value", by=".location",
   }
 
   # rebuild and return
-  dt <- merge(tagTubeYear(d2), as.data.frame(ans), by=c(".year", ".location"))
+  d2 <- tagTubeYear(d2)
+  #strip outputs if already there...
+  #  question:should we do this earlier...
+  if(is.null(.xargs$rename)){
+    d2 <- d2[!names(d2) %in% .xargs$output]
+  } else {
+    d2 <- d2[!names(d2) %in% .xargs$rename]
+  }
+  dt <- merge(d2, as.data.frame(ans), by=c(".year", ".location"))
   return(as.data.frame(dt))
 
 }
@@ -277,10 +284,14 @@ tubeAnnualTest <- function(data, test=NULL, by=".location",
   }
 
   d2$..annual.test.. <- d2$..annual.test.. == (ncol(ans)-1)
+  #currently have to strip ans if already there
+  #   because not overwriting...
   if("rename" %in% names(.xargs)) {
+    d2 <- d2[names(d2) != .xargs$rename[1]]
     names(d2)[names(d2) %in% "..annual.test.."] <- .xargs$rename[1]
   } else {
     .temp <- paste(test, .start, .end, sep=".")
+    d2 <- d2[names(d2) != .temp]
     names(d2)[names(d2) %in% "..annual.test.."] <- .temp
   }
 

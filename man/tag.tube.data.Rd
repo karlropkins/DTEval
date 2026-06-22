@@ -6,13 +6,12 @@
 \alias{tagTubeStartEnd}
 \alias{tagTubeLatLon}
 \alias{tagTubeSampleID}
-\alias{TagTubeValue}
+\alias{tagTubeValue}
 \alias{tagTubeDate}
 \alias{tageTubeMonth}
 \alias{tagTubeYear}
 \alias{tagTubeLocation}
 \alias{tagTubeRequired}
-\alias{tagTubeValue}
 \alias{tagTubeMonth}
 \title{Diffusion Tube Pro-processing}
 \usage{

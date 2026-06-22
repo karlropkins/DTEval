@@ -77,6 +77,9 @@
 tubeSummary <- function(data, ...){
 
   #d2 should have all tags if data is recognisable dt data
+  #################################################
+  # should we replace this with tagTubeRequired ???
+  #################################################
   d2 <- tagTube(data)
 
   #general stats
@@ -89,13 +92,17 @@ tubeSummary <- function(data, ...){
 
   #n.intervals
   #     this is the number of unique start/end dates
+  #     same as
+  #         length(unique(tagTubeDate(dt)$.date))
   test <- paste(d2$.start_date, d2$.end_date)
   n.intervals <- length(unique(test))
 
-  #n.sites
+  #n.locations
   #     this is the number of unique lat/longs
+  #     same as
+  #        length(unique(tagTubeLocation(dt)$.location))
   test <- paste(d2$.latitude, d2$.longitude)
-  n.sites <- length(unique(test))
+  n.locations <- length(unique(test))
 
   #n.samples
   n.samples <- length(unique(d2$.sample_id))
@@ -104,7 +111,7 @@ tubeSummary <- function(data, ...){
   n.bad.tags <- nrow(subset(tubeSummarySample(d2, output="full.report"), checksum>0))
 
   out <- data.frame(sampling.from, sampling.to,
-                    n.total, n.samples, n.intervals, n.sites, n.bad.tags)
+                    n.total, n.samples, n.intervals, n.locations, n.bad.tags)
 
   return(out)
 

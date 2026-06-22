@@ -18,6 +18,8 @@
 #' and \code{\link{testTubePrecision}}.
 
 # maybe link to ggplot2 and a r help page on graphics for this?
+# or maybe more to lattice ... ???
+
 
 #' @param data Data source, typically a data.frame or similar, to be used to
 #' build a plot using ggplot2.
@@ -92,6 +94,15 @@
 ###############################
 # documentation notes
 ###############################
+
+# need to....
+#######################
+
+# check tubePlot(plot.type="line", ...) with two facets...
+# see notes about potential issue in Bradford Investigation 03 code notes
+#    guessing it is not tracking one of the facets...???
+#    See MOST URGENT below...
+
 
 # like to
 #######################
@@ -793,14 +804,15 @@ tubePlot <-
               #print(y)
               #print(..test.[!..test. %in% c(x,y)])
               ..tmp. <- calcTubeStat(..tmp., y, by=..test.[!..test. %in% c(x,y)])
+
               ..tmp. <- ..tmp.[!is.na(..tmp.[[paste(y, ".mean", sep="")]]),]
               .d3 <- merge(..tmp., .d3, all.x=TRUE)
               .d3 <- .d3[order(.d3[[x]]),]
               drops <- names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPath)]
-              plt <- dte_ggshellAddGeom(.xargs2, .d3, plt,
-                                        ggplot2::geom_path,
-                                        defaults = list(na.rm=TRUE),
-                                        drops = drops)
+              #plt <- dte_ggshellAddGeom(.xargs2, .d3, plt,
+              #                          ggplot2::geom_path,
+              #                          defaults = list(na.rm=TRUE),
+              #                          drops = drops)
             } else {
               drops <- names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPath)]
               plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,

@@ -108,6 +108,20 @@
 
 
 
+
+
+#####################################
+# MOST URGENT
+#####################################
+
+## like tidier error messaging on extraTubeMeta
+##     think it is dropping to data.table when:
+##        by or x are missing from one or both of data and/or ref
+##        (check if this is tagTube or tagTubeRequired)
+
+
+
+
 ######################################
 # to think about
 ######################################
@@ -126,7 +140,7 @@
 #         compare input and output class for elements being extracted
 #         any different try to fix?
 #         may warn if fix fails or is unknown??
-
+#     (Should be fixed now BUT how extensively to check ???[2026-06-18])
 
 #############################
 # addTubeMeta
@@ -199,6 +213,8 @@ addTubeMeta <- function(data, ref=NULL, by=NULL,...){
 #     merged in require-tags-only variation on tagTube
 #     or allow for a dummyTube() function that allows you to
 #     pass untagged files to a tube function (at you own risk)
+#     Maybe move from tagTube to tagTubeRequired(...) BUT
+#         think about what is required...
 # (same for repairTubeMeta)
 
 # notes
@@ -267,6 +283,7 @@ checkTubeMeta <- function(data, x=NULL, by=NULL, ...){
 
 # compare this and older method in padTubeMeta
 # not sure which is best..?
+#    see notes
 
 #' @rdname misc.tube.meta
 #' @export
@@ -294,8 +311,8 @@ extractTubeMeta <- function (data, x = NULL, by = NULL, ...)
     #######################
     # this could be tidier
     # is this a wrong use of data.table
-    # also it will not track ordered factors
-    #    like .month
+    # also it may not always track ordered factors
+    #    check .month ??
     #######################
     .test <- names(out)[names(out) %in% names(data)]
     .test <- sapply(out, class) == sapply(as.data.frame(data)[.test], class)
@@ -306,12 +323,10 @@ extractTubeMeta <- function (data, x = NULL, by = NULL, ...)
         } else {
           if(class(data[, names(.test[i])])[1]=="factor"){
             ######################
-            # this might not work for all factors for an
+            # this might not work for all factors...
+            #    (currently make factor then copying attributes...)
             out[, names(.test[i])] <- factor(out[, names(.test[i])])
             attributes(out[, names(.test[i])]) <- attributes(data[, names(.test[i])])
-
-                                             #,
-                                             #levels=levels(data[, names(.test[i])]))
           } else {
             out[, names(.test[i])] <- as(out[, names(.test[i])], class(data[, names(.test[i])]))
           }
@@ -530,12 +545,14 @@ repairTubeMeta <- function(data, x=NULL, by=NULL, options=NULL, ...){
     }
     if(length(.ts)>1){
       # have multiple valid options, tag as suspect
+      print(.ops)
+      print(paste(.d[.d[[by]]==i, x], ".SUSPECT", sep=""))
       .d[.d[[by]]==i, x] <- paste(.d[.d[[by]]==i, x], ".SUSPECT", sep="")
       .n.rep[2] <- .n.rep[2] + 1
     }
   }
   if(.n.rep[1]>1 | .n.rep[2]>1){
-    message("[repairTubeMeta] ", .n.rep[1], " repair(s) made; ", .n.rep[2],
+    message("[repairTubeMeta] ", .n.rep[1], " ", x, " repair(s) made; ", .n.rep[2],
             " suspect(s) subsets identified.")
   }
   return(.d)
