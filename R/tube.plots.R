@@ -786,6 +786,10 @@ tubePlot <-
                 ..test. <- unique(unlist(.xargs2[..test.]))
               }
               ..test. <- unique(c(x, y, ..test.))
+              if("facet" %in% names(.xargs2)){
+                #can miss-tracking facet.type if set...
+                ..test. <- unique(c(..test., .xargs2$facet))
+              }
               .d3 <- .d2[..test.]
               ######################################
               #think about sort()
@@ -803,16 +807,16 @@ tubePlot <-
               #print(names(..tmp.))
               #print(y)
               #print(..test.[!..test. %in% c(x,y)])
-              ..tmp. <- calcTubeStat(..tmp., y, by=..test.[!..test. %in% c(x,y)])
+              ..tmp. <- calcTubeStat(..tmp., y, by=..test.[!..test. %in% c(x, y, .xargs$facet)])
 
               ..tmp. <- ..tmp.[!is.na(..tmp.[[paste(y, ".mean", sep="")]]),]
               .d3 <- merge(..tmp., .d3, all.x=TRUE)
               .d3 <- .d3[order(.d3[[x]]),]
               drops <- names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPath)]
-              #plt <- dte_ggshellAddGeom(.xargs2, .d3, plt,
-              #                          ggplot2::geom_path,
-              #                          defaults = list(na.rm=TRUE),
-              #                          drops = drops)
+              plt <- dte_ggshellAddGeom(.xargs2, .d3, plt,
+                                        ggplot2::geom_path,
+                                        defaults = list(na.rm=TRUE),
+                                        drops = drops)
             } else {
               drops <- names(.xargs2)[!names(.xargs2) %in% dte_GeomArgs(ggplot2::GeomPath)]
               plt <- dte_ggshellAddGeom(.xargs2, .d2, plt,

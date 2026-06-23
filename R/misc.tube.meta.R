@@ -545,8 +545,6 @@ repairTubeMeta <- function(data, x=NULL, by=NULL, options=NULL, ...){
     }
     if(length(.ts)>1){
       # have multiple valid options, tag as suspect
-      print(.ops)
-      print(paste(.d[.d[[by]]==i, x], ".SUSPECT", sep=""))
       .d[.d[[by]]==i, x] <- paste(.d[.d[[by]]==i, x], ".SUSPECT", sep="")
       .n.rep[2] <- .n.rep[2] + 1
     }
