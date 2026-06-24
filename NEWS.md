@@ -4,7 +4,7 @@
 
     * __v 0.1.1__ [2026-06-22] added draft functions: tubeAnnualCover, 
     tubeAnnualTest; fixes: extractTubeMeta output class; tubeAnnual rename;
-    doc typos: tagTube, tubeSummary ... 
+    tubePlot line/multi facet; doc typos: tagTube; tubeSummary ... 
     * __v 0.1.0__ [2026-06-09] developer's version public for beta testing   
 
 # DTEval version 0.0

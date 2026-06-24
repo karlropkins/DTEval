@@ -310,21 +310,24 @@ extractTubeMeta <- function (data, x = NULL, by = NULL, ...)
     # reset classes
     #######################
     # this could be tidier
-    # is this a wrong use of data.table
-    # also it may not always track ordered factors
-    #    check .month ??
+    #    also: is this a wrong use of data.table?
+    # May need to do more testing for factors, ordered factors, etc...
     #######################
     .test <- names(out)[names(out) %in% names(data)]
     .test <- sapply(out, class) == sapply(as.data.frame(data)[.test], class)
     for(i in 1:length(.test)){
       if(!.test[i]){
+        print(.test[i])
+        print(class(data[, names(.test[i])]))
         if(class(data[, names(.test[i])])[1]=="Date"){
           out[, names(.test[i])] <- as.Date(as.numeric(out[, names(.test[i])]))
         } else {
-          if(class(data[, names(.test[i])])[1]=="factor"){
+          if(class(data[, names(.test[i])])[1] %in% c("factor", "ordered")){
             ######################
             # this might not work for all factors...
             #    (currently make factor then copying attributes...)
+            #    (seems to work for my .year, .month factors...)
+            #         (what else to test ???)
             out[, names(.test[i])] <- factor(out[, names(.test[i])])
             attributes(out[, names(.test[i])]) <- attributes(data[, names(.test[i])])
           } else {
