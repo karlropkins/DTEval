@@ -317,8 +317,8 @@ extractTubeMeta <- function (data, x = NULL, by = NULL, ...)
     .test <- sapply(out, class) == sapply(as.data.frame(data)[.test], class)
     for(i in 1:length(.test)){
       if(!.test[i]){
-        print(.test[i])
-        print(class(data[, names(.test[i])]))
+        ##print(.test[i])
+        ##print(class(data[, names(.test[i])]))
         if(class(data[, names(.test[i])])[1]=="Date"){
           out[, names(.test[i])] <- as.Date(as.numeric(out[, names(.test[i])]))
         } else {
