@@ -1337,7 +1337,7 @@ tubePlot <-
     plt <- plt + ggplot2::labs(
       x = dte_quickText(.xargs$xlab, .xargs$auto.text),
       y = dte_quickText(.xargs$ylab, .xargs$auto.text),
-      title = dte_quickText(.xargs$title, .xargs$auto.text)
+      subtitle = dte_quickText(.xargs$title, .xargs$auto.text)
     )
 #    if("xlab" %in% names(.xargs)){
 #      # move from xlab and ylab to labs ???
@@ -1351,7 +1351,7 @@ tubePlot <-
       # will need to add other labels
       plt <- plt +  ggplot2::theme(axis.title.x = ggtext::element_markdown(),
                                    axis.title.y = ggtext::element_markdown(),
-                                   plot.title = ggtext::element_markdown())
+                                   plot.subtitle = ggtext::element_markdown())
     }
 
     if("rotate.x.axes" %in% names(.xargs)){
