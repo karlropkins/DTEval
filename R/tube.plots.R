@@ -415,13 +415,19 @@ tubePlot <-
                              ggplot2::aes(x=.data[[x]],
                                           y=.data[[y]])
                              )
-        #annotation
-        if(!"xlab" %in% names(.xargs)){
-          .xargs$xlab <- x
-        }
-        if(!"ylab" %in% names(.xargs)){
-          .xargs$ylab <- y
-        }
+      #annotation
+      if(!"xlab" %in% names(.xargs)){
+        .xargs$xlab <- x
+      }
+      if(!"ylab" %in% names(.xargs)){
+        .xargs$ylab <- y
+      }
+      #if(!"title" %in% names(.xargs)){
+      #  # could be main ???
+      #  .xargs$title <- ""
+      #}
+
+
       plt <- plt + ggplot2::theme_bw() +
         ggplot2::theme(strip.background = ggplot2::element_rect(fill="transparent"))
     }
@@ -445,7 +451,10 @@ tubePlot <-
       #point
       #################################
       # added  overplot option
-      #     calculates mean or count of overplot data
+      #   calculates mean or count of overplot data
+      #   to think about
+      #      over.plot versus overplot ???
+      #      overplot = TRUE
       if("point" %in% i){
         .xargs2 <- dte_ggshellTidyArgs(.xargs, "point")
         .xargs2.test <- dte_ggshellTestArgs(.xargs2, d2)
@@ -1290,18 +1299,26 @@ tubePlot <-
 
     #annotation
     ###########################
-    if("xlab" %in% names(.xargs)){
-      # move from xlab and ylab to labs ???
-      plt <- plt + ggplot2::xlab(dte_quickText(.xargs$xlab, .xargs$auto.text))
-    }
-    if("ylab" %in% names(.xargs)){
-      # move from xlab and ylab to labs ???
-      plt <- plt + ggplot2::ylab(dte_quickText(.xargs$ylab, .xargs$auto.text))
-    }
+    #   maybe use labs() for a lots of following ???
+    #   all of xlab, ylab and title should be in .xargs
+    plt <- plt + ggplot2::labs(
+      x = dte_quickText(.xargs$xlab, .xargs$auto.text),
+      y = dte_quickText(.xargs$ylab, .xargs$auto.text),
+      title = dte_quickText(.xargs$title, .xargs$auto.text)
+    )
+#    if("xlab" %in% names(.xargs)){
+#      # move from xlab and ylab to labs ???
+#      plt <- plt + ggplot2::xlab(dte_quickText(.xargs$xlab, .xargs$auto.text))
+#    }
+#    if("ylab" %in% names(.xargs)){
+#      # move from xlab and ylab to labs ???
+#      plt <- plt + ggplot2::ylab(dte_quickText(.xargs$ylab, .xargs$auto.text))
+#    }
     if(.xargs$auto.text){
       # will need to add other labels
       plt <- plt +  ggplot2::theme(axis.title.x = ggtext::element_markdown(),
-                                   axis.title.y = ggtext::element_markdown())
+                                   axis.title.y = ggtext::element_markdown(),
+                                   plot.title = ggtext::element_markdown())
     }
 
     if("rotate.x.axes" %in% names(.xargs)){
