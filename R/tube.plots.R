@@ -128,6 +128,39 @@
 #    NAs rather than removing them... BUT might mean we cannot
 #    reduce the plot range..???
 
+# have a locator option....
+# see https://stackoverflow.com/questions/9450873/locator-equivalent-in-ggplot2-for-maps
+#    this seems to work for maps if lat and long are in data source ...
+#    (needs to test with something known...)
+#        (looks out, maybe by width of borders)
+#        (dropped maps - not sure why it was included)
+## gglocator <- function(object){
+##     require(grid)
+##     z <- grid.locator("npc")
+##     y <- sapply(z, function(x) as.numeric(substring(x, 1, nchar(x))))
+##     locatedX <- min(object$data$long) + y[1]*diff(range(object$data$long))
+##     locatedy <- min(object$data$lat)  + y[2]*diff(range(object$data$lat))
+##     return(c(locatedX, locatedy))
+##}
+# got to following using layer_scales
+# still looks out...
+#    think it is data range not plot range...
+#    might also be a transform to consider... ?
+#    and I guess it only works for single panel plots...
+#    have a dodgy bodge that gets me closer...
+##gglocator <- function(object){
+##  z <- grid::grid.locator("npc")
+##  y <- sapply(z, function(x) as.numeric(substring(x, 1, nchar(x))))
+##  temp <- ggplot2::layer_scales(object)$x$range$range
+##  locatedX <- min(temp) + y[1]*diff(temp)
+##  temp <- ggplot2::layer_scales(object)$y$range$range
+##  locatedY <- min(temp)  + y[2]*diff(temp)
+##  print(c(locatedX, locatedY))
+##  return(as.data.frame(t(c(locatedX, locatedY))))
+##}
+# then...
+##ggplot2::last_plot() + ggplot2::geom_point(ggplot2::aes(x=x, y=y), data=gglocator(ggplot2::last_plot()), col="green")
+# maybe look at my old png locator coder in grey.area ???
 
 ###############################
 # added
