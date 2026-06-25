@@ -158,7 +158,6 @@ tubeMap <-
                                    type =  "esri",
                                    minNumTiles = 12,
                                    mergeTiles = TRUE)
-
       dc <- suppressMessages(suppressWarnings(
         OpenStreetMap::openproj(dc,
                                 projection = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")
@@ -226,7 +225,6 @@ tubeMap <-
       #  ggplot2::scale_x_discrete(labels = NULL, breaks = NULL) +
       #  ggplot2::scale_y_discrete(labels = NULL, breaks = NULL)
 
-
       map <- plt
 
       #      map + ggplot2::coord_equal()
@@ -255,6 +253,7 @@ tubeMap <-
 ###############################
       tubePlot(map, x, y, ...) + ggplot2::coord_quickmap()
     ))
+
 
 
     out <- out + ggplot2::theme(axis.title.x=ggplot2::element_blank(),

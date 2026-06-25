@@ -387,6 +387,7 @@ tubePlot <-
     #args
     .xargs <- dte_ggshellTidyArgs(list(...))
     .xargs <- modifyList(list(grid.borders = 0.05,
+                              title="",
                               auto.text = TRUE),
                          .xargs)
 
@@ -1349,11 +1350,11 @@ tubePlot <-
 #    }
     if(.xargs$auto.text){
       # will need to add other labels
-      plt <- plt +  ggplot2::theme(axis.title.x = ggtext::element_markdown(),
-                                   axis.title.y = ggtext::element_markdown(),
-                                   plot.subtitle = ggtext::element_markdown())
-    }
 
+        plt <- plt +  ggplot2::theme(axis.title.x = ggtext::element_markdown(),
+                                     axis.title.y = ggtext::element_markdown(),
+                                     plot.subtitle = ggtext::element_markdown())
+    }
     if("rotate.x.axes" %in% names(.xargs)){
       if(is.logical(.xargs$rotate.x.axes) && .xargs$rotate.x.axes){
         .xargs$rotate.x.axes <- 90
