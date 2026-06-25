@@ -422,10 +422,10 @@ tubePlot <-
       if(!"ylab" %in% names(.xargs)){
         .xargs$ylab <- y
       }
-      #if(!"title" %in% names(.xargs)){
-      #  # could be main ???
-      #  .xargs$title <- ""
-      #}
+      if(!"title" %in% names(.xargs)){
+        # could be main ???
+        .xargs$title <- ""
+      }
 
 
       plt <- plt + ggplot2::theme_bw() +
