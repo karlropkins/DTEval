@@ -390,6 +390,12 @@ tubePlot <-
                               title="",
                               auto.text = TRUE),
                          .xargs)
+    # notes
+    #   not sure why but some between labs and element_markdown
+    #      seems to be an issue that mean it dies if you
+    #      set set either title or subtitle to markdown within
+    #      setting a value for title or subtitle...
+    #   so need title in above...
 
     #data
     if("ggplot" %in% class(data)){
