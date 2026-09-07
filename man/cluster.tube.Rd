@@ -2,15 +2,26 @@
 % Please edit documentation in R/cluster.tube.R
 \name{cluster.tube}
 \alias{cluster.tube}
+\alias{clusterTubeData.old}
 \alias{clusterTubeData}
 \title{Cluster Diffusion Tube Data}
 \usage{
+clusterTubeData.old(
+  data,
+  tube = ".value",
+  by = "site",
+  clusters = 2,
+  method = 2,
+  ...
+)
+
 clusterTubeData(
   data,
   tube = ".value",
   by = "site",
   clusters = 2,
   method = 2,
+  fuzzy = FALSE,
   ...
 )
 }
@@ -27,13 +38,22 @@ group the data before clustering. (see Note.)}
 \item{clusters}{The number of clusters to extract, default 2.}
 
 \item{method}{The clustering method to apply: 1 (standard cluster);
-2 (clustering of correlations); or 3 (clustering on normalised profiles)}
+2 (clustering of correlations); 3 (clustering on normalised profiles);
+4 (clustering of mean subtracted ans sd scaled profiles); or 5 (clustering
+of mean scaled profiles).}
 
 \item{...}{additional arguments, currently ignored.}
+
+\item{fuzzy}{logical or numeric, fuzzy clustering, default \code{FALSE};
+alternatives, \code{TRUE} to fuzzy cluster using default membership
+exponent (\code{1.2}) or a \code{numeric} to use fuzzy clustering and
+set the exponent directly.}
 }
 \value{
-All functions return the supplied \code{data.frame}
-with attached cluster assignment: \code{.cluster}.
+By default, all functions return the supplied \code{data.frame}
+with attached cluster assignment: \code{.cluster} or, if using fuzzy
+clustering, \code{.cluster} and the cluster assignment probabilities,
+0 to 1 for each cluster.
 }
 \description{
 Functions for clustering multiple site
@@ -47,7 +67,11 @@ It assigns data to the requested number of clusters.
 \note{
 \code{clusterTubeData} is currently only fully tested for use with
 single \code{by} terms. It will accept multiple values, but at this stage
-outputs for multiple inputs should not be
+outputs for multiple inputs should not be treated with caution.
+
+\code{clusterTubeData.old} is the previous version of this function. It is
+likely to be removed once new version has been finalised, but meantime
+kept for comparison.
 
 \code{clusterTubeData} and related functions assume that \code{data}
 is a data set \code{DTEval} will recognise as Diffusion Tube data, so either

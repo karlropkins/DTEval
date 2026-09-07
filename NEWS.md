@@ -2,10 +2,12 @@
 
 * Package release for beta testing 
 
+    * __v 0.1.2__ [2026-09-07] clusterTubeData update, added fuzzy clustering 
+    option
     * __v 0.1.1__ [2026-06-25] added draft functions: tubeAnnualCover, 
     tubeAnnualTest; added tubePlot title; fixes: extractTubeMeta output 
     class; tubeAnnual rename; tubePlot line/multi facet; doc typos: tagTube; 
-    tubeSummary ... 
+    tubeSummary  
     * __v 0.1.0__ [2026-06-09] developer's version public for beta testing   
 
 # DTEval version 0.0
