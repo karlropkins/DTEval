@@ -662,11 +662,19 @@ tagTubeValue <-
 
 # think about
 ##############################
+
 #  handling for different outputs??
 #       vector name
 #       vector elements/type
 #  for overwrite/force handling???
 #       does this need a hidden date.force ???
+
+#  work [tag].force, [tag.method], and renaming into
+#  single generic function
+#       needs data, force, method, and xargs
+#       tag and tag.ref for force and method
+#           ref might always be tag without '.' ???
+
 
 
 #' @rdname tag.tube.data

@@ -33,8 +33,6 @@
 #' set the exponent directly.
 #' @param ... additional arguments, currently ignored.
 
-#
-
 #' @details
 #' \code{clusterTubeData} attempts to cluster data in the supplied time-series.
 #'
@@ -57,6 +55,12 @@
 #' with attached cluster assignment: \code{.cluster} or, if using fuzzy
 #' clustering, \code{.cluster} and the cluster assignment probabilities,
 #' 0 to 1 for each cluster.
+
+#####################################
+## Needed ...
+####################################
+## need a link/reference for cluster package...
+
 
 # need to check that data is not a simplified version of the supplied data...
 
